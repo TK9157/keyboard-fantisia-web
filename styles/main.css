@@ -1,0 +1,1460 @@
+/* ============================================================
+   KEYBOARD FANTASIA — Design System & Global Styles
+   ============================================================ */
+
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+/* --- CSS Custom Properties (Design Tokens) --- */
+:root {
+  /* Primary Palette — Silver & Steel */
+  --silver-light: #E8E8E8;
+  --silver: #C0C0C0;
+  --silver-dark: #A0A0A0;
+  --steel: #8A8D8F;
+  --steel-dark: #6B6E70;
+  --gunmetal: #2C2F33;
+  --gunmetal-dark: #1E2124;
+  --black-deep: #0A0A0A;
+  --black-mesh: #1A1A1A;
+  --black-soft: #2A2A2A;
+
+  /* Chrome & Accent */
+  --chrome: #D4D4D8;
+  --chrome-bright: #F0F0F4;
+  --chrome-dark: #9A9AA0;
+
+  /* LED Colors */
+  --led-green: #00FF41;
+  --led-green-dim: #00AA2B;
+  --led-red: #FF3333;
+  --led-blue: #3399FF;
+  --led-amber: #FFAA00;
+  --led-cyan: #00E5FF;
+
+  /* Cassette Colors */
+  --cassette-c1: #E63946;
+  --cassette-c2: #457B9D;
+  --cassette-c3: #2A9D8F;
+  --cassette-c4: #E9C46A;
+  --cassette-c5: #F4A261;
+  --cassette-c6: #6A4C93;
+
+  /* Typography */
+  --font-display: 'Orbitron', monospace;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-tech: 'Rajdhani', sans-serif;
+
+  /* Spacing */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+  --gap-2xl: 48px;
+
+  /* Borders */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-round: 50%;
+
+  /* Shadows */
+  --shadow-inset-light: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --shadow-inset-dark: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --shadow-bevel: 0 1px 0 rgba(255, 255, 255, 0.1), 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --shadow-drop-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-drop-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-drop-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-drop-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-glow-green: 0 0 8px rgba(0, 255, 65, 0.4), 0 0 24px rgba(0, 255, 65, 0.15);
+  --shadow-glow-blue: 0 0 8px rgba(51, 153, 255, 0.4), 0 0 24px rgba(51, 153, 255, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-overlay: 10;
+  --z-modal: 100;
+  --z-top: 1000;
+}
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--black-deep);
+  color: var(--silver);
+  overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Texture Utilities --- */
+
+/* Brushed Metal Horizontal */
+.texture-brushed-metal {
+  background:
+    repeating-linear-gradient(90deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.03) 2px),
+    linear-gradient(180deg,
+      var(--silver-light) 0%,
+      var(--silver) 20%,
+      var(--steel) 50%,
+      var(--silver) 80%,
+      var(--silver-light) 100%);
+}
+
+/* Brushed Metal Vertical */
+.texture-brushed-metal-v {
+  background:
+    repeating-linear-gradient(0deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.03) 2px),
+    linear-gradient(90deg,
+      var(--silver-light) 0%,
+      var(--silver) 20%,
+      var(--steel) 50%,
+      var(--silver) 80%,
+      var(--silver-light) 100%);
+}
+
+/* Speaker Mesh Pattern */
+.texture-mesh {
+  background:
+    radial-gradient(circle, transparent 1px, var(--black-mesh) 1px) 0 0 / 4px 4px,
+    var(--black-deep);
+}
+
+/* Dark Panel */
+.texture-dark-panel {
+  background: linear-gradient(180deg,
+      var(--gunmetal) 0%,
+      var(--black-soft) 30%,
+      var(--black-deep) 100%);
+}
+
+/* --- Stereo System Layout --- */
+.stereo-system {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  max-width: 1400px;
+  width: 100%;
+  padding: var(--gap-lg);
+  perspective: 1200px;
+}
+
+/* --- Speaker Styles --- */
+.speaker {
+  width: 220px;
+  min-width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow:
+    var(--shadow-drop-lg),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.speaker--left {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+
+.speaker--right {
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+
+/* Speaker Frame */
+.speaker__frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.02) 1px,
+      rgba(255, 255, 255, 0.02) 2px),
+    linear-gradient(180deg,
+      var(--silver-light) 0%,
+      var(--silver) 15%,
+      var(--steel) 50%,
+      var(--silver) 85%,
+      var(--silver-light) 100%);
+  padding: var(--gap-md);
+  gap: var(--gap-md);
+}
+
+/* Tweeter Section */
+.speaker__tweeter {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.speaker__tweeter-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-round);
+  border: 6px solid transparent;
+  background: linear-gradient(135deg, var(--chrome-bright), var(--steel-dark)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.speaker__tweeter-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-round);
+  overflow: hidden;
+}
+
+/* Left Tweeter — Brand Identity */
+.tweeter-brand {
+  background: linear-gradient(180deg, var(--gunmetal) 0%, var(--black-deep) 100%);
+  padding: var(--gap-sm);
+  text-align: center;
+}
+
+.tweeter-brand__photo {
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  object-fit: cover;
+  border: 2px solid var(--chrome);
+  margin-bottom: var(--gap-xs);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+.tweeter-brand__name {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--led-green);
+  text-shadow: var(--shadow-glow-green);
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+}
+
+.tweeter-brand__title {
+  font-family: var(--font-tech);
+  font-size: 0.5rem;
+  color: var(--silver-dark);
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+}
+
+/* Right Tweeter — Photo Scroll */
+.tweeter-scroll {
+  background: var(--black-deep);
+  position: relative;
+}
+
+.tweeter-scroll__container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.tweeter-scroll__film {
+  display: flex;
+  flex-direction: column;
+  animation: filmScrollVertical 30s linear infinite;
+  animation-play-state: paused;
+}
+
+.tweeter-scroll__film.is-playing {
+  animation-play-state: running;
+}
+
+.tweeter-scroll__frame {
+  width: 100%;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.tweeter-scroll__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Film sprocket holes */
+.tweeter-scroll__sprockets {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+  z-index: 3;
+}
+
+.tweeter-scroll__sprockets--left {
+  left: 0;
+}
+
+.tweeter-scroll__sprockets--right {
+  right: 0;
+}
+
+.tweeter-scroll__sprocket {
+  width: 8px;
+  height: 5px;
+  background: var(--black-deep);
+  border-radius: 1px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.tweeter-scroll__idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  color: var(--steel-dark);
+  text-align: center;
+  padding: var(--gap-sm);
+}
+
+@keyframes filmScrollVertical {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* Woofer Section */
+.speaker__woofer {
+  flex: 1;
+  min-height: 120px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 3px 12px rgba(0, 0, 0, 0.6),
+    0 2px 4px rgba(255, 255, 255, 0.08);
+}
+
+.speaker__woofer-mesh {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle, transparent 1px, rgba(0, 0, 0, 0.9) 1px) 0 0 / 5px 5px;
+  position: relative;
+}
+
+.speaker__woofer-cone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  background:
+    radial-gradient(circle at 40% 40%,
+      var(--steel) 0%,
+      var(--steel-dark) 20%,
+      var(--gunmetal) 45%,
+      var(--black-soft) 70%,
+      var(--black-deep) 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.speaker__woofer-dust-cap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  background:
+    radial-gradient(circle at 35% 35%,
+      var(--chrome) 0%,
+      var(--silver) 40%,
+      var(--steel-dark) 100%);
+  box-shadow:
+    inset 0 1px 3px rgba(255, 255, 255, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Woofer pulse animation when playing */
+.speaker__woofer-cone.is-pulsing {
+  animation: wooferPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes wooferPulse {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.015);
+  }
+}
+
+/* --- Main Deck --- */
+.main-deck {
+  flex: 1;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.02) 1px,
+      rgba(255, 255, 255, 0.02) 2px),
+    linear-gradient(180deg,
+      var(--silver-light) 0%,
+      var(--silver) 10%,
+      var(--steel) 50%,
+      var(--silver) 90%,
+      var(--silver-light) 100%);
+  box-shadow:
+    var(--shadow-drop-xl),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+
+/* --- Video Display (Upper Screen) --- */
+.video-display {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--black-deep);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 3px 16px rgba(0, 0, 0, 0.8),
+    inset 0 0 1px rgba(255, 255, 255, 0.05);
+  border-bottom: 2px solid var(--gunmetal);
+}
+
+.video-display__screen {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-display__idle {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at center, rgba(0, 30, 0, 0.3) 0%, transparent 70%),
+    var(--black-deep);
+}
+
+.video-display__idle-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--led-green);
+  text-shadow: var(--shadow-glow-green);
+  letter-spacing: 2px;
+  animation: titlePulse 3s ease-in-out infinite;
+}
+
+.video-display__idle-subtitle {
+  font-family: var(--font-tech);
+  font-size: 0.85rem;
+  color: var(--silver-dark);
+  margin-top: var(--gap-sm);
+  letter-spacing: 1px;
+}
+
+@keyframes titlePulse {
+
+  0%,
+  100% {
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.6), 0 0 40px rgba(0, 255, 65, 0.2);
+  }
+}
+
+/* Now Playing Overlay */
+.now-playing {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--gap-sm) var(--gap-md);
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+  pointer-events: none;
+}
+
+.now-playing.is-visible {
+  opacity: 1;
+}
+
+.now-playing__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.now-playing__title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--led-green);
+  text-shadow: var(--shadow-glow-green);
+}
+
+.now-playing__movie {
+  font-family: var(--font-tech);
+  font-size: 0.7rem;
+  color: var(--silver);
+}
+
+.now-playing__director {
+  font-family: var(--font-tech);
+  font-size: 0.6rem;
+  color: var(--silver-dark);
+}
+
+.now-playing__time {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  color: var(--led-green);
+  text-shadow: var(--shadow-glow-green);
+}
+
+/* --- Cassette Rack (below display) --- */
+.cassette-rack {
+  display: flex;
+  gap: 3px;
+  padding: var(--gap-sm) var(--gap-md);
+  background: linear-gradient(180deg,
+      var(--gunmetal-dark) 0%,
+      var(--gunmetal) 50%,
+      var(--gunmetal-dark) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.cassette-rack__slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cassette-rack__tape {
+  height: 28px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-tech);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.5px;
+}
+
+.cassette-rack__tape::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
+}
+
+.cassette-rack__tape:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.cassette-rack__tape.is-active {
+  filter: brightness(1.3);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.cassette-rack__tape--c1 {
+  background: var(--cassette-c1);
+}
+
+.cassette-rack__tape--c2 {
+  background: var(--cassette-c2);
+}
+
+.cassette-rack__tape--c3 {
+  background: var(--cassette-c3);
+}
+
+.cassette-rack__tape--c4 {
+  background: var(--cassette-c4);
+}
+
+.cassette-rack__tape--c5 {
+  background: var(--cassette-c5);
+}
+
+.cassette-rack__tape--c6 {
+  background: var(--cassette-c6);
+}
+
+.cassette-rack__label {
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  color: var(--silver-dark);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* --- Control Panel (middle section) --- */
+.control-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-lg);
+  padding: var(--gap-md) var(--gap-lg);
+  background:
+    repeating-linear-gradient(90deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.015) 1px,
+      rgba(255, 255, 255, 0.015) 2px),
+    linear-gradient(180deg,
+      var(--silver) 0%,
+      var(--steel) 40%,
+      var(--steel-dark) 60%,
+      var(--silver) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+/* Chrome accent strip */
+.control-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--gap-lg);
+  right: var(--gap-lg);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--chrome-bright), transparent);
+}
+
+/* --- Transport Controls --- */
+.transport-controls {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+}
+
+.transport-btn {
+  width: 44px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--gunmetal-dark);
+  position: relative;
+  transition: all var(--transition-fast);
+  background:
+    linear-gradient(180deg,
+      var(--chrome-bright) 0%,
+      var(--silver) 30%,
+      var(--silver-dark) 70%,
+      var(--steel) 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.transport-btn:hover {
+  background:
+    linear-gradient(180deg,
+      #fff 0%,
+      var(--silver-light) 30%,
+      var(--silver) 70%,
+      var(--silver-dark) 100%);
+}
+
+.transport-btn:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.transport-btn.is-active {
+  background:
+    linear-gradient(180deg,
+      var(--silver-dark) 0%,
+      var(--steel) 50%,
+      var(--silver) 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.transport-btn__icon {
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* LED indicator on active transport */
+.transport-btn__led {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-round);
+  background: var(--steel-dark);
+  transition: all var(--transition-fast);
+}
+
+.transport-btn.is-active .transport-btn__led {
+  background: var(--led-green);
+  box-shadow: 0 0 4px var(--led-green);
+}
+
+/* --- Volume Dial --- */
+.volume-dial {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.volume-dial:active {
+  cursor: grabbing;
+}
+
+/* Outer ring with LED glow */
+.volume-dial__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-round);
+  background: conic-gradient(from 210deg,
+      var(--led-green) 0deg,
+      var(--led-cyan) 60deg,
+      var(--led-blue) 120deg,
+      var(--led-green) 180deg,
+      var(--led-cyan) 240deg,
+      transparent 240deg,
+      transparent 360deg);
+  opacity: 0.6;
+  filter: blur(2px);
+  transition: opacity var(--transition-medium);
+}
+
+.volume-dial.is-adjusting .volume-dial__ring {
+  opacity: 1;
+}
+
+/* Main dial body */
+.volume-dial__body {
+  position: absolute;
+  inset: 6px;
+  border-radius: var(--radius-round);
+  background:
+    radial-gradient(circle at 35% 35%,
+      var(--chrome-bright) 0%,
+      var(--silver) 25%,
+      var(--steel) 50%,
+      var(--steel-dark) 75%,
+      var(--gunmetal) 100%);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.05s linear;
+}
+
+/* Dial grooves */
+.volume-dial__body::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: var(--radius-round);
+  background:
+    repeating-conic-gradient(from 0deg,
+      transparent 0deg 4deg,
+      rgba(0, 0, 0, 0.1) 4deg 5deg,
+      transparent 5deg 10deg);
+}
+
+/* Dial indicator notch */
+.volume-dial__indicator {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 14px;
+  background: var(--led-green);
+  border-radius: 2px;
+  box-shadow: 0 0 6px var(--led-green);
+}
+
+/* Volume label */
+.volume-dial__label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  color: var(--silver-dark);
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+/* --- Cassette Switches --- */
+.cassette-switches {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--gap-sm);
+}
+
+.cassette-switches__label {
+  font-family: var(--font-display);
+  font-size: 0.4rem;
+  color: var(--silver-dark);
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.cassette-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cassette-switch__toggle {
+  width: 32px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--gunmetal-dark);
+  position: relative;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: background var(--transition-fast);
+}
+
+.cassette-switch__toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-round);
+  background: linear-gradient(180deg,
+      var(--chrome-bright) 0%,
+      var(--silver-dark) 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-fast);
+}
+
+.cassette-switch.is-active .cassette-switch__toggle {
+  background: var(--led-green-dim);
+}
+
+.cassette-switch.is-active .cassette-switch__toggle::after {
+  transform: translateX(16px);
+}
+
+.cassette-switch__name {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  color: var(--silver-dark);
+  transition: color var(--transition-fast);
+  min-width: 20px;
+}
+
+.cassette-switch.is-active .cassette-switch__name {
+  color: var(--led-green);
+  text-shadow: 0 0 4px rgba(0, 255, 65, 0.3);
+}
+
+/* --- Cassette Deck (Bottom Compartment) --- */
+.cassette-deck {
+  padding: var(--gap-md);
+  background: linear-gradient(180deg,
+      var(--gunmetal) 0%,
+      var(--black-soft) 20%,
+      var(--black-deep) 80%,
+      var(--gunmetal) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.cassette-deck__window {
+  width: 100%;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--gunmetal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-xl);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Cassette tape label */
+.cassette-deck__label {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  color: var(--silver-dark);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* Tape Reels */
+.cassette-deck__reel {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-round);
+  border: 3px solid var(--gunmetal);
+  position: relative;
+  transition: border-color var(--transition-fast);
+}
+
+.cassette-deck__reel.is-spinning {
+  animation: reelSpin 2s linear infinite;
+}
+
+.cassette-deck__reel-hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-round);
+  background:
+    radial-gradient(circle at 40% 40%,
+      var(--chrome) 0%,
+      var(--steel) 50%,
+      var(--gunmetal) 100%);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Reel spokes */
+.cassette-deck__reel-spoke {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  background: var(--gunmetal);
+  transform-origin: center top;
+}
+
+.cassette-deck__reel-spoke:nth-child(1) {
+  transform: translate(-50%, 0) rotate(0deg);
+}
+
+.cassette-deck__reel-spoke:nth-child(2) {
+  transform: translate(-50%, 0) rotate(120deg);
+}
+
+.cassette-deck__reel-spoke:nth-child(3) {
+  transform: translate(-50%, 0) rotate(240deg);
+}
+
+@keyframes reelSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tape between reels */
+.cassette-deck__tape-path {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 2px;
+  background: var(--gunmetal);
+}
+
+/* --- Song List Overlay --- */
+.song-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-medium);
+  overflow: hidden;
+}
+
+.song-list.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.song-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-sm) var(--gap-md);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+}
+
+.song-list__title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--led-green);
+  text-shadow: var(--shadow-glow-green);
+  letter-spacing: 1px;
+}
+
+.song-list__close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--steel-dark);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--silver);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.song-list__close:hover {
+  background: var(--gunmetal);
+  color: var(--led-green);
+  border-color: var(--led-green-dim);
+}
+
+.song-list__tracks {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-sm) 0;
+}
+
+.song-list__track {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-left: 2px solid transparent;
+}
+
+.song-list__track:hover {
+  background: rgba(0, 255, 65, 0.05);
+  border-left-color: var(--led-green-dim);
+}
+
+.song-list__track.is-playing {
+  background: rgba(0, 255, 65, 0.08);
+  border-left-color: var(--led-green);
+}
+
+.song-list__track-num {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  color: var(--steel-dark);
+  min-width: 24px;
+  text-align: center;
+}
+
+.song-list__track.is-playing .song-list__track-num {
+  color: var(--led-green);
+}
+
+.song-list__track-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.song-list__track-title {
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  color: var(--silver);
+  font-weight: 500;
+}
+
+.song-list__track.is-playing .song-list__track-title {
+  color: var(--led-green);
+  text-shadow: 0 0 4px rgba(0, 255, 65, 0.2);
+}
+
+.song-list__track-meta {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  color: var(--steel-dark);
+}
+
+.song-list__track-playing-indicator {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  opacity: 0;
+}
+
+.song-list__track.is-playing .song-list__track-playing-indicator {
+  opacity: 1;
+}
+
+.song-list__track-playing-indicator span {
+  display: block;
+  width: 3px;
+  background: var(--led-green);
+  border-radius: 1px;
+  animation: eqBar 0.8s ease-in-out infinite;
+}
+
+.song-list__track-playing-indicator span:nth-child(1) {
+  height: 40%;
+  animation-delay: 0s;
+}
+
+.song-list__track-playing-indicator span:nth-child(2) {
+  height: 70%;
+  animation-delay: 0.2s;
+}
+
+.song-list__track-playing-indicator span:nth-child(3) {
+  height: 50%;
+  animation-delay: 0.4s;
+}
+
+@keyframes eqBar {
+
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* --- Progress Bar --- */
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--gunmetal-dark);
+  position: relative;
+  cursor: pointer;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: var(--led-green);
+  width: 0%;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 4px rgba(0, 255, 65, 0.3);
+}
+
+.progress-bar__handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--led-green);
+  box-shadow: 0 0 6px var(--led-green);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.progress-bar:hover .progress-bar__handle {
+  opacity: 1;
+}
+
+/* --- Scrollbar Styling --- */
+.song-list__tracks::-webkit-scrollbar {
+  width: 4px;
+}
+
+.song-list__tracks::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.song-list__tracks::-webkit-scrollbar-thumb {
+  background: var(--steel-dark);
+  border-radius: 2px;
+}
+
+/* --- Responsive Styles --- */
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .stereo-system {
+    flex-direction: column;
+    align-items: center;
+    padding: var(--gap-md);
+  }
+
+  .speaker {
+    width: 100%;
+    max-width: 700px;
+    flex-direction: row;
+    min-width: unset;
+    height: 120px;
+  }
+
+  .speaker--left,
+  .speaker--right {
+    border-radius: var(--radius-lg);
+  }
+
+  .speaker__frame {
+    flex-direction: row;
+  }
+
+  .speaker__tweeter {
+    width: 100px;
+    height: 100px;
+    aspect-ratio: unset;
+    flex-shrink: 0;
+  }
+
+  .speaker__woofer {
+    min-height: unset;
+    flex: 1;
+  }
+
+  .main-deck {
+    max-width: 700px;
+    width: 100%;
+  }
+
+  .volume-dial {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  body {
+    align-items: flex-start;
+  }
+
+  .stereo-system {
+    padding: var(--gap-sm);
+    gap: var(--gap-sm);
+  }
+
+  .speaker {
+    height: auto;
+    flex-direction: column;
+  }
+
+  .speaker__frame {
+    flex-direction: column;
+    padding: var(--gap-sm);
+    gap: var(--gap-sm);
+  }
+
+  .speaker__tweeter {
+    width: 80px;
+    height: 80px;
+    aspect-ratio: unset;
+    align-self: center;
+  }
+
+  .speaker__woofer {
+    min-height: 60px;
+  }
+
+  .main-deck {
+    max-width: 100%;
+  }
+
+  .control-panel {
+    flex-wrap: wrap;
+    gap: var(--gap-md);
+    padding: var(--gap-sm) var(--gap-md);
+  }
+
+  .transport-btn {
+    width: 48px;
+    height: 42px;
+    font-size: 0.9rem;
+  }
+
+  .volume-dial {
+    width: 80px;
+    height: 80px;
+  }
+
+  .cassette-rack {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: var(--gap-sm);
+  }
+
+  .cassette-rack__slot {
+    min-width: calc(33% - 4px);
+  }
+
+  .cassette-deck__window {
+    height: 60px;
+  }
+
+  .cassette-deck__reel {
+    width: 36px;
+    height: 36px;
+  }
+
+  .song-list__track {
+    padding: var(--gap-md) var(--gap-md);
+  }
+
+  .video-display__idle-title {
+    font-size: 1rem;
+  }
+}
+
+/* --- Utility Classes --- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-medium) ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

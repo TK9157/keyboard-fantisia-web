@@ -1,0 +1,553 @@
+{
+  "cassettes": [
+    {
+      "id": "C1",
+      "label": "Vol 1",
+      "fullLabel": "Keyboard Fantasia Vol 1",
+      "color": "#E63946",
+      "photoSet": "S1",
+      "tracks": [
+        {
+          "id": 1,
+          "title": "Roja Kaadhal Rojave",
+          "movie": "Roja (1992)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c1_track01.mp3",
+          "videoFile": "media/video/c1_track01.mp4"
+        },
+        {
+          "id": 2,
+          "title": "Ilayanila Pozhigirathe",
+          "movie": "Payanangal Mudivathillai (1982)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track02.mp3",
+          "videoFile": "media/video/c1_track02.mp4"
+        },
+        {
+          "id": 3,
+          "title": "Poomalai Vaazhum",
+          "movie": "Mann Vasanai (1983)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track03.mp3",
+          "videoFile": "media/video/c1_track03.mp4"
+        },
+        {
+          "id": 4,
+          "title": "Thendral Vandhu Ennai Thodum",
+          "movie": "Avatharam (1995)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track04.mp3",
+          "videoFile": "media/video/c1_track04.mp4"
+        },
+        {
+          "id": 5,
+          "title": "Mandram Vandha",
+          "movie": "Mouna Raagam (1986)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track05.mp3",
+          "videoFile": "media/video/c1_track05.mp4"
+        },
+        {
+          "id": 6,
+          "title": "Ennai Thalatta Varuvala",
+          "movie": "Kadhalukku Mariyadhai (1997)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track06.mp3",
+          "videoFile": "media/video/c1_track06.mp4"
+        },
+        {
+          "id": 7,
+          "title": "Putham Puthu Kaalai",
+          "movie": "Alaigal Oivathillai (1981)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track07.mp3",
+          "videoFile": "media/video/c1_track07.mp4"
+        },
+        {
+          "id": 8,
+          "title": "Sundari Kannal",
+          "movie": "Thalapathi (1991)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track08.mp3",
+          "videoFile": "media/video/c1_track08.mp4"
+        },
+        {
+          "id": 9,
+          "title": "Poove Sempoove",
+          "movie": "Solla Thudikkudhu Manasu (1988)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c1_track09.mp3",
+          "videoFile": "media/video/c1_track09.mp4"
+        },
+        {
+          "id": 10,
+          "title": "Malargale Malargale",
+          "movie": "Love Birds (1996)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c1_track10.mp3",
+          "videoFile": "media/video/c1_track10.mp4"
+        }
+      ]
+    },
+    {
+      "id": "C2",
+      "label": "Vol 2",
+      "fullLabel": "Keyboard Fantasia Vol 2",
+      "color": "#457B9D",
+      "photoSet": "S2",
+      "tracks": [
+        {
+          "id": 1,
+          "title": "Vennilavae Vennilavae",
+          "movie": "Minsara Kanavu (1997)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track01.mp3",
+          "videoFile": "media/video/c2_track01.mp4"
+        },
+        {
+          "id": 2,
+          "title": "Kannalanae",
+          "movie": "Bombay (1995)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track02.mp3",
+          "videoFile": "media/video/c2_track02.mp4"
+        },
+        {
+          "id": 3,
+          "title": "Oru Deivam Thantha Poove",
+          "movie": "Kannathil Muthamittal (2002)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track03.mp3",
+          "videoFile": "media/video/c2_track03.mp4"
+        },
+        {
+          "id": 4,
+          "title": "Nila Kaaigiradhu",
+          "movie": "Indira (1995)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track04.mp3",
+          "videoFile": "media/video/c2_track04.mp4"
+        },
+        {
+          "id": 5,
+          "title": "Kadhal Sadugudu",
+          "movie": "Alaipayuthey (2000)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track05.mp3",
+          "videoFile": "media/video/c2_track05.mp4"
+        },
+        {
+          "id": 6,
+          "title": "Pachai Niramae",
+          "movie": "Alaipayuthey (2000)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track06.mp3",
+          "videoFile": "media/video/c2_track06.mp4"
+        },
+        {
+          "id": 7,
+          "title": "Snehithane Snehithane",
+          "movie": "Alaipayuthey (2000)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track07.mp3",
+          "videoFile": "media/video/c2_track07.mp4"
+        },
+        {
+          "id": 8,
+          "title": "Vellai Pookal",
+          "movie": "Kannathil Muthamittal (2002)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track08.mp3",
+          "videoFile": "media/video/c2_track08.mp4"
+        },
+        {
+          "id": 9,
+          "title": "New York Nagaram",
+          "movie": "Sillunu Oru Kaadhal (2006)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track09.mp3",
+          "videoFile": "media/video/c2_track09.mp4"
+        },
+        {
+          "id": 10,
+          "title": "Munbe Vaa",
+          "movie": "Sillunu Oru Kaadhal (2006)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c2_track10.mp3",
+          "videoFile": "media/video/c2_track10.mp4"
+        }
+      ]
+    },
+    {
+      "id": "C3",
+      "label": "Vol 3",
+      "fullLabel": "Keyboard Fantasia Vol 3",
+      "color": "#2A9D8F",
+      "photoSet": "S3",
+      "tracks": [
+        {
+          "id": 1,
+          "title": "Uyire Uyire",
+          "movie": "Bombay (1995)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track01.mp3",
+          "videoFile": "media/video/c3_track01.mp4"
+        },
+        {
+          "id": 2,
+          "title": "Pudhu Vellai Mazhai",
+          "movie": "Roja (1992)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track02.mp3",
+          "videoFile": "media/video/c3_track02.mp4"
+        },
+        {
+          "id": 3,
+          "title": "Chinna Chinna Aasai",
+          "movie": "Roja (1992)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track03.mp3",
+          "videoFile": "media/video/c3_track03.mp4"
+        },
+        {
+          "id": 4,
+          "title": "Konjum Mainakkale",
+          "movie": "Kandukondain Kandukondain (2000)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track04.mp3",
+          "videoFile": "media/video/c3_track04.mp4"
+        },
+        {
+          "id": 5,
+          "title": "Narumugaye",
+          "movie": "Iruvar (1997)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track05.mp3",
+          "videoFile": "media/video/c3_track05.mp4"
+        },
+        {
+          "id": 6,
+          "title": "Enna Solla Pogirai",
+          "movie": "Kandukondain Kandukondain (2000)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track06.mp3",
+          "videoFile": "media/video/c3_track06.mp4"
+        },
+        {
+          "id": 7,
+          "title": "Nenjukkul Peidhidum",
+          "movie": "Vaaranam Aayiram (2008)",
+          "musicDirector": "Harris Jayaraj",
+          "audioFile": "media/audio/c3_track07.mp3",
+          "videoFile": "media/video/c3_track07.mp4"
+        },
+        {
+          "id": 8,
+          "title": "Vaseegara",
+          "movie": "Minnale (2001)",
+          "musicDirector": "Harris Jayaraj",
+          "audioFile": "media/audio/c3_track08.mp3",
+          "videoFile": "media/video/c3_track08.mp4"
+        },
+        {
+          "id": 9,
+          "title": "Anjali Anjali",
+          "movie": "Duet (1994)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c3_track09.mp3",
+          "videoFile": "media/video/c3_track09.mp4"
+        },
+        {
+          "id": 10,
+          "title": "Ennulle Ennulle",
+          "movie": "Valli (1993)",
+          "musicDirector": "Deva",
+          "audioFile": "media/audio/c3_track10.mp3",
+          "videoFile": "media/video/c3_track10.mp4"
+        }
+      ]
+    },
+    {
+      "id": "C4",
+      "label": "Vol 4",
+      "fullLabel": "Keyboard Fantasia Vol 4",
+      "color": "#E9C46A",
+      "photoSet": "S4",
+      "tracks": [
+        {
+          "id": 1,
+          "title": "Minsara Poove",
+          "movie": "Padayappa (1999)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c4_track01.mp3",
+          "videoFile": "media/video/c4_track01.mp4"
+        },
+        {
+          "id": 2,
+          "title": "O Priya Priya",
+          "movie": "Geetanjali (1989)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c4_track02.mp3",
+          "videoFile": "media/video/c4_track02.mp4"
+        },
+        {
+          "id": 3,
+          "title": "Kannodu Kanbathellam",
+          "movie": "Jeans (1998)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c4_track03.mp3",
+          "videoFile": "media/video/c4_track03.mp4"
+        },
+        {
+          "id": 4,
+          "title": "Thanga Thamarai",
+          "movie": "Minsara Kanavu (1997)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c4_track04.mp3",
+          "videoFile": "media/video/c4_track04.mp4"
+        },
+        {
+          "id": 5,
+          "title": "Megham Karukuthu",
+          "movie": "Thotta Chinungi (1995)",
+          "musicDirector": "Deva",
+          "audioFile": "media/audio/c4_track05.mp3",
+          "videoFile": "media/video/c4_track05.mp4"
+        },
+        {
+          "id": 6,
+          "title": "Kadhalar Dhinam",
+          "movie": "Kadhalar Dhinam (1999)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c4_track06.mp3",
+          "videoFile": "media/video/c4_track06.mp4"
+        },
+        {
+          "id": 7,
+          "title": "Kadhal Kavithai",
+          "movie": "Prashanth Hit Songs",
+          "musicDirector": "Various",
+          "audioFile": "media/audio/c4_track07.mp3",
+          "videoFile": "media/video/c4_track07.mp4"
+        },
+        {
+          "id": 8,
+          "title": "Maanguyile Poonguyile",
+          "movie": "Karakattakkaran (1989)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c4_track08.mp3",
+          "videoFile": "media/video/c4_track08.mp4"
+        },
+        {
+          "id": 9,
+          "title": "En Jeevan Paduthu",
+          "movie": "Anbulla Rajinikanth (1988)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c4_track09.mp3",
+          "videoFile": "media/video/c4_track09.mp4"
+        },
+        {
+          "id": 10,
+          "title": "Innisai Paadivarum",
+          "movie": "Thullatha Manamum Thullum (1999)",
+          "musicDirector": "S.A. Rajkumar",
+          "audioFile": "media/audio/c4_track10.mp3",
+          "videoFile": "media/video/c4_track10.mp4"
+        }
+      ]
+    },
+    {
+      "id": "C5",
+      "label": "Vol 5",
+      "fullLabel": "Keyboard Fantasia Vol 5",
+      "color": "#F4A261",
+      "photoSet": "S5",
+      "tracks": [
+        {
+          "id": 1,
+          "title": "AsaPulla",
+          "movie": "Youth(2026)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c5_track01.mp3",
+          "videoFile": "media/video/c5_track01.mp4"
+        },
+        {
+          "id": 2,
+          "title": "Telephone Manipol",
+          "movie": "En Swasa Kaatre (1999)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c5_track02.mp3",
+          "videoFile": "media/video/c5_track02.mp4"
+        },
+        {
+          "id": 3,
+          "title": "Kaadhal Rojave",
+          "movie": "Roja (1992)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c5_track03.mp3",
+          "videoFile": "media/video/c5_track03.mp4"
+        },
+        {
+          "id": 4,
+          "title": "Enna Satham Indha Neram",
+          "movie": "Salangai Oli (1983)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c5_track04.mp3",
+          "videoFile": "media/video/c5_track04.mp4"
+        },
+        {
+          "id": 5,
+          "title": "Rasathi Unna",
+          "movie": "Once More (1997)",
+          "musicDirector": "S.A. Rajkumar",
+          "audioFile": "media/audio/c5_track05.mp3",
+          "videoFile": "media/video/c5_track05.mp4"
+        },
+        {
+          "id": 6,
+          "title": "Oru Naalum",
+          "movie": "Ejamaan (1993)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c5_track06.mp3",
+          "videoFile": "media/video/c5_track06.mp4"
+        },
+        {
+          "id": 7,
+          "title": "Raasaave Unnai",
+          "movie": "Mella Pesungal (1990)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c5_track07.mp3",
+          "videoFile": "media/video/c5_track07.mp4"
+        },
+        {
+          "id": 8,
+          "title": "Ottagathai Kattikko",
+          "movie": "Gentleman (1993)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c5_track08.mp3",
+          "videoFile": "media/video/c5_track08.mp4"
+        },
+        {
+          "id": 9,
+          "title": "Antha Arabic Kadaloram",
+          "movie": "Bombay (1995)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c5_track09.mp3",
+          "videoFile": "media/video/c5_track09.mp4"
+        },
+        {
+          "id": 10,
+          "title": "Kummi Adi",
+          "movie": "Thiruda Thiruda (1993)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c5_track10.mp3",
+          "videoFile": "media/video/c5_track10.mp4"
+        }
+      ]
+    },
+    {
+      "id": "C6",
+      "label": "Vol 6",
+      "fullLabel": "Keyboard Fantasia Vol 6",
+      "color": "#6A4C93",
+      "photoSet": "S6",
+      "tracks": [
+        {
+          "id": 1,
+          "title": "Haiyya Ho",
+          "movie": "Gentleman (1993)",
+          "musicDirector": "A.R. Rahman",
+          "audioFile": "media/audio/c6_track01.mp3",
+          "videoFile": "media/video/c6_track01.mp4"
+        },
+        {
+          "id": 2,
+          "title": "Poongatru Thirumbuma",
+          "movie": "Keladi Kanmani (1990)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track02.mp3",
+          "videoFile": "media/video/c6_track02.mp4"
+        },
+        {
+          "id": 3,
+          "title": "Nee Partha Parvai",
+          "movie": "Hey Ram (2000)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track03.mp3",
+          "videoFile": "media/video/c6_track03.mp4"
+        },
+        {
+          "id": 4,
+          "title": "Suttum Vizhi Sudare",
+          "movie": "Ghajini (2005)",
+          "musicDirector": "Harris Jayaraj",
+          "audioFile": "media/audio/c6_track04.mp3",
+          "videoFile": "media/video/c6_track04.mp4"
+        },
+        {
+          "id": 5,
+          "title": "Thenpaandi Cheemayile",
+          "movie": "Nayakan (1987)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track05.mp3",
+          "videoFile": "media/video/c6_track05.mp4"
+        },
+        {
+          "id": 6,
+          "title": "Kalaivaniye",
+          "movie": "Sindhu Bhairavi (1985)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track06.mp3",
+          "videoFile": "media/video/c6_track06.mp4"
+        },
+        {
+          "id": 7,
+          "title": "Thendral Vanthu Theendum Bodhu",
+          "movie": "Avatharam (1995)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track07.mp3",
+          "videoFile": "media/video/c6_track07.mp4"
+        },
+        {
+          "id": 8,
+          "title": "Sundari Neeyum",
+          "movie": "Michael Madana Kama Rajan (1990)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track08.mp3",
+          "videoFile": "media/video/c6_track08.mp4"
+        },
+        {
+          "id": 9,
+          "title": "En Iniya Pon Nilave",
+          "movie": "Moodu Pani (1980)",
+          "musicDirector": "Ilaiyaraaja",
+          "audioFile": "media/audio/c6_track09.mp3",
+          "videoFile": "media/video/c6_track09.mp4"
+        },
+        {
+          "id": 10,
+          "title": "Ilamai Enum Poongatru",
+          "movie": "Pagalil Oru Iravu (1978)",
+          "musicDirector": "M.S. Viswanathan",
+          "audioFile": "media/audio/c6_track10.mp3",
+          "videoFile": "media/video/c6_track10.mp4"
+        }
+      ]
+    }
+  ],
+  "photoSets": {
+    "S1": [],
+    "S2": [],
+    "S3": [],
+    "S4": [],
+    "S5": [],
+    "S6": []
+  },
+  "branding": {
+    "title": "Keyboard Fantasia",
+    "artistName": "Pradeep N",
+    "designation": "Engineer, VSSC",
+    "tagline": "Keyboard Fantasia by Pradeep N, Engineer, VSSC",
+    "artistPhoto": "media/photos/pradeep_n.jpg"
+  }
+}
