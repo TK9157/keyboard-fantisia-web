@@ -14,39 +14,63 @@ var AuthModule = (function() {
   // ── Public API ──
 
   function init() {
+    var isLoginPage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+    var isPlayerPage = window.location.pathname.endsWith('player.html');
+    
+    // Supabase fallback
     if (!isSupabaseConfigured()) {
       console.warn('⚠️ Supabase not configured — auth features disabled');
-      showPlayerDirectly();
+      if (isLoginPage) window.location.href = 'player.html';
       return;
     }
 
     var sb = getSupabase();
-    if (!sb) { showPlayerDirectly(); return; }
+    if (!sb) { 
+      if (isLoginPage) window.location.href = 'player.html';
+      return; 
+    }
+
+    var isGuest = sessionStorage.getItem('kb_guest') === 'true';
+
+    // Check existing session
+    sb.auth.getSession().then(function(result) {
+      if (result.data.session) {
+        if (isLoginPage) {
+          window.location.href = 'player.html';
+        } else {
+          handleSignedIn(result.data.session);
+        }
+      } else if (isGuest) {
+        if (isLoginPage) {
+          window.location.href = 'player.html';
+        } else {
+          currentUser = { id: null, email: null, name: 'Guest', avatar: '' };
+          fetchIPAndTrackVisitor();
+          notifyListeners('guest', currentUser);
+        }
+      } else {
+        if (isPlayerPage) {
+          window.location.href = 'index.html';
+        }
+      }
+    }).catch(function(err) {
+      console.error('Session check failed:', err);
+      if (isPlayerPage) window.location.href = 'index.html';
+    });
 
     // Listen for auth state changes
     sb.auth.onAuthStateChange(function(event, session) {
       console.log('🔐 Auth event:', event);
       if (event === 'SIGNED_IN' && session) {
-        handleSignedIn(session);
+        if (isLoginPage) {
+          window.location.href = 'player.html';
+        } else {
+          handleSignedIn(session);
+        }
       } else if (event === 'SIGNED_OUT') {
-        handleSignedOut();
-      } else if (event === 'INITIAL_SESSION' && session) {
-        handleSignedIn(session);
-      } else if (event === 'INITIAL_SESSION' && !session) {
-        showAuthOverlay();
+        sessionStorage.removeItem('kb_guest');
+        if (!isLoginPage) window.location.href = 'index.html';
       }
-    });
-
-    // Check existing session
-    sb.auth.getSession().then(function(result) {
-      if (result.data.session) {
-        handleSignedIn(result.data.session);
-      } else {
-        showAuthOverlay();
-      }
-    }).catch(function(err) {
-      console.error('Session check failed:', err);
-      showAuthOverlay();
     });
   }
 
@@ -59,10 +83,17 @@ var AuthModule = (function() {
     var btnText = document.getElementById('google-btn-text');
     if (btnText) btnText.textContent = 'Connecting...';
 
+    var redirectUrl = window.location.origin + window.location.pathname;
+    redirectUrl = redirectUrl.replace('index.html', 'player.html');
+    if (!redirectUrl.endsWith('player.html')) {
+        if (redirectUrl.endsWith('/')) redirectUrl += 'player.html';
+        else redirectUrl += '/player.html';
+    }
+
     sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: redirectUrl
       }
     }).then(function(result) {
       if (result.error) {
@@ -70,7 +101,6 @@ var AuthModule = (function() {
         if (btnText) btnText.textContent = 'Sign in with Google';
         showAuthError('Sign-in failed. Please try again.');
       }
-      // If successful, page will redirect to Google
     }).catch(function(err) {
       console.error('Sign-in exception:', err);
       if (btnText) btnText.textContent = 'Sign in with Google';
@@ -78,15 +108,15 @@ var AuthModule = (function() {
   }
 
   function signOut() {
+    sessionStorage.removeItem('kb_guest');
     var sb = getSupabase();
-    if (!sb) return;
-
-    sb.auth.signOut().then(function() {
-      currentUser = null;
-      currentVisitorId = null;
-      hideUserBadge();
-      showAuthOverlay();
-    });
+    if (sb) {
+      sb.auth.signOut().then(function() {
+        window.location.href = 'index.html';
+      });
+    } else {
+      window.location.href = 'index.html';
+    }
   }
 
   const ADMIN_EMAILS = ['pradeep@vssc.gov.in', 'admin@example.com']; // Update with actual admin emails
@@ -105,8 +135,7 @@ var AuthModule = (function() {
       var sb = getSupabase();
       if (sb) {
         sb.auth.signOut().then(function() {
-          handleSignedOut();
-          showAuthOverlay();
+          window.location.href = 'index.html';
         });
       }
       return;
@@ -121,32 +150,21 @@ var AuthModule = (function() {
 
     console.log('👤 Signed in as:', currentUser.name, currentUser.email);
 
-    hideAuthOverlay();
     showUserBadge(currentUser);
     fetchIPAndTrackVisitor();
     notifyListeners('signed_in', currentUser);
   }
 
-  function handleSignedOut() {
-    currentUser = null;
-    currentVisitorId = null;
-    hideUserBadge();
-    notifyListeners('signed_out', null);
-  }
-
   // ── Continue as Guest ──
 
   function continueAsGuest() {
-    currentUser = { id: null, email: null, name: 'Guest', avatar: '' };
-    hideAuthOverlay();
-    fetchIPAndTrackVisitor();
-    notifyListeners('guest', currentUser);
+    sessionStorage.setItem('kb_guest', 'true');
+    window.location.href = 'player.html';
   }
 
   // ── IP Address Detection ──
 
   function fetchIPAndTrackVisitor() {
-    // Try multiple free IP services with fallback
     fetchIP()
       .then(function(ipData) {
         visitorIP = ipData.ip || null;
@@ -160,7 +178,6 @@ var AuthModule = (function() {
   }
 
   function fetchIP() {
-    // Primary: ipapi.co (free, gives IP + geo)
     return fetch('https://ipapi.co/json/')
       .then(function(r) { 
         if (!r.ok) throw new Error('ipapi failed');
@@ -170,7 +187,6 @@ var AuthModule = (function() {
         return { ip: data.ip, city: data.city, country: data.country_name };
       })
       .catch(function() {
-        // Fallback: ipify (free, IP only)
         return fetch('https://api.ipify.org?format=json')
           .then(function(r) { return r.json(); })
           .then(function(data) {
@@ -209,31 +225,6 @@ var AuthModule = (function() {
 
   // ── UI Helpers ──
 
-  function showAuthOverlay() {
-    var overlay = document.getElementById('auth-overlay');
-    if (overlay) {
-      overlay.classList.add('is-visible');
-      overlay.style.display = 'flex';
-    }
-  }
-
-  function hideAuthOverlay() {
-    var overlay = document.getElementById('auth-overlay');
-    if (overlay) {
-      overlay.classList.remove('is-visible');
-      // Slight delay to let transition finish
-      setTimeout(function() {
-        overlay.style.display = 'none';
-      }, 400);
-    }
-  }
-
-  function showPlayerDirectly() {
-    // If Supabase isn't configured, skip auth and show player immediately
-    var overlay = document.getElementById('auth-overlay');
-    if (overlay) overlay.style.display = 'none';
-  }
-
   function showUserBadge(user) {
     var badge = document.getElementById('user-badge');
     var nameEl = document.getElementById('user-badge-name');
@@ -253,11 +244,6 @@ var AuthModule = (function() {
     }
 
     badge.classList.add('is-visible');
-  }
-
-  function hideUserBadge() {
-    var badge = document.getElementById('user-badge');
-    if (badge) badge.classList.remove('is-visible');
   }
 
   function showAuthError(msg) {
