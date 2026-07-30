@@ -229,6 +229,15 @@ class KeyboardFantasiaApp {
         if (label) label.textContent = `VOL ${Math.round(value)}`;
         const valDisp = document.getElementById('volume-value');
         if (valDisp) valDisp.textContent = Math.round(value);
+
+        // Update Volume SVG fill
+        const fill = document.getElementById('volume-fill');
+        if (fill) {
+          const maxOffset = 282.74;
+          const minOffset = 47.12;
+          const offset = maxOffset - ((value / 100) * (maxOffset - minOffset));
+          fill.style.strokeDashoffset = offset;
+        }
       },
       50
     );

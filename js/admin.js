@@ -17,25 +17,13 @@ const AdminModule = {
 
     errorEl.style.display = 'none';
 
-    if (!window.supabaseClient) {
-      errorEl.textContent = 'Supabase client not initialized. Check config.';
-      errorEl.style.display = 'block';
-      return;
-    }
+    if (username === 'admin' && password === 'admin@123') {
+      errorEl.style.display = 'none';
+      
+      // Set a local session flag
+      localStorage.setItem('admin_session', 'true');
 
-    // Map username to a hidden internal email format
-    const email = username + '@admin.local';
-
-    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      errorEl.textContent = error.message;
-      errorEl.style.display = 'block';
-    } else {
-      // Success
+      // Success UI transition
       const loginOverlay = document.getElementById('admin-login-overlay');
       if (loginOverlay) {
         loginOverlay.classList.remove('is-visible');
@@ -44,7 +32,14 @@ const AdminModule = {
         }, 500);
       }
       
-      this.openDashboard();
+      if (!window.location.pathname.endsWith('admin.html')) {
+        window.location.href = 'admin.html';
+      } else {
+        this.openDashboard();
+      }
+    } else {
+      errorEl.textContent = 'Invalid username or password.';
+      errorEl.style.display = 'block';
     }
   },
 
@@ -62,10 +57,11 @@ const AdminModule = {
   },
 
   async closeDashboard() {
-    if (window.supabaseClient) {
-      await window.supabaseClient.auth.signOut();
-    }
+    localStorage.removeItem('admin_session');
     document.getElementById('admin-dashboard').classList.remove('is-open');
+    if (window.location.pathname.endsWith('admin.html')) {
+      this.openLogin();
+    }
   },
 
   async uploadFile() {
@@ -220,16 +216,11 @@ window.AdminModule = AdminModule;
 // Initialization for dedicated /admin.html page
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.pathname.endsWith('admin.html')) {
-    // Wait slightly for Supabase to restore session
-    setTimeout(async () => {
-      if (window.supabaseClient) {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
-        if (session) {
-          AdminModule.openDashboard();
-        } else {
-          AdminModule.openLogin();
-        }
-      }
-    }, 500);
+    const hasSession = localStorage.getItem('admin_session') === 'true';
+    if (hasSession) {
+      AdminModule.openDashboard();
+    } else {
+      AdminModule.openLogin();
+    }
   }
 });
