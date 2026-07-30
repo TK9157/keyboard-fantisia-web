@@ -319,7 +319,8 @@
       top: 48%;
       left: 44.5%;
       width: 11%;
-      height: 19.5%;
+      height: auto;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       cursor: grab;
       touch-action: none;
@@ -332,7 +333,6 @@
       border-radius: 50%;
       /* We map the actual rotation to this invisible element or a visible overlay */
       position: relative;
-      background-image: url('media/images/knob.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -408,11 +408,11 @@
     /* Cassette Spin Video */
     #cassette-spin-video {
       position: absolute;
-      top: 10.5%; /* Positioned in CRT */
+      top: 70%; /* Positioned in Cassette Deck */
       left: 28%;
       width: 44%;
-      height: 31.5%;
-      object-fit: contain;
+      height: 20%;
+      object-fit: cover;
       border-radius: 4px;
       z-index: 10;
       opacity: 0;
