@@ -225,10 +225,20 @@ class KeyboardFantasiaApp {
       dialContainer,
       (value) => {
         player.setVolume(value);
+        
+        // Calculate dynamic color (Green -> Red)
+        // Hue 120 is Green, Hue 0 is Red
+        const hue = 120 - ((value / 100) * 120);
+        const color = `hsl(${hue}, 100%, 50%)`;
+
         const label = document.getElementById('volume-label');
         if (label) label.textContent = `VOL ${Math.round(value)}`;
+        
         const valDisp = document.getElementById('volume-value');
-        if (valDisp) valDisp.textContent = Math.round(value);
+        if (valDisp) {
+          valDisp.textContent = Math.round(value);
+          valDisp.style.color = color;
+        }
 
         // Update Volume SVG fill
         const fill = document.getElementById('volume-fill');
@@ -237,6 +247,8 @@ class KeyboardFantasiaApp {
           const minOffset = 47.12;
           const offset = maxOffset - ((value / 100) * (maxOffset - minOffset));
           fill.style.strokeDashoffset = offset;
+          fill.style.stroke = color;
+          fill.style.filter = `drop-shadow(0 0 5px ${color})`;
         }
       },
       50

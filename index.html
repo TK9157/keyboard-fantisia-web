@@ -49,7 +49,8 @@
 
     body {
       font-family: var(--font-body);
-      background: #000;
+      background: #050505 url('media/images/stereo_bg.jpg') center/cover no-repeat;
+      backdrop-filter: blur(20px) brightness(0.3); /* Immersive blurred background */
       color: #fff;
       overflow-x: hidden;
       min-height: 100vh;
@@ -59,7 +60,7 @@
       margin: 0;
     }
 
-    /* ── Power State ── */
+    /*  Power State  */
     .image-player.is-off {
       filter: brightness(0.2) grayscale(0.5);
       pointer-events: none;
@@ -69,17 +70,18 @@
       pointer-events: auto; /* Power button always clickable */
     }
 
-    /* ── Image Player Layout ── */
+    /*  Image Player Layout  */
     .image-player {
       position: relative;
-      max-width: 1200px;
       width: 100%;
+      max-width: 100vw; /* Allow it to fill the screen width */
       aspect-ratio: 1024 / 576; /* Based on the background image */
       margin: 0 auto;
       background-image: url('media/images/stereo_bg.jpg');
-      background-size: contain;
+      background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      box-shadow: 0 0 50px rgba(0,0,0,0.8); /* Blend edge */
     }
 
     /* Invisible clickable areas that overlay the image */
@@ -171,22 +173,22 @@
     /* Volume Progress SVG */
     .volume-progress-svg {
       position: absolute;
-      top: -15%; left: -15%;
-      width: 130%; height: 130%;
+      top: -2%; left: -2%;
+      width: 104%; height: 104%;
       pointer-events: none;
       transform: rotate(120deg); /* align to start at bottom-left */
     }
     .volume-track {
       fill: none;
       stroke: rgba(0, 255, 65, 0.15);
-      stroke-width: 6;
+      stroke-width: 4.8;
       stroke-dasharray: 282.74;
       stroke-dashoffset: 47.12;
     }
     .volume-fill {
       fill: none;
       stroke: var(--led-green);
-      stroke-width: 6;
+      stroke-width: 4.8;
       stroke-dasharray: 282.74;
       stroke-dashoffset: 165; /* updated by js */
       stroke-linecap: round;
@@ -361,6 +363,21 @@
       position: absolute;
       cursor: pointer;
       border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .transport-btn-area span {
+      font-size: 0.65rem;
+      font-family: monospace;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.3);
+      pointer-events: none;
+      transition: all 0.2s;
+    }
+    .transport-btn-area:hover span {
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     }
     .transport-btn-area:hover {
       background: rgba(255, 255, 255, 0.2);
@@ -750,6 +767,7 @@
   <!-- AUTH OVERLAY (HOME PAGE) -->
   <div class="auth-overlay is-visible" id="auth-overlay">
     <div class="auth-card">
+
       <div class="auth-card__icon">🎹</div>
       <div class="auth-card__title">KEYBOARD FANTASIA</div>
       <div class="auth-card__subtitle">by Pradeep N, Engineer, VSSC</div>
