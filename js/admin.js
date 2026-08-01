@@ -89,7 +89,7 @@ const AdminModule = {
       .upload(filePath, file);
 
     if (error) {
-      statusEl.textContent = `Error: ${error.message}`;
+      statusEl.textContent = `Upload Error: ${error.message} (Did you create a public 'media' bucket and configure RLS policies?)`;
       statusEl.style.color = 'var(--led-red)';
     } else {
       const { data: publicUrlData } = window.supabaseClient.storage
@@ -150,7 +150,7 @@ const AdminModule = {
       ]);
 
     if (error) {
-      alert(`Error saving song: ${error.message}`);
+      alert(`Error saving song: ${error.message}\n\nMake sure your Supabase 'tracks' table exists and RLS policies allow inserts for anonymous users.`);
     } else {
       alert("Song added successfully!");
       // Clear inputs

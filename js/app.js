@@ -26,7 +26,8 @@ class KeyboardFantasiaApp {
         data = await DataService.fetchAllData();
       }
       
-      if (!data) {
+      if (!data || !data.cassettes || data.cassettes.length === 0) {
+        console.log('Using local fallback data (Supabase data empty or failed)');
         const response = await fetch('data/cassettes.json');
         data = await response.json();
       }
@@ -47,6 +48,7 @@ class KeyboardFantasiaApp {
       this._initProgressBar();
       this._initSongList();
       this._initPowerAndAdmin();
+      this._initArtistProfile();
 
       // Subscribe to state changes
       this._bindStateListeners();
@@ -329,10 +331,18 @@ class KeyboardFantasiaApp {
     overlay.classList.add('is-open');
   }
 
-  // ───── Branding ─────
+  // ───── Artist Profile ─────
 
-  _initBranding() {
-    // Branding is now part of the background image
+  _initArtistProfile() {
+    const leftTweeter = document.querySelector('.woofer-overlay.left');
+    const artistModal = document.getElementById('artist-profile-modal');
+    if (leftTweeter && artistModal) {
+      leftTweeter.addEventListener('click', () => {
+        artistModal.style.display = 'flex';
+        // Add small delay before adding is-visible to allow display to apply
+        setTimeout(() => artistModal.classList.add('is-visible'), 10);
+      });
+    }
   }
 
   // ───── Photo Scroll ─────
@@ -347,11 +357,21 @@ class KeyboardFantasiaApp {
     // Master Power State
     state.on('isPoweredOn', (s) => {
       const wrapper = document.getElementById('image-player-wrapper');
+      const powerBtn = document.getElementById('power-btn');
+      
       if (wrapper) {
         if (s.isPoweredOn) {
           wrapper.classList.remove('is-off');
+          powerBtn?.classList.remove('power-flash');
+          
+          if (!state.get('activeCassette')) {
+            document.querySelectorAll('.cassette-switch').forEach(sw => sw.classList.add('cassette-flash'));
+          }
         } else {
           wrapper.classList.add('is-off');
+          powerBtn?.classList.add('power-flash');
+          
+          document.querySelectorAll('.cassette-switch').forEach(sw => sw.classList.remove('cassette-flash'));
         }
       }
     });
@@ -361,6 +381,13 @@ class KeyboardFantasiaApp {
       // Update switches
       document.querySelectorAll('.cassette-switch').forEach(sw => {
         sw.classList.toggle('is-active', sw.dataset.cassette === s.activeCassette);
+        
+        // Handle flashing
+        if (s.activeCassette) {
+          sw.classList.remove('cassette-flash');
+        } else if (state.get('isPoweredOn')) {
+          sw.classList.add('cassette-flash');
+        }
       });
 
       // Update rack tapes

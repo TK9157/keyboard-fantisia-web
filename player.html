@@ -173,8 +173,8 @@
     /* Volume Progress SVG */
     .volume-progress-svg {
       position: absolute;
-      top: -2%; left: -2%;
-      width: 104%; height: 104%;
+      top: 10%; left: 10%;
+      width: 80%; height: 80%;
       pointer-events: none;
       transform: rotate(120deg); /* align to start at bottom-left */
     }
@@ -426,7 +426,7 @@
 
     #volume-value {
       position: absolute;
-      bottom: -20px;
+      top: -25px;
       left: 50%;
       transform: translateX(-50%);
       font-family: var(--font-display);
@@ -475,8 +475,33 @@
       /* The scale is driven by CSS var updated in JS */
       transform: scale(var(--bass-scale, 1)); 
     }
-    .woofer-overlay.left { left: 4.8%; }
+    .woofer-overlay.left { 
+      left: 4.8%; 
+      pointer-events: auto; /* Make clickable */
+      cursor: pointer;
+      transition: box-shadow 0.3s;
+    }
+    .woofer-overlay.left:hover {
+      box-shadow: 0 0 30px rgba(0,255,65,0.4) inset;
+    }
     .woofer-overlay.right { left: 78.5%; }
+
+    /* Flashing Animations */
+    @keyframes flash-red {
+      0%, 100% { background: rgba(255, 51, 51, 0.4); box-shadow: 0 0 10px rgba(255, 51, 51, 0.6); }
+      50% { background: rgba(255, 51, 51, 0.9); box-shadow: 0 0 30px rgba(255, 51, 51, 1); }
+    }
+    .power-flash {
+      animation: flash-red 1.5s infinite ease-in-out;
+    }
+
+    @keyframes flash-green {
+      0%, 100% { background: rgba(0, 255, 65, 0.1); border-radius: 4px; box-shadow: 0 0 5px rgba(0, 255, 65, 0.1) inset; }
+      50% { background: rgba(0, 255, 65, 0.4); border-radius: 4px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.6) inset; }
+    }
+    .cassette-flash {
+      animation: flash-green 1.5s infinite ease-in-out;
+    }
 
     /* Cassette Spin Video */
     #cassette-spin-video {
@@ -851,11 +876,31 @@
     <button class="user-badge__signout" id="user-badge-signout" onclick="AuthModule.signOut()" title="Sign out">✕</button>
   </div>
 
+  <!-- ARTIST PROFILE MODAL -->
+  <div class="auth-overlay" id="artist-profile-modal" style="display: none;">
+    <div class="auth-card" style="max-width: 500px; text-align: left; padding: var(--gap-lg);">
+      <button class="admin-close" onclick="document.getElementById('artist-profile-modal').classList.remove('is-visible'); setTimeout(() => document.getElementById('artist-profile-modal').style.display='none', 500);" style="position: absolute; top: 16px; right: 16px; border: none; background: transparent; color: var(--silver-dark);">✕</button>
+      <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--gunmetal); border: 2px solid var(--led-green); overflow: hidden; flex-shrink: 0;">
+          <img src="media/images/profile_placeholder.jpg" alt="Artist Profile" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src=''; this.alt='Profile Picture';">
+        </div>
+        <div>
+          <h2 style="font-family: var(--font-display); color: var(--led-green); margin-bottom: 4px;">Pradeep N</h2>
+          <div style="font-family: var(--font-tech); color: var(--silver-dark); font-size: 0.9rem;">Engineer, VSSC • Keyboard Fantasia Creator</div>
+        </div>
+      </div>
+      <div style="font-family: var(--font-body); color: #ddd; font-size: 0.95rem; line-height: 1.6;">
+        <p style="margin-bottom: 12px;">Welcome to Keyboard Fantasia! This is a nostalgic Panasonic-style cassette stereo media player featuring instrumental renditions of classic songs.</p>
+        <p>I hope you enjoy this immersive auditory experience. Feel free to explore the different cassettes and enjoy the music!</p>
+      </div>
+    </div>
+  </div>
+
   <!-- IMAGE PLAYER WRAPPER -->
   <div class="image-player is-off" id="image-player-wrapper">
     
     <!-- POWER BUTTON (Green button on lower right) -->
-    <div id="power-btn" title="Master Power"></div>
+    <div id="power-btn" class="power-flash" title="Master Power"></div>
     
     <!-- WOOFER PHYSICS OVERLAYS -->
     <div class="woofer-overlay left"></div>
@@ -878,22 +923,27 @@
     <div class="video-container">
       <video id="video-player" playsinline></video>
       
-      <div id="idle-screen" class="video-overlay">
-        <div class="video-display__idle-title" id="deck-label" style="cursor:pointer;" title="Click for Admin Access" onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</div>
+      <div id="idle-screen" class="video-overlay" style="background: radial-gradient(ellipse at center, rgba(0,30,0,0.5) 0%, rgba(10,10,10,0.8) 100%);">
+        <!-- AI Piano Video Placeholder -->
+        <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
         
-        <!-- DECORATIVE EQ -->
-        <div class="decor-eq">
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-          <div class="decor-bar"></div>
-        </div>
+        <div style="z-index: 1; display: flex; flex-direction: column; align-items: center;">
+          <div class="video-display__idle-title" id="deck-label" style="cursor:pointer;" title="Click for Admin Access" onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</div>
+          
+          <!-- DECORATIVE EQ -->
+          <div class="decor-eq">
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+            <div class="decor-bar"></div>
+          </div>
 
-        <div class="video-display__idle-subtitle">SELECT A CASSETTE TO PLAY</div>
+          <div class="video-display__idle-subtitle">SELECT A CASSETTE TO PLAY</div>
+        </div>
       </div>
       
       <div id="boot-screen" class="video-overlay" style="display:none; background: #000; z-index: 20;">
