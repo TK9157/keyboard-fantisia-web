@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Keyboard Fantasia by Pradeep N — A nostalgic Panasonic-style cassette stereo media player featuring instrumental renditions of classic songs">
+  <meta name="description"
+    content="Keyboard Fantasia by Pradeep N — A nostalgic Panasonic-style cassette stereo media player featuring instrumental renditions of classic songs">
   <title>Keyboard Fantasia — by Pradeep N, Engineer, VSSC</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
   <style>
     /* ============================================================
@@ -23,11 +27,11 @@
       --silver-dark: #A0A0A0;
       --steel-dark: #6B6E70;
       --gunmetal: #2C2F33;
-      
+
       --font-display: 'Orbitron', monospace;
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-tech: 'Rajdhani', sans-serif;
-      
+
       --gap-xs: 4px;
       --gap-sm: 8px;
       --gap-md: 16px;
@@ -36,10 +40,16 @@
       --gap-2xl: 48px;
       --radius-sm: 4px;
       --radius-xl: 16px;
-      --shadow-glow-green: 0 0 8px rgba(0,255,65,0.4), 0 0 24px rgba(0,255,65,0.15);
+      --shadow-glow-green: 0 0 8px rgba(0, 255, 65, 0.4), 0 0 24px rgba(0, 255, 65, 0.15);
     }
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     html {
       font-size: 16px;
@@ -50,7 +60,8 @@
     body {
       font-family: var(--font-body);
       background: #050505 url('media/New.jpg.jpeg') center/cover no-repeat;
-      backdrop-filter: blur(20px) brightness(0.3); /* Immersive blurred background */
+      backdrop-filter: blur(20px) brightness(0.3);
+      /* Immersive blurred background */
       color: #fff;
       overflow-x: hidden;
       min-height: 100vh;
@@ -62,26 +73,30 @@
 
     /* ── Power State ── */
     .image-player.is-off {
-      filter: brightness(0.2) grayscale(0.5);
+      filter: brightness(0.65) grayscale(0.4);
       pointer-events: none;
     }
-    
+
     .image-player.is-off #power-btn {
-      pointer-events: auto; /* Power button always clickable */
+      pointer-events: auto;
+      /* Power button always clickable */
     }
 
     /* ── Image Player Layout ── */
     .image-player {
       position: relative;
       width: 100%;
-      max-width: 100vw; /* Allow it to fill the screen width */
-      aspect-ratio: 1024 / 576; /* Based on the background image */
+      max-width: 100vw;
+      /* Allow it to fill the screen width */
+      aspect-ratio: 1024 / 576;
+      /* Based on the background image */
       margin: 0 auto;
       background-image: url('media/New.jpg.jpeg');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
-      box-shadow: 0 0 50px rgba(0,0,0,0.8); /* Blend edge */
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      /* Blend edge */
     }
 
     /* Invisible clickable areas that overlay the image */
@@ -90,6 +105,7 @@
       cursor: pointer;
       /* background: rgba(255, 0, 0, 0.2);  Uncomment to see hitboxes */
     }
+
     .overlay-area:hover {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 4px;
@@ -98,34 +114,45 @@
     /* Cassette Switches (Top Center) */
     .cassette-switches {
       position: absolute;
-      top: 3%;
-      left: 28%;
-      width: 44%;
-      height: 7%;
+      top: 2%;
+      left: 28.1%;
+      width: 43.2%;
+      height: 8%;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 0;
+      grid-template-rows: repeat(2, 1fr);
+      gap: 6px;
     }
-    
+
     .cassette-switch {
       width: 100%;
       height: 100%;
       cursor: pointer;
-      background-color: transparent !important;
-      mix-blend-mode: normal !important;
+      border-radius: 4px;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+      border: 2px solid transparent;
     }
-    
-    .cassette-switch.inverted {
-      filter: invert(100%);
-      backdrop-filter: invert(100%);
+
+    .cassette-switch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 255, 65, 0.5);
+      border: 2px solid var(--led-green);
+    }
+
+    .cassette-switch:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0, 255, 65, 0.5);
     }
 
     /* Video Screen Area */
     .video-container {
       position: absolute;
       top: 10.5%;
-      left: 28%;
-      width: 44%;
+      left: 28.1%;
+      width: 43.2%;
       height: 31.5%;
       background: #000;
       overflow: hidden;
@@ -154,7 +181,7 @@
     }
 
     #idle-screen {
-      background: radial-gradient(ellipse at center, rgba(0,30,0,0.3) 0%, transparent 70%), #0a0a0a;
+      background: radial-gradient(ellipse at center, rgba(0, 30, 0, 0.3) 0%, transparent 70%), #0a0a0a;
     }
 
     /* EQ Visualizer */
@@ -164,7 +191,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1; /* Behind text */
+      z-index: 1;
+      /* Behind text */
       pointer-events: none;
       opacity: 0.8;
     }
@@ -172,11 +200,15 @@
     /* Volume Progress SVG */
     .volume-progress-svg {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
-      transform: rotate(120deg); /* align to start at bottom-left */
+      transform: rotate(120deg);
+      /* align to start at bottom-left */
     }
+
     .volume-track {
       fill: none;
       stroke: rgba(0, 255, 65, 0.15);
@@ -184,12 +216,14 @@
       stroke-dasharray: 282.74;
       stroke-dashoffset: 47.12;
     }
+
     .volume-fill {
       fill: none;
       stroke: var(--led-green);
       stroke-width: 4.3;
       stroke-dasharray: 282.74;
-      stroke-dashoffset: 165; /* updated by js */
+      stroke-dashoffset: 165;
+      /* updated by js */
       stroke-linecap: round;
       transition: stroke-dashoffset 0.1s linear;
       filter: drop-shadow(0 0 2px var(--led-green));
@@ -205,6 +239,7 @@
       height: 40px;
       margin: 15px 0;
     }
+
     .decor-bar {
       width: 10px;
       background: var(--led-green);
@@ -212,18 +247,49 @@
       opacity: 0.8;
       box-shadow: 0 0 5px var(--led-green);
     }
-    .decor-bar:nth-child(1) { animation-delay: 0.1s; }
-    .decor-bar:nth-child(2) { animation-delay: 0.4s; }
-    .decor-bar:nth-child(3) { animation-delay: 0.2s; }
-    .decor-bar:nth-child(4) { animation-delay: 0.6s; }
-    .decor-bar:nth-child(5) { animation-delay: 0.3s; }
-    .decor-bar:nth-child(6) { animation-delay: 0.7s; }
-    .decor-bar:nth-child(7) { animation-delay: 0.2s; }
-    .decor-bar:nth-child(8) { animation-delay: 0.5s; }
+
+    .decor-bar:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .decor-bar:nth-child(2) {
+      animation-delay: 0.4s;
+    }
+
+    .decor-bar:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    .decor-bar:nth-child(4) {
+      animation-delay: 0.6s;
+    }
+
+    .decor-bar:nth-child(5) {
+      animation-delay: 0.3s;
+    }
+
+    .decor-bar:nth-child(6) {
+      animation-delay: 0.7s;
+    }
+
+    .decor-bar:nth-child(7) {
+      animation-delay: 0.2s;
+    }
+
+    .decor-bar:nth-child(8) {
+      animation-delay: 0.5s;
+    }
 
     @keyframes eqBounce {
-      0%, 100% { height: 10px; }
-      50% { height: 40px; }
+
+      0%,
+      100% {
+        height: 10px;
+      }
+
+      50% {
+        height: 40px;
+      }
     }
 
     .video-display__idle-title {
@@ -250,7 +316,7 @@
       align-items: center;
       padding: 10px;
       pointer-events: none;
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 80%);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 80%);
     }
 
     .now-playing__text-container {
@@ -268,8 +334,9 @@
       color: var(--led-green);
       text-shadow: var(--shadow-glow-green);
     }
-    
-    .now-playing__movie, .now-playing__director {
+
+    .now-playing__movie,
+    .now-playing__director {
       font-family: var(--font-tech);
       font-size: 0.7rem;
       color: #ddd;
@@ -277,14 +344,14 @@
 
     /* Song List Overlay */
     #song-list {
-      background: rgba(0,0,0,0.9);
+      background: rgba(0, 0, 0, 0.9);
       backdrop-filter: blur(5px);
       z-index: 10;
       display: none;
       align-items: stretch;
       flex-direction: column;
     }
-    
+
     #song-list.is-open {
       display: flex;
     }
@@ -294,7 +361,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 10px;
-      border-bottom: 1px solid rgba(0,255,65,0.3);
+      border-bottom: 1px solid rgba(0, 255, 65, 0.3);
     }
 
     .song-list__title {
@@ -323,16 +390,16 @@
       align-items: center;
       padding: 8px 10px;
       cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       font-family: var(--font-tech);
     }
 
     .song-list__track:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .song-list__track.is-playing {
-      background: rgba(0,255,65,0.1);
+      background: rgba(0, 255, 65, 0.1);
       color: var(--led-green);
     }
 
@@ -346,18 +413,46 @@
       display: flex;
       flex-direction: column;
     }
-    
-    .song-list__track-title { font-size: 0.9rem; }
-    .song-list__track-meta { font-size: 0.7rem; color: #aaa; }
+
+    .song-list__track-title {
+      font-size: 0.9rem;
+    }
+
+    .song-list__track-meta {
+      font-size: 0.7rem;
+      color: #aaa;
+    }
 
     /* Transport Controls */
     /* Based on image: Left block of buttons and Right block of buttons around the central dial */
-    
-    #btn-rewind { top: 57%; left: 36.5%; width: 3.5%; height: 5%; }
-    #btn-play { top: 57%; left: 40.5%; width: 3.5%; height: 5%; }
-    
-    #btn-ff { top: 57%; left: 56%; width: 3.5%; height: 5%; }
-    #btn-stop { top: 57%; left: 60%; width: 3.5%; height: 5%; }
+
+    #btn-rewind {
+      top: 57%;
+      left: 36.5%;
+      width: 3.5%;
+      height: 5%;
+    }
+
+    #btn-play {
+      top: 57%;
+      left: 40.5%;
+      width: 3.5%;
+      height: 5%;
+    }
+
+    #btn-ff {
+      top: 57%;
+      left: 56%;
+      width: 3.5%;
+      height: 5%;
+    }
+
+    #btn-stop {
+      top: 57%;
+      left: 60%;
+      width: 3.5%;
+      height: 5%;
+    }
 
     .transport-btn-area {
       position: absolute;
@@ -367,22 +462,28 @@
       align-items: center;
       justify-content: center;
     }
+
     .transport-btn-area span {
       font-size: 0.65rem;
       font-family: monospace;
-      font-weight: bold;
-      color: rgba(255, 255, 255, 0.3);
+      font-weight: 900;
+      color: #000;
+      -webkit-text-stroke: 1px #000;
       pointer-events: none;
       transition: all 0.2s;
     }
+
     .transport-btn-area:hover span {
-      color: rgba(255, 255, 255, 0.8);
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+      color: #000;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
+
     .transport-btn-area:hover {
       background: rgba(255, 255, 255, 0.2);
     }
-    .transport-btn-area:active, .transport-btn-area.is-active {
+
+    .transport-btn-area:active,
+    .transport-btn-area.is-active {
       background: rgba(0, 255, 65, 0.3);
     }
 
@@ -399,7 +500,10 @@
       cursor: grab;
       touch-action: none;
     }
-    .volume-dial-area:active { cursor: grabbing; }
+
+    .volume-dial-area:active {
+      cursor: grabbing;
+    }
 
     .dial-body {
       width: 100%;
@@ -411,7 +515,7 @@
       background-position: center;
       background-repeat: no-repeat;
     }
-    
+
     /* A small indicator dot to show rotation on the dial */
     .dial-indicator {
       position: absolute;
@@ -440,28 +544,38 @@
     /* ── Hardware Elements ── */
     #power-btn {
       position: absolute;
-      top: 61%;
-      left: 67%;
-      width: 3.5%;
-      height: 6%;
+      top: 61.7%;
+      left: 68.05%;
+      width: 3%;
+      height: 5.1%;
       border-radius: 50%;
       cursor: pointer;
-      background: rgba(255, 51, 51, 0.4);
-      box-shadow: 0 0 10px rgba(255, 51, 51, 0.6);
       transition: all 0.3s ease;
     }
-    
-    .image-player:not(.is-off) #power-btn {
-      background: rgba(0, 255, 65, 0.4);
-      box-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
+
+    /* OFF state: Intense Red */
+    .image-player.is-off #power-btn {
+      background: rgba(255, 0, 0, 0.8);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.5);
+      filter: brightness(3);
+      animation: pulse-red 1.5s infinite ease-in-out;
     }
-    
+
+    /* ON state: Green */
+    .image-player:not(.is-off) #power-btn {
+      background: rgba(0, 255, 65, 0.6);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+      animation: pulse-green 2s infinite ease-in-out;
+    }
+
     #power-btn:hover {
       filter: brightness(1.5);
     }
 
     @keyframes typeText {
-      to { opacity: 1; }
+      to {
+        opacity: 1;
+      }
     }
 
     .woofer-overlay {
@@ -470,38 +584,58 @@
       width: 17%;
       aspect-ratio: 1;
       border-radius: 50%;
-      background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.5) 100%);
+      background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
       transform-origin: center center;
       pointer-events: none;
       /* The scale is driven by CSS var updated in JS */
-      transform: scale(var(--bass-scale, 1)); 
+      transform: scale(var(--bass-scale, 1));
     }
-    .woofer-overlay.left { 
-      left: 4.8%; 
-      pointer-events: auto; /* Make clickable */
+
+    .woofer-overlay.left {
+      left: 4.8%;
+      pointer-events: auto;
+      /* Make clickable */
       cursor: pointer;
       transition: box-shadow 0.3s;
     }
+
     .woofer-overlay.left:hover {
-      box-shadow: 0 0 30px rgba(0,255,65,0.4) inset;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.4) inset;
     }
-    .woofer-overlay.right { left: 78.5%; }
+
+    .woofer-overlay.right {
+      left: 78.5%;
+    }
 
     /* Flashing Animations */
-    @keyframes flash-red {
-      0%, 100% { background: rgba(255, 51, 51, 0.4); box-shadow: 0 0 10px rgba(255, 51, 51, 0.6); }
-      50% { background: rgba(255, 51, 51, 0.9); box-shadow: 0 0 30px rgba(255, 51, 51, 1); }
-    }
-    .power-flash {
-      animation: flash-red 1.5s infinite ease-in-out;
+    @keyframes pulse-red {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+        box-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 0, 0, 0.8);
+      }
     }
 
-    @keyframes flash-green {
-      0%, 100% { background: rgba(0, 255, 65, 0.1); border-radius: 4px; box-shadow: 0 0 5px rgba(0, 255, 65, 0.1) inset; }
-      50% { background: rgba(0, 255, 65, 0.4); border-radius: 4px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.6) inset; }
-    }
-    .cassette-flash {
-      animation: flash-green 1.5s infinite ease-in-out;
+    @keyframes pulse-green {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+        box-shadow: 0 0 25px rgba(0, 255, 65, 1);
+      }
     }
 
     /* Cassette Spin Video */
@@ -520,6 +654,7 @@
       pointer-events: none;
       background: #000;
     }
+
     .image-player.is-playing #cassette-spin-video {
       opacity: 1;
     }
@@ -538,8 +673,11 @@
       padding: var(--gap-xl);
       overflow-y: auto;
     }
-    #admin-dashboard.is-open { display: flex; }
-    
+
+    #admin-dashboard.is-open {
+      display: flex;
+    }
+
     .admin-header {
       display: flex;
       justify-content: space-between;
@@ -548,13 +686,13 @@
       padding-bottom: var(--gap-md);
       margin-bottom: var(--gap-lg);
     }
-    
+
     .admin-title {
       font-family: var(--font-display);
       font-size: 1.5rem;
       color: var(--led-green);
     }
-    
+
     .admin-close {
       background: transparent;
       border: 1px solid var(--led-red);
@@ -564,42 +702,46 @@
       font-family: var(--font-tech);
       border-radius: 4px;
     }
-    .admin-close:hover { background: rgba(255,0,0,0.1); }
-    
+
+    .admin-close:hover {
+      background: rgba(255, 0, 0, 0.1);
+    }
+
     .admin-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: var(--gap-lg);
     }
-    
+
     .admin-panel {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       padding: var(--gap-md);
       border-radius: var(--radius-md);
     }
-    
+
     .admin-panel h3 {
       font-family: var(--font-display);
       color: var(--led-cyan);
       margin-bottom: var(--gap-md);
       font-size: 1rem;
     }
-    
+
     .admin-input-group {
       margin-bottom: var(--gap-sm);
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
-    
+
     .admin-input-group label {
       font-family: var(--font-tech);
       font-size: 0.8rem;
       color: var(--silver-dark);
     }
-    
-    .admin-input-group input, .admin-input-group select {
+
+    .admin-input-group input,
+    .admin-input-group select {
       background: #000;
       border: 1px solid var(--steel-dark);
       color: #fff;
@@ -607,7 +749,7 @@
       font-family: var(--font-body);
       border-radius: 4px;
     }
-    
+
     .admin-btn {
       background: var(--led-green-dim);
       color: #000;
@@ -618,24 +760,28 @@
       border-radius: 4px;
       margin-top: 8px;
     }
-    .admin-btn:hover { background: var(--led-green); }
-    
+
+    .admin-btn:hover {
+      background: var(--led-green);
+    }
+
     #admin-song-list {
       max-height: 400px;
       overflow-y: auto;
       margin-top: var(--gap-md);
     }
-    
+
     .admin-song-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       font-family: var(--font-tech);
     }
+
     .admin-delete-btn {
-      background: rgba(255,0,0,0.2);
+      background: rgba(255, 0, 0, 0.2);
       color: var(--led-red);
       border: 1px solid var(--led-red);
       padding: 2px 8px;
@@ -656,16 +802,19 @@
       opacity: 0;
       transition: opacity 0.5s ease;
     }
-    .auth-overlay.is-visible { opacity: 1; }
+
+    .auth-overlay.is-visible {
+      opacity: 1;
+    }
 
     .auth-card {
       width: 380px;
       max-width: 90vw;
-      background: linear-gradient(145deg, rgba(30,33,37,0.95) 0%, rgba(15,15,20,0.98) 100%);
-      border: 1px solid rgba(0,255,65,0.15);
+      background: linear-gradient(145deg, rgba(30, 33, 37, 0.95) 0%, rgba(15, 15, 20, 0.98) 100%);
+      border: 1px solid rgba(0, 255, 65, 0.15);
       border-radius: var(--radius-xl);
       padding: var(--gap-2xl) var(--gap-xl);
-      box-shadow: 0 0 60px rgba(0,255,65,0.06), 0 25px 80px rgba(0,0,0,0.7);
+      box-shadow: 0 0 60px rgba(0, 255, 65, 0.06), 0 25px 80px rgba(0, 0, 0, 0.7);
       text-align: center;
       position: relative;
     }
@@ -709,7 +858,11 @@
       color: #3c4043;
       margin-bottom: var(--gap-md);
     }
-    .google-signin-btn svg { width: 20px; height: 20px; }
+
+    .google-signin-btn svg {
+      width: 20px;
+      height: 20px;
+    }
 
     .guest-btn {
       display: block;
@@ -722,6 +875,7 @@
       font-family: var(--font-tech);
       cursor: pointer;
     }
+
     .guest-btn:hover {
       border-color: var(--led-green-dim);
       color: var(--led-green);
@@ -737,19 +891,21 @@
       align-items: center;
       gap: 10px;
       padding: 6px 14px 6px 6px;
-      background: linear-gradient(135deg, rgba(30,33,37,0.92) 0%, rgba(15,15,20,0.95) 100%);
-      border: 1px solid rgba(0,255,65,0.15);
+      background: linear-gradient(135deg, rgba(30, 33, 37, 0.92) 0%, rgba(15, 15, 20, 0.95) 100%);
+      border: 1px solid rgba(0, 255, 65, 0.15);
       border-radius: 40px;
       opacity: 0;
       transform: translateY(-10px);
       transition: all 0.4s ease;
       pointer-events: none;
     }
+
     .user-badge.is-visible {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
+
     .user-badge__avatar {
       width: 32px;
       height: 32px;
@@ -764,10 +920,31 @@
       color: var(--led-green);
       overflow: hidden;
     }
-    .user-badge__avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .user-badge__info { display: flex; flex-direction: column; gap: 1px; }
-    .user-badge__name { font-family: var(--font-tech); font-size: 0.72rem; color: var(--led-green); }
-    .user-badge__email { font-family: var(--font-body); font-size: 0.55rem; color: var(--silver-dark); }
+
+    .user-badge__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-badge__info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .user-badge__name {
+      font-family: var(--font-tech);
+      font-size: 0.72rem;
+      color: var(--led-green);
+    }
+
+    .user-badge__email {
+      font-family: var(--font-body);
+      font-size: 0.55rem;
+      color: var(--silver-dark);
+    }
+
     .user-badge__signout {
       margin-left: 6px;
       width: 22px;
@@ -780,15 +957,24 @@
     }
 
     @keyframes titlePulse {
-      0%, 100% { opacity: 0.7; text-shadow: 0 0 8px rgba(0,255,65,0.3); }
-      50% { opacity: 1; text-shadow: 0 0 20px rgba(0,255,65,0.6), 0 0 40px rgba(0,255,65,0.2); }
-    }
 
+      0%,
+      100% {
+        opacity: 0.7;
+        text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+      }
+
+      50% {
+        opacity: 1;
+        text-shadow: 0 0 20px rgba(0, 255, 65, 0.6), 0 0 40px rgba(0, 255, 65, 0.2);
+      }
+    }
   </style>
 
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
+
 <body>
 
 
@@ -798,7 +984,7 @@
       <div class="auth-card__icon">🛠️</div>
       <div class="auth-card__title">ADMIN ACCESS</div>
       <div class="auth-card__subtitle">Enter your Supabase credentials</div>
-      
+
       <div class="admin-input-group" style="text-align:left; margin-bottom:12px;">
         <label>Username</label>
         <input type="text" id="admin-email">
@@ -807,13 +993,15 @@
         <label>Password</label>
         <input type="password" id="admin-password">
       </div>
-      
+
       <div class="auth-error" id="admin-error"></div>
-      
-      <button class="google-signin-btn" onclick="AdminModule.login()" style="justify-content:center; background:var(--led-green); color:#000;">
+
+      <button class="google-signin-btn" onclick="AdminModule.login()"
+        style="justify-content:center; background:var(--led-green); color:#000;">
         Sign In
       </button>
-      <button class="guest-btn" onclick="document.getElementById('admin-login-overlay').classList.remove('is-visible'); setTimeout(() => document.getElementById('admin-login-overlay').style.display='none', 500);">Cancel</button>
+      <button class="guest-btn"
+        onclick="document.getElementById('admin-login-overlay').classList.remove('is-visible'); setTimeout(() => document.getElementById('admin-login-overlay').style.display='none', 500);">Cancel</button>
     </div>
   </div>
 
@@ -823,7 +1011,7 @@
       <div class="admin-title">KEYBOARD FANTASIA ADMIN</div>
       <button class="admin-close" onclick="AdminModule.closeDashboard()">LOGOUT & CLOSE</button>
     </div>
-    
+
     <div class="admin-grid">
       <!-- Upload Media -->
       <div class="admin-panel">
@@ -835,7 +1023,7 @@
         <button class="admin-btn" onclick="AdminModule.uploadFile()">Upload File</button>
         <div id="upload-status" style="margin-top:8px; font-family:var(--font-tech); font-size:0.8rem;"></div>
       </div>
-      
+
       <!-- Add New Song -->
       <div class="admin-panel">
         <h3>Add New Song</h3>
@@ -858,7 +1046,7 @@
         <button class="admin-btn" onclick="AdminModule.addSong()">Save Song</button>
       </div>
     </div>
-    
+
     <!-- Song List -->
     <div class="admin-panel" style="margin-top:var(--gap-lg);">
       <h3>Manage Songs</h3>
@@ -875,66 +1063,80 @@
       <div class="user-badge__name" id="user-badge-name">Guest</div>
       <div class="user-badge__email" id="user-badge-email"></div>
     </div>
-    <button class="user-badge__signout" id="user-badge-signout" onclick="AuthModule.signOut()" title="Sign out">✕</button>
+    <button class="user-badge__signout" id="user-badge-signout" onclick="AuthModule.signOut()"
+      title="Sign out">✕</button>
   </div>
 
   <!-- ARTIST PROFILE MODAL -->
   <div class="auth-overlay" id="artist-profile-modal" style="display: none;">
     <div class="auth-card" style="max-width: 500px; text-align: left; padding: var(--gap-lg);">
-      <button class="admin-close" onclick="document.getElementById('artist-profile-modal').classList.remove('is-visible'); setTimeout(() => document.getElementById('artist-profile-modal').style.display='none', 500);" style="position: absolute; top: 16px; right: 16px; border: none; background: transparent; color: var(--silver-dark);">✕</button>
+      <button class="admin-close"
+        onclick="document.getElementById('artist-profile-modal').classList.remove('is-visible'); setTimeout(() => document.getElementById('artist-profile-modal').style.display='none', 500);"
+        style="position: absolute; top: 16px; right: 16px; border: none; background: transparent; color: var(--silver-dark);">✕</button>
       <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
-        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--gunmetal); border: 2px solid var(--led-green); overflow: hidden; flex-shrink: 0;">
-          <img src="media/images/profile_placeholder.jpg" alt="Artist Profile" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src=''; this.alt='Profile Picture';">
+        <div
+          style="width: 80px; height: 80px; border-radius: 50%; background: var(--gunmetal); border: 2px solid var(--led-green); overflow: hidden; flex-shrink: 0;">
+          <img src="media/images/profile_placeholder.jpg" alt="Artist Profile"
+            style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src=''; this.alt='Profile Picture';">
         </div>
         <div>
           <h2 style="font-family: var(--font-display); color: var(--led-green); margin-bottom: 4px;">Pradeep N</h2>
-          <div style="font-family: var(--font-tech); color: var(--silver-dark); font-size: 0.9rem;">Engineer, VSSC • Keyboard Fantasia Creator</div>
+          <div style="font-family: var(--font-tech); color: var(--silver-dark); font-size: 0.9rem;">Engineer, VSSC •
+            Keyboard Fantasia Creator</div>
         </div>
       </div>
       <div style="font-family: var(--font-body); color: #ddd; font-size: 0.95rem; line-height: 1.6;">
-        <p style="margin-bottom: 12px;">Welcome to Keyboard Fantasia! This is a nostalgic Panasonic-style cassette stereo media player featuring instrumental renditions of classic songs.</p>
-        <p>I hope you enjoy this immersive auditory experience. Feel free to explore the different cassettes and enjoy the music!</p>
+        <p style="margin-bottom: 12px;">Welcome to Keyboard Fantasia! This is a nostalgic Panasonic-style cassette
+          stereo media player featuring instrumental renditions of classic songs.</p>
+        <p>I hope you enjoy this immersive auditory experience. Feel free to explore the different cassettes and enjoy
+          the music!</p>
       </div>
     </div>
   </div>
 
   <!-- IMAGE PLAYER WRAPPER -->
   <div class="image-player is-off" id="image-player-wrapper">
-    
+
     <!-- POWER BUTTON (Green button on lower right) -->
     <div id="power-btn" class="power-flash" title="Master Power"></div>
-    
+
     <!-- WOOFER PHYSICS OVERLAYS -->
     <div class="woofer-overlay left"></div>
     <div class="woofer-overlay right"></div>
-    
+
     <!-- CASSETTE SPIN VIDEO -->
     <video id="cassette-spin-video" src="media/images/Nested%20Sequence%2002.mp4" muted loop playsinline></video>
-    
+
     <!-- Cassette Switches (Top center of the image) -->
     <div class="cassette-switches" id="cassette-switches">
-      <div class="cassette-switch" data-cassette="C1"></div>
-      <div class="cassette-switch" data-cassette="C2"></div>
-      <div class="cassette-switch" data-cassette="C3"></div>
-      <div class="cassette-switch" data-cassette="C4"></div>
-      <div class="cassette-switch inverted" data-cassette="C5"></div>
-      <div class="cassette-switch inverted" data-cassette="C6"></div>
-      <div class="cassette-switch inverted" data-cassette="C7"></div>
-      <div class="cassette-switch inverted" data-cassette="C8"></div>
-      <div class="cassette-switch" data-cassette="C9"></div>
+      <div class="cassette-switch" data-cassette="C1" style="background-image: url('media/images/Cass/C1.jpeg');"
+        title="Vol 1"></div>
+      <div class="cassette-switch" data-cassette="C2" style="background-image: url('media/images/Cass/C2.jpeg');"
+        title="Vol 2"></div>
+      <div class="cassette-switch" data-cassette="C3" style="background-image: url('media/images/Cass/C3.jpeg');"
+        title="Vol 3"></div>
+      <div class="cassette-switch" data-cassette="C4" style="background-image: url('media/images/Cass/C4.jpeg');"
+        title="Vol 4"></div>
+      <div class="cassette-switch" data-cassette="C5" style="background-image: url('media/images/Cass/C5.jpeg');"
+        title="Vol 5"></div>
+      <div class="cassette-switch" data-cassette="C6" style="background-image: url('media/images/Cass/C6.jpeg');"
+        title="Vol 6"></div>
     </div>
 
     <!-- Video Display Area -->
     <div class="video-container">
       <video id="video-player" playsinline></video>
-      
-      <div id="idle-screen" class="video-overlay" style="background: radial-gradient(ellipse at center, rgba(0,30,0,0.5) 0%, rgba(10,10,10,0.8) 100%);">
+
+      <div id="idle-screen" class="video-overlay"
+        style="background: radial-gradient(ellipse at center, rgba(0,30,0,0.5) 0%, rgba(10,10,10,0.8) 100%);">
         <!-- AI Piano Video Placeholder -->
-        <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
-        
+        <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline
+          style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
+
         <div style="z-index: 1; display: flex; flex-direction: column; align-items: center;">
-          <div class="video-display__idle-title" id="deck-label" style="cursor:pointer;" title="Click for Admin Access" onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</div>
-          
+          <div class="video-display__idle-title" id="deck-label" style="cursor:pointer;" title="Click for Admin Access"
+            onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</div>
+
           <!-- DECORATIVE EQ -->
           <div class="decor-eq">
             <div class="decor-bar"></div>
@@ -950,12 +1152,15 @@
           <div class="video-display__idle-subtitle">SELECT A CASSETTE TO PLAY</div>
         </div>
       </div>
-      
+
       <div id="boot-screen" class="video-overlay" style="display:none; background: #000; z-index: 20;">
-        <div style="color: var(--led-green); font-family: var(--font-display); font-size: 0.9rem; text-align: left; width: 100%; padding: 20px;">
+        <div
+          style="color: var(--led-green); font-family: var(--font-display); font-size: 0.9rem; text-align: left; width: 100%; padding: 20px;">
           <div class="boot-text" style="opacity: 0; animation: typeText 0.1s forwards;">SYSTEM STARTING...</div>
-          <div class="boot-text" style="opacity: 0; animation: typeText 0.1s forwards; animation-delay: 0.5s;">VSSC AUDIO ENGINE v1.0</div>
-          <div class="boot-text" style="opacity: 0; animation: typeText 0.1s forwards; animation-delay: 1.0s;">INITIALIZING... OK</div>
+          <div class="boot-text" style="opacity: 0; animation: typeText 0.1s forwards; animation-delay: 0.5s;">VSSC
+            AUDIO ENGINE v1.0</div>
+          <div class="boot-text" style="opacity: 0; animation: typeText 0.1s forwards; animation-delay: 1.0s;">
+            INITIALIZING... OK</div>
         </div>
       </div>
 
@@ -1010,4 +1215,5 @@
   <script type="module" src="js/app.js"></script>
 
 </body>
+
 </html>
