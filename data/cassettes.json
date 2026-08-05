@@ -9,11 +9,11 @@
       "tracks": [
         {
           "id": 1,
-          "title": "Roja Kaadhal Rojave",
-          "movie": "Roja (1992)",
+          "title": "Dheema",
+          "movie": "LIK 2026",
           "musicDirector": "A.R. Rahman",
-          "audioFile": "media/audio/c1_track01.mp3",
-          "videoFile": "media/video/c1_track01.mp4"
+          "audioFile": "https://fgydtvjspoxhckmezykw.supabase.co/storage/v1/object/public/PradeepN_songs_tracks/audio/Dheema.mp3",
+          "videoFile": "https://fgydtvjspoxhckmezykw.supabase.co/storage/v1/object/public/PradeepN_songs_tracks/video/Test001.mp4"
         },
         {
           "id": 2,
