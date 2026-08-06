@@ -34,7 +34,7 @@ class KeyboardFantasiaApp {
       state.set({ cassettesData: data });
 
       // Set initial volume
-      player.setVolume(50);
+      player.setVolume(0);
 
       // Link video element
       const videoEl = document.getElementById('video-player');
@@ -96,6 +96,10 @@ class KeyboardFantasiaApp {
           // If turning off, stop playback
           player.stop();
           state.set({ currentTrack: null, activeCassette: null, songListOpen: false });
+          if (this.rotaryDial) {
+            this.rotaryDial.setValue(0);
+            this.rotaryDial.onValueChange(0);
+          }
         }
       });
     }
@@ -252,7 +256,7 @@ class KeyboardFantasiaApp {
           fill.style.filter = `drop-shadow(0 0 2px ${color})`;
         }
       },
-      50
+      0
     );
   }
 

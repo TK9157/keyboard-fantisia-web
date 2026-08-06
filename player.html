@@ -59,7 +59,7 @@
 
     body {
       font-family: var(--font-body);
-      background: #050505 url('media/New.jpg.jpeg') center/cover no-repeat;
+      background: #050505 url('media/images/Switch/New%20skin%20.jpg.jpeg') center/cover no-repeat;
       backdrop-filter: blur(20px) brightness(0.3);
       /* Immersive blurred background */
       color: #fff;
@@ -71,10 +71,8 @@
       margin: 0;
     }
 
-    /* ── Power State ── */
     .image-player.is-off {
-      filter: brightness(0.65) grayscale(0.4);
-      pointer-events: none;
+      /* Removed pointer-events: none so elements remain clickable when off */
     }
 
     .image-player.is-off #power-btn {
@@ -91,7 +89,7 @@
       aspect-ratio: 1024 / 576;
       /* Based on the background image */
       margin: 0 auto;
-      background-image: url('media/New.jpg.jpeg');
+      background-image: url('media/images/Switch/New%20skin%20.jpg.jpeg');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
@@ -149,16 +147,7 @@
 
     /* Video Screen Area */
     .video-container {
-      position: absolute;
-      top: 10.5%;
-      left: 28.1%;
-      width: 43.2%;
-      height: 31.5%;
-      background: #000;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: none;
     }
 
     #video-player {
@@ -176,12 +165,12 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      background: #000;
+      background: transparent;
       z-index: 2;
     }
 
     #idle-screen {
-      background: radial-gradient(ellipse at center, rgba(0, 30, 0, 0.3) 0%, transparent 70%), #0a0a0a;
+      /* Background removed per request */
     }
 
     /* EQ Visualizer */
@@ -427,31 +416,31 @@
     /* Based on image: Left block of buttons and Right block of buttons around the central dial */
 
     #btn-rewind {
-      top: 57%;
-      left: 36.5%;
-      width: 3.5%;
-      height: 5%;
+      top: 50.2%;
+      left: 41%;
+      width: 4%;
+      height: 9%;
     }
 
     #btn-play {
-      top: 57%;
-      left: 40.5%;
-      width: 3.5%;
-      height: 5%;
+      top: 58.3%;
+      left: 41%;
+      width: 4%;
+      height: 9%;
     }
 
     #btn-ff {
-      top: 57%;
-      left: 56%;
-      width: 3.5%;
-      height: 5%;
+      top: 50.2%;
+      left: 55%;
+      width: 4%;
+      height: 9%;
     }
 
     #btn-stop {
-      top: 57%;
-      left: 60%;
-      width: 3.5%;
-      height: 5%;
+      top: 58.3%;
+      left: 55%;
+      width: 4%;
+      height: 9%;
     }
 
     .transport-btn-area {
@@ -464,11 +453,10 @@
     }
 
     .transport-btn-area span {
-      font-size: 0.65rem;
+      font-size: 0.88rem;
       font-family: monospace;
-      font-weight: 900;
+      font-weight: 800;
       color: #000;
-      -webkit-text-stroke: 1px #000;
       pointer-events: none;
       transition: all 0.2s;
     }
@@ -518,15 +506,7 @@
 
     /* A small indicator dot to show rotation on the dial */
     .dial-indicator {
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      width: 6px;
-      height: 6px;
-      background: var(--led-green);
-      border-radius: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 0 5px var(--led-green);
+      display: none;
     }
 
     #volume-value {
@@ -544,10 +524,11 @@
     /* ── Hardware Elements ── */
     #power-btn {
       position: absolute;
-      top: 61.7%;
-      left: 68.05%;
-      width: 3%;
-      height: 5.1%;
+      top: 62.89%;
+      left: 68.75%;
+      width: 1.6%;
+      height: 2.72%;
+      margin-top: 3px;
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -1127,8 +1108,7 @@
     <div class="video-container">
       <video id="video-player" playsinline></video>
 
-      <div id="idle-screen" class="video-overlay"
-        style="background: radial-gradient(ellipse at center, rgba(0,30,0,0.5) 0%, rgba(10,10,10,0.8) 100%);">
+      <div id="idle-screen" class="video-overlay">
         <!-- AI Piano Video Placeholder -->
         <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline
           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
