@@ -1,81 +1,213 @@
 // ============================================================
-// AUTH MODULE — Google Sign-In + IP Tracking + Visitor Logging
+// AUTH MODULE — Anonymous Guest Auto-Login + Admin Google OAuth
 // Keyboard Fantasia Player
 // ============================================================
+//
+// FLOW:
+//   Guests  → Auto signed-in anonymously (no UI, no redirect)
+//   Admins  → "Sign in with Google" button on index.html
+//             Email must be in ADMIN_EMAILS whitelist
+// ============================================================
 
-var AuthModule = (function() {
+var AuthModule = (function () {
   'use strict';
+
+  // ── Admin whitelist ──
+  // Add authorised admin Google account emails here
+  var ADMIN_EMAILS = [
+    'pradeep@vssc.gov.in',
+    'pradeepn.vssc@gmail.com'
+  ];
 
   var currentUser = null;
   var currentVisitorId = null;
   var visitorIP = null;
+  var isAdmin = false;
   var authListeners = [];
+  var _initialized = false;
 
-  // ── Public API ──
-
+  // ─────────────────────────────────────────────────────────
+  // PUBLIC: init()
+  //   Called on every page load.
+  //   • player.html → ensure a session exists (guest or admin)
+  //   • index.html  → if already authed, redirect to player
+  // ─────────────────────────────────────────────────────────
   function init() {
-    var isLoginPage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+    if (_initialized) return;
+    _initialized = true;
+
+    var isLoginPage = window.location.pathname.endsWith('index.html') ||
+                      window.location.pathname === '/' ||
+                      window.location.pathname.endsWith('/');
     var isPlayerPage = window.location.pathname.endsWith('player.html');
-    
-    // Supabase fallback
+
     if (!isSupabaseConfigured()) {
-      console.warn('⚠️ Supabase not configured — auth features disabled');
+      console.warn('⚠️ Supabase not configured — running without auth');
       if (isLoginPage) window.location.href = 'player.html';
       return;
     }
 
     var sb = getSupabase();
-    if (!sb) { 
+    if (!sb) {
       if (isLoginPage) window.location.href = 'player.html';
-      return; 
+      return;
     }
 
-    var isGuest = sessionStorage.getItem('kb_guest') === 'true';
+    // ── Observe ongoing auth changes ──
+    sb.auth.onAuthStateChange(function (event, session) {
+      console.log('🔐 Auth event:', event);
 
-    // Check existing session
-    sb.auth.getSession().then(function(result) {
-      if (result.data.session) {
-        if (isLoginPage) {
-          window.location.href = 'player.html';
-        } else {
-          handleSignedIn(result.data.session);
-        }
-      } else if (isGuest) {
-        if (isLoginPage) {
-          window.location.href = 'player.html';
-        } else {
-          currentUser = { id: null, email: null, name: 'Guest', avatar: '' };
-          fetchIPAndTrackVisitor();
-          notifyListeners('guest', currentUser);
-        }
-      } else {
-        if (isPlayerPage) {
-          window.location.href = 'index.html';
-        }
+      if (event === 'SIGNED_IN' && session) {
+        _handleSession(session, isLoginPage, isPlayerPage);
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        isAdmin = false;
+        // Re-sign in as guest automatically on player page
+        if (isPlayerPage) _signInAsGuest();
       }
-    }).catch(function(err) {
-      console.error('Session check failed:', err);
-      if (isPlayerPage) window.location.href = 'index.html';
     });
 
-    // Listen for auth state changes
-    sb.auth.onAuthStateChange(function(event, session) {
-      console.log('🔐 Auth event:', event);
-      if (event === 'SIGNED_IN' && session) {
+    // ── Check existing session ──
+    sb.auth.getSession().then(function (result) {
+      var session = result.data && result.data.session;
+
+      if (session) {
+        _handleSession(session, isLoginPage, isPlayerPage);
+      } else {
+        // No session → sign in anonymously (guest mode)
         if (isLoginPage) {
-          window.location.href = 'player.html';
-        } else {
-          handleSignedIn(session);
+          // On login page, just show the sign-in UI — do nothing
+          return;
         }
-      } else if (event === 'SIGNED_OUT') {
-        sessionStorage.removeItem('kb_guest');
-        if (!isLoginPage) window.location.href = 'index.html';
+        _signInAsGuest();
       }
+    }).catch(function (err) {
+      console.error('Session check failed:', err);
+      if (isPlayerPage) _signInAsGuest();
     });
   }
 
-  // ── Google Sign-In ──
+  // ─────────────────────────────────────────────────────────
+  // PRIVATE: _signInAsGuest()
+  //   Uses Supabase Anonymous Sign-in so guests can read DB.
+  // ─────────────────────────────────────────────────────────
+  function _signInAsGuest() {
+    var sb = getSupabase();
+    if (!sb) return;
 
+    sb.auth.signInAnonymously().then(function (result) {
+      if (result.error) {
+        console.warn('Anonymous sign-in failed:', result.error.message);
+        // Still allow page to work — data will use local fallback
+        currentUser = { id: null, email: null, name: 'Guest', avatar: '', isAnonymous: true };
+        isAdmin = false;
+        notifyListeners('guest', currentUser);
+        return;
+      }
+
+      var session = result.data && result.data.session;
+      if (session) {
+        currentUser = {
+          id: session.user.id,
+          email: null,
+          name: 'Guest',
+          avatar: '',
+          isAnonymous: true
+        };
+        isAdmin = false;
+        console.log('👤 Signed in as anonymous guest');
+        fetchIPAndTrackVisitor();
+        notifyListeners('guest', currentUser);
+      }
+    }).catch(function (err) {
+      console.warn('Anonymous sign-in exception:', err);
+      currentUser = { id: null, email: null, name: 'Guest', avatar: '', isAnonymous: true };
+      notifyListeners('guest', currentUser);
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // PRIVATE: _handleSession(session, isLoginPage, isPlayerPage)
+  //   Routes sign-in based on anonymous vs Google user.
+  // ─────────────────────────────────────────────────────────
+  function _handleSession(session, isLoginPage, isPlayerPage) {
+    var user = session.user;
+    var meta = user.user_metadata || {};
+
+    // Anonymous users
+    if (user.is_anonymous) {
+      if (isLoginPage) {
+        window.location.href = 'player.html';
+        return;
+      }
+      currentUser = { id: user.id, email: null, name: 'Guest', avatar: '', isAnonymous: true };
+      isAdmin = false;
+      fetchIPAndTrackVisitor();
+      notifyListeners('guest', currentUser);
+      return;
+    }
+
+    // OAuth (Google) users — whitelist check
+    var email = (user.email || meta.email || '').toLowerCase();
+    if (!ADMIN_EMAILS.includes(email)) {
+      console.warn('🚫 Unauthorized login attempt:', email);
+      _showAuthError('Access denied: ' + email + ' is not an authorised admin account.');
+      var sb = getSupabase();
+      if (sb) sb.auth.signOut();
+      return;
+    }
+
+    // Authorised admin
+    currentUser = {
+      id: user.id,
+      email: email,
+      name: meta.full_name || meta.name || email,
+      avatar: meta.avatar_url || meta.picture || '',
+      isAnonymous: false
+    };
+    isAdmin = true;
+
+    if (isLoginPage) {
+      window.location.href = 'player.html';
+      return;
+    }
+
+    console.log('👑 Signed in as admin:', currentUser.name);
+    _showUserBadge(currentUser);
+    fetchIPAndTrackVisitor();
+    notifyListeners('signed_in', currentUser);
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // PUBLIC: continueAsGuest()  (called from index.html button)
+  // ─────────────────────────────────────────────────────────
+  function continueAsGuest() {
+    var sb = getSupabase();
+    if (!sb) {
+      window.location.href = 'player.html';
+      return;
+    }
+
+    var btn = document.querySelector('.guest-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Entering as Guest...';
+    }
+
+    sb.auth.signInAnonymously().then(function (result) {
+      if (result.error) {
+        console.warn('Anonymous sign-in warning:', result.error.message);
+      }
+      window.location.href = 'player.html';
+    }).catch(function (err) {
+      console.warn('Anonymous sign-in exception:', err);
+      window.location.href = 'player.html';
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // PUBLIC: signInWithGoogle()  (called from index.html button)
+  // ─────────────────────────────────────────────────────────
   function signInWithGoogle() {
     var sb = getSupabase();
     if (!sb) return;
@@ -83,35 +215,30 @@ var AuthModule = (function() {
     var btnText = document.getElementById('google-btn-text');
     if (btnText) btnText.textContent = 'Connecting...';
 
-    var redirectUrl = window.location.origin + window.location.pathname;
-    redirectUrl = redirectUrl.replace('index.html', 'player.html');
-    if (!redirectUrl.endsWith('player.html')) {
-        if (redirectUrl.endsWith('/')) redirectUrl += 'player.html';
-        else redirectUrl += '/player.html';
-    }
+    var redirectUrl = window.location.origin + '/player.html';
 
     sb.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: redirectUrl
-      }
-    }).then(function(result) {
+      options: { redirectTo: redirectUrl }
+    }).then(function (result) {
       if (result.error) {
         console.error('Google sign-in error:', result.error.message);
         if (btnText) btnText.textContent = 'Sign in with Google';
-        showAuthError('Sign-in failed. Please try again.');
+        _showAuthError('Sign-in failed. Please try again.');
       }
-    }).catch(function(err) {
+    }).catch(function (err) {
       console.error('Sign-in exception:', err);
       if (btnText) btnText.textContent = 'Sign in with Google';
     });
   }
 
+  // ─────────────────────────────────────────────────────────
+  // PUBLIC: signOut()
+  // ─────────────────────────────────────────────────────────
   function signOut() {
-    sessionStorage.removeItem('kb_guest');
     var sb = getSupabase();
     if (sb) {
-      sb.auth.signOut().then(function() {
+      sb.auth.signOut().then(function () {
         window.location.href = 'index.html';
       });
     } else {
@@ -119,120 +246,67 @@ var AuthModule = (function() {
     }
   }
 
-  const ADMIN_EMAILS = ['pradeep@vssc.gov.in', 'admin@example.com']; // Update with actual admin emails
-
-  // ── Handle Sign-In Success ──
-
-  function handleSignedIn(session) {
-    var user = session.user;
-    var meta = user.user_metadata || {};
-    var email = user.email || meta.email || '';
-
-    // Admin Whitelist Check
-    if (!ADMIN_EMAILS.includes(email.toLowerCase())) {
-      console.warn('Unauthorized login attempt by:', email);
-      showAuthError('Unauthorized Account: ' + email);
-      var sb = getSupabase();
-      if (sb) {
-        sb.auth.signOut().then(function() {
-          window.location.href = 'index.html';
-        });
-      }
-      return;
-    }
-
-    currentUser = {
-      id: user.id,
-      email: email,
-      name: meta.full_name || meta.name || email || 'User',
-      avatar: meta.avatar_url || meta.picture || ''
-    };
-
-    console.log('👤 Signed in as:', currentUser.name, currentUser.email);
-
-    showUserBadge(currentUser);
-    fetchIPAndTrackVisitor();
-    notifyListeners('signed_in', currentUser);
-  }
-
-  // ── Continue as Guest ──
-
-  function continueAsGuest() {
-    sessionStorage.setItem('kb_guest', 'true');
-    window.location.href = 'player.html';
-  }
-
-  // ── IP Address Detection ──
-
+  // ─────────────────────────────────────────────────────────
+  // Visitor IP tracking
+  // ─────────────────────────────────────────────────────────
   function fetchIPAndTrackVisitor() {
-    fetchIP()
-      .then(function(ipData) {
+    _fetchIP()
+      .then(function (ipData) {
         visitorIP = ipData.ip || null;
-        console.log('🌐 Visitor IP:', visitorIP);
-        trackVisitor(ipData);
+        _trackVisitor(ipData);
       })
-      .catch(function(err) {
-        console.warn('IP detection failed:', err);
-        trackVisitor({ ip: null });
+      .catch(function () {
+        _trackVisitor({ ip: null });
       });
   }
 
-  function fetchIP() {
+  function _fetchIP() {
     return fetch('https://ipapi.co/json/')
-      .then(function(r) { 
-        if (!r.ok) throw new Error('ipapi failed');
-        return r.json(); 
-      })
-      .then(function(data) {
-        return { ip: data.ip, city: data.city, country: data.country_name };
-      })
-      .catch(function() {
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (d) { return { ip: d.ip, city: d.city, country: d.country_name }; })
+      .catch(function () {
         return fetch('https://api.ipify.org?format=json')
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            return { ip: data.ip, city: null, country: null };
-          });
+          .then(function (r) { return r.json(); })
+          .then(function (d) { return { ip: d.ip, city: null, country: null }; })
+          .catch(function () { return { ip: null, city: null, country: null }; });
       });
   }
 
-  // ── Track Visitor in Supabase ──
-
-  function trackVisitor(ipData) {
+  function _trackVisitor(ipData) {
     if (!isSupabaseConfigured()) return;
     var sb = getSupabase();
-    if (!sb) return;
+    if (!sb || !currentUser) return;
 
     sb.rpc('upsert_visitor', {
-      p_auth_uid: currentUser && currentUser.id ? currentUser.id : null,
-      p_email: currentUser ? currentUser.email : null,
-      p_name: currentUser ? currentUser.name : null,
-      p_avatar_url: currentUser ? currentUser.avatar : null,
+      p_auth_uid: currentUser.id || null,
+      p_email: currentUser.email || null,
+      p_name: currentUser.name || 'Guest',
+      p_avatar_url: currentUser.avatar || null,
       p_ip_address: ipData.ip || null,
       p_user_agent: navigator.userAgent,
       p_city: ipData.city || null,
       p_country: ipData.country || null
-    }).then(function(result) {
+    }).then(function (result) {
       if (result.error) {
         console.warn('Visitor tracking error:', result.error.message);
       } else {
         currentVisitorId = result.data;
         console.log('📊 Visitor tracked, ID:', currentVisitorId);
       }
-    }).catch(function(err) {
+    }).catch(function (err) {
       console.warn('Visitor tracking failed:', err);
     });
   }
 
-  // ── UI Helpers ──
-
-  function showUserBadge(user) {
+  // ─────────────────────────────────────────────────────────
+  // UI Helpers
+  // ─────────────────────────────────────────────────────────
+  function _showUserBadge(user) {
     var badge = document.getElementById('user-badge');
     var nameEl = document.getElementById('user-badge-name');
     var avatarEl = document.getElementById('user-badge-avatar');
     var emailEl = document.getElementById('user-badge-email');
-
     if (!badge) return;
-
     if (nameEl) nameEl.textContent = user.name;
     if (emailEl) emailEl.textContent = user.email || '';
     if (avatarEl) {
@@ -242,41 +316,54 @@ var AuthModule = (function() {
         avatarEl.textContent = (user.name || 'G').charAt(0).toUpperCase();
       }
     }
-
     badge.classList.add('is-visible');
   }
 
-  function showAuthError(msg) {
+  function _showAuthError(msg) {
     var errEl = document.getElementById('auth-error');
     if (errEl) {
       errEl.textContent = msg;
       errEl.style.display = 'block';
-      setTimeout(function() { errEl.style.display = 'none'; }, 5000);
+      setTimeout(function () { errEl.style.display = 'none'; }, 6000);
     }
+    console.error('Auth error:', msg);
   }
 
-  // ── Event System ──
-
-  function onAuth(callback) {
-    authListeners.push(callback);
-  }
+  // ─────────────────────────────────────────────────────────
+  // Event System
+  // ─────────────────────────────────────────────────────────
+  function onAuth(callback) { authListeners.push(callback); }
 
   function notifyListeners(event, data) {
-    authListeners.forEach(function(cb) {
-      try { cb(event, data); } catch(e) { console.error('Auth listener error:', e); }
+    authListeners.forEach(function (cb) {
+      try { cb(event, data); } catch (e) { console.error('Auth listener error:', e); }
     });
   }
 
-  // ── Public Interface ──
+  // Auto-initialize on DOM ready
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        init();
+      });
+    } else {
+      init();
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Public Interface
+  // ─────────────────────────────────────────────────────────
   return {
     init: init,
+    continueAsGuest: continueAsGuest,
     signInWithGoogle: signInWithGoogle,
     signOut: signOut,
-    continueAsGuest: continueAsGuest,
     onAuth: onAuth,
-    getCurrentUser: function() { return currentUser; },
-    getVisitorId: function() { return currentVisitorId; },
-    getVisitorIP: function() { return visitorIP; }
+    isAdmin: function () { return isAdmin; },
+    getCurrentUser: function () { return currentUser; },
+    getVisitorId: function () { return currentVisitorId; },
+    getVisitorIP: function () { return visitorIP; },
+    fetchIPAndTrackVisitor: fetchIPAndTrackVisitor
   };
-
 })();

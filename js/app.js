@@ -20,18 +20,9 @@ class KeyboardFantasiaApp {
    */
   async init() {
     try {
-      // Load cassette data from Supabase, fallback to local JSON
-      let data;
-      if (window.DataService && typeof DataService.fetchAllData === 'function') {
-        data = await DataService.fetchAllData();
-      }
-      
-      if (!data || !data.cassettes || data.cassettes.length === 0) {
-        console.log('Using local fallback data (Supabase data empty or failed)');
-        const response = await fetch('data/cassettes.json');
-        data = await response.json();
-      }
-      state.set({ cassettesData: data });
+      // Load cassette data: Supabase (guest/anon session) → local JSON fallback
+      // auth.js has already signed in the user anonymously before this runs
+      await state.loadCassettesData();
 
       // Set initial volume
       player.setVolume(0);
@@ -118,30 +109,51 @@ class KeyboardFantasiaApp {
   // ───── Cassette Switches ─────
 
   _initCassetteSwitches() {
+    // Pill hitboxes on the center console
     const container = document.getElementById('cassette-switches');
-    if (!container) return;
+    if (container) {
+      container.addEventListener('click', (e) => {
+        const sw = e.target.closest('.cassette-switch');
+        if (!sw) return;
+        this._selectCassette(sw.dataset.cassette);
+      });
+    }
 
-    // Use the existing static HTML elements that map to the image coordinates
-    container.addEventListener('click', (e) => {
-      const sw = e.target.closest('.cassette-switch');
-      if (!sw) return;
-      const cassetteId = sw.dataset.cassette;
-      this._selectCassette(cassetteId);
-    });
+    // Cassette image rack at the top of the player
+    const rack = document.getElementById('cassette-rack');
+    if (rack) {
+      rack.addEventListener('click', (e) => {
+        const item = e.target.closest('.cassette-rack-item');
+        if (!item) return;
+        this._selectCassette(item.dataset.cassette);
+      });
+    }
   }
 
   _selectCassette(cassetteId) {
+    const isPoweredOn = state.get('isPoweredOn');
+    if (!isPoweredOn) {
+      // Auto power-on when clicking any cassette switch or rack item
+      state.set({ isPoweredOn: true, isBooting: true });
+      setTimeout(() => {
+        state.set({ isBooting: false });
+      }, 1200);
+
+      if (!this.audioPhysics) {
+        this.audioPhysics = createAudioPhysics(player.audio);
+        this.audioPhysics.init();
+      }
+    }
+
     const current = state.get('activeCassette');
 
-    // Toggle off if same cassette
+    // Single-click guarantee: If already active, ensure tracklist queue opens immediately
     if (current === cassetteId) {
-      state.set({ activeCassette: null, songListOpen: false });
-      player.stop();
-      state.set({ currentTrack: null });
+      state.set({ songListOpen: true });
       return;
     }
 
-    // Stop current playback when switching cassettes
+    // Stop current playback when switching cassettes and open tracklist queue
     player.stop();
     state.set({
       activeCassette: cassetteId,
@@ -379,13 +391,11 @@ class KeyboardFantasiaApp {
       }
     });
 
-    // Active cassette changes — update switches, rack, song list, photos
+    // Active cassette changes — update switches, rack items, song list, photos
     state.on('activeCassette', (s) => {
-      // Update switches
+      // Update pill hitboxes
       document.querySelectorAll('.cassette-switch').forEach(sw => {
         sw.classList.toggle('is-active', sw.dataset.cassette === s.activeCassette);
-        
-        // Handle flashing
         if (s.activeCassette) {
           sw.classList.remove('cassette-flash');
         } else if (state.get('isPoweredOn')) {
@@ -393,9 +403,9 @@ class KeyboardFantasiaApp {
         }
       });
 
-      // Update rack tapes
-      document.querySelectorAll('.cassette-rack__tape').forEach(tape => {
-        tape.classList.toggle('is-active', tape.dataset.cassette === s.activeCassette);
+      // Update cassette rack image thumbnails
+      document.querySelectorAll('.cassette-rack-item').forEach(item => {
+        item.classList.toggle('is-active', item.dataset.cassette === s.activeCassette);
       });
 
       // Update cassette deck label
@@ -403,6 +413,11 @@ class KeyboardFantasiaApp {
       if (deckLabel) {
         const cassette = s.activeCassette ? state.getCassette(s.activeCassette) : null;
         deckLabel.textContent = cassette ? cassette.fullLabel : 'NO CASSETTE';
+      }
+
+      // Immediately re-render song list with new tracks if song list is open
+      if (s.songListOpen && s.activeCassette) {
+        this._renderSongList(s.activeCassette);
       }
 
       // Update photos

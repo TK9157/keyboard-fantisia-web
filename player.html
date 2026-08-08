@@ -59,7 +59,7 @@
 
     body {
       font-family: var(--font-body);
-      background: #050505 url('media/images/Switch/cleint%201%20jpg.jpeg') center/cover no-repeat;
+      background: #050505 url('media/images/Switch/New%20skin%20.jpg.jpeg') center/cover no-repeat;
       backdrop-filter: blur(20px) brightness(0.3);
       /* Immersive blurred background */
       color: #fff;
@@ -89,7 +89,7 @@
       aspect-ratio: 1024 / 576;
       /* Based on the background image */
       margin: 0 auto;
-      background-image: url('media/images/Switch/cleint%201%20jpg.jpeg');
+      background-image: url('media/images/Switch/New%20skin%20.jpg.jpeg');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
@@ -109,40 +109,168 @@
       border-radius: 4px;
     }
 
-    /* Cassette Switches (Top Center) */
-    .cassette-switches {
+    /* Cassette Rack (image thumbnails at top of player) */
+    #cassette-rack {
       position: absolute;
       top: 2%;
-      left: 28.1%;
-      width: 43.2%;
-      height: 8%;
+      left: 27.5%;
+      width: 45%;
+      height: 9%;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      gap: 6px;
+      gap: 4px;
+      z-index: 5;
     }
 
-    .cassette-switch {
-      width: 100%;
-      height: 100%;
+    .cassette-rack-item {
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 3px;
       background-size: cover;
       background-position: center;
-      transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+      transition: transform 0.15s, box-shadow 0.15s, border 0.15s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
       border: 2px solid transparent;
     }
 
-    .cassette-switch:hover {
+    .cassette-rack-item:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0, 255, 65, 0.5);
-      border: 2px solid var(--led-green);
+      box-shadow: 0 4px 12px rgba(0, 255, 65, 0.5);
+      border-color: var(--led-green);
     }
 
+    .cassette-rack-item.is-active {
+      border-color: var(--led-green);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+      transform: none;
+    }
+
+    /* Cassette pill hitboxes on the center console */
+    .cassette-switches {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Cassette Spin Video (Bottom tape deck window) */
+    #cassette-spin-video {
+      position: absolute;
+      top: 67.5%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 47%;
+      height: 22%;
+      object-fit: cover;
+      z-index: 3;
+      /* Visual Debug Mode */
+      border: 2px solid yellow;
+      background-color: rgba(255, 255, 0, 0.2);
+    }
+
+    .cassette-switch {
+      position: absolute;
+      cursor: pointer;
+      border-radius: 20px;
+      pointer-events: auto;
+      touch-action: manipulation;
+      /* ── Physical hardware button styling (No green glows) ── */
+      border: 2px solid black;
+      background-color: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: black;
+      font-size: 12px;
+      font-weight: bold;
+      font-family: monospace;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: none;
+      text-shadow: none;
+      outline: none;
+      transition: background-color 0.15s, box-shadow 0.15s, transform 0.1s;
+      transform: translate(-50%, -50%);
+    }
+
+    .cassette-switch:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+      border: 2px solid black;
+      box-shadow: none;
+      color: black;
+    }
+
+    .cassette-switch.is-active,
     .cassette-switch:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 5px rgba(0, 255, 65, 0.5);
+      /* Realistic physical pressed button state */
+      background-color: rgba(0, 0, 0, 0.25);
+      border: 2px solid black;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+      color: black;
+      transform: translate(-50%, -47%);
+    }
+
+    .cassette-switch.cassette-flash {
+      animation: buttonPulse 1.5s infinite;
+    }
+
+    @keyframes buttonPulse {
+      0%, 100% { background-color: transparent; }
+      50% { background-color: rgba(0, 0, 0, 0.15); }
+    }
+
+    /*
+      PILL BUTTON COORDINATES — Precision calibrated from live DOM inspection
+      Left col (C1, C2, C3):  left: 39%   (micro-nudged +0.5% to the right)
+      Right col (C4, C5, C6): left: 61.5% (perfect alignment)
+
+      Vertical rows:
+        Top:    top: 55%   (nudged down slightly from 54%)
+        Middle: top: 60.5% (nudged down slightly from 60%)
+        Bottom: top: 65.5% (rescued UP from 66% to hit the 3rd pill)
+    */
+    #cassette-C1 {
+      top: 53.2%;
+      left: 38.9%;
+      width: 3.8%;
+      height: 2.8%;
+    }
+
+    #cassette-C2 {
+      top: 57.2%;
+      left: 39%;
+      width: 3.8%;
+      height: 2.8%;
+    }
+
+    #cassette-C3 {
+      top: 61.3%;
+      left: 38.9%;
+      width: 3.8%;
+      height: 2.8%;
+    }
+
+    #cassette-C4 {
+      top: 53.2%;
+      left: 61.5%;
+      width: 3.8%;
+      height: 2.8%;
+    }
+
+    #cassette-C5 {
+      top: 57.2%;
+      left: 61.5%;
+      width: 3.8%;
+      height: 2.8%;
+    }
+
+    #cassette-C6 {
+      top: 61.3%;
+      left: 61.5%;
+      width: 3.8%;
+      height: 2.8%;
     }
 
     /* Video Screen Area */
@@ -331,14 +459,23 @@
       color: #ddd;
     }
 
-    /* Song List Overlay */
+    /* Song List Overlay — strictly confined to the black display screen area */
     #song-list {
-      background: rgba(0, 0, 0, 0.9);
-      backdrop-filter: blur(5px);
-      z-index: 10;
+      position: absolute;
+      top: 12%;
+      left: 27.5%;
+      width: 45%;
+      height: 33%;
+      max-height: 33%;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 4px;
+      z-index: 20;
       display: none;
-      align-items: stretch;
       flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(0, 255, 65, 0.08);
     }
 
     #song-list.is-open {
@@ -349,8 +486,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
+      padding: 6px 10px;
       border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+      flex-shrink: 0;
     }
 
     .song-list__title {
@@ -377,10 +515,11 @@
     .song-list__track {
       display: flex;
       align-items: center;
-      padding: 8px 10px;
+      padding: 5px 10px;
       cursor: pointer;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
       font-family: var(--font-tech);
+      min-height: 36px;
     }
 
     .song-list__track:hover {
@@ -459,6 +598,8 @@
       color: #000;
       pointer-events: none;
       transition: all 0.2s;
+      text-align: center;
+      line-height: 1.1;
     }
 
     .transport-btn-area:hover span {
@@ -574,9 +715,8 @@
 
     .woofer-overlay.left {
       left: 4.8%;
-      pointer-events: auto;
-      /* Make clickable */
-      cursor: pointer;
+      /* pointer-events removed — was causing rogue clickable zone on speaker */
+      pointer-events: none;
       transition: box-shadow 0.3s;
     }
 
@@ -1088,20 +1228,30 @@
     <!-- CASSETTE SPIN VIDEO -->
     <video id="cassette-spin-video" src="media/images/Nested%20Sequence%2002.mp4" muted loop playsinline></video>
 
-    <!-- Cassette Switches (Top center of the image) -->
-    <div class="cassette-switches" id="cassette-switches">
-      <div class="cassette-switch" data-cassette="C1" style="background-image: url('media/images/Cass/C1.jpeg');"
+    <!-- Cassette Image Rack (top of player, always visible) -->
+    <div id="cassette-rack">
+      <div class="cassette-rack-item" data-cassette="C1" style="background-image: url('media/images/Cass/C1.jpeg');"
         title="Vol 1"></div>
-      <div class="cassette-switch" data-cassette="C2" style="background-image: url('media/images/Cass/C2.jpeg');"
+      <div class="cassette-rack-item" data-cassette="C2" style="background-image: url('media/images/Cass/C2.jpeg');"
         title="Vol 2"></div>
-      <div class="cassette-switch" data-cassette="C3" style="background-image: url('media/images/Cass/C3.jpeg');"
+      <div class="cassette-rack-item" data-cassette="C3" style="background-image: url('media/images/Cass/C3.jpeg');"
         title="Vol 3"></div>
-      <div class="cassette-switch" data-cassette="C4" style="background-image: url('media/images/Cass/C4.jpeg');"
+      <div class="cassette-rack-item" data-cassette="C4" style="background-image: url('media/images/Cass/C4.jpeg');"
         title="Vol 4"></div>
-      <div class="cassette-switch" data-cassette="C5" style="background-image: url('media/images/Cass/C5.jpeg');"
+      <div class="cassette-rack-item" data-cassette="C5" style="background-image: url('media/images/Cass/C5.jpeg');"
         title="Vol 5"></div>
-      <div class="cassette-switch" data-cassette="C6" style="background-image: url('media/images/Cass/C6.jpeg');"
+      <div class="cassette-rack-item" data-cassette="C6" style="background-image: url('media/images/Cass/C6.jpeg');"
         title="Vol 6"></div>
+    </div>
+
+    <!-- Cassette Pill Hitboxes (center console, flanking the dial) -->
+    <div class="cassette-switches" id="cassette-switches">
+      <div class="cassette-switch" id="cassette-C1" data-cassette="C1" title="Cassette 1">C1</div>
+      <div class="cassette-switch" id="cassette-C2" data-cassette="C2" title="Cassette 2">C2</div>
+      <div class="cassette-switch" id="cassette-C3" data-cassette="C3" title="Cassette 3">C3</div>
+      <div class="cassette-switch" id="cassette-C4" data-cassette="C4" title="Cassette 4">C4</div>
+      <div class="cassette-switch" id="cassette-C5" data-cassette="C5" title="Cassette 5">C5</div>
+      <div class="cassette-switch" id="cassette-C6" data-cassette="C6" title="Cassette 6">C6</div>
     </div>
 
     <!-- Video Display Area -->
@@ -1154,20 +1304,22 @@
         </div>
       </div>
 
-      <div id="song-list" class="video-overlay">
-        <div class="song-list__header">
-          <div class="song-list__title" id="song-list-title">Cassette Name</div>
-          <button class="song-list__close" id="song-list-close">✕</button>
-        </div>
-        <div id="song-list-tracks"></div>
-      </div>
     </div>
 
     <!-- Transport Buttons -->
     <div class="transport-btn-area" id="btn-rewind" title="Rewind"><span>REW</span></div>
-    <div class="transport-btn-area" id="btn-play" title="Play"><span>PLAY/PAUSE</span></div>
+    <div class="transport-btn-area" id="btn-play" title="Play/Pause"><span>PLAY/<br>PAUSE</span></div>
     <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
     <div class="transport-btn-area" id="btn-stop" title="Stop"><span>STOP</span></div>
+
+    <!-- Song / Track List Overlay (shown when cassette selected) -->
+    <div id="song-list">
+      <div class="song-list__header">
+        <div class="song-list__title" id="song-list-title">Select a Cassette</div>
+        <button class="song-list__close" id="song-list-close">✕</button>
+      </div>
+      <div id="song-list-tracks"></div>
+    </div>
 
     <!-- Volume Dial -->
     <div id="volume-dial" class="volume-dial-area" title="Volume">
