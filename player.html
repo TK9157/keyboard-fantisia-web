@@ -81,20 +81,20 @@
     }
 
     /* ── Image Player Layout ── */
+    /* — Image Player Layout — */
     .image-player {
       position: relative;
+      overflow: hidden;
+      /* Add this to clip overflowing elements */
       width: 100%;
       max-width: 100vw;
-      /* Allow it to fill the screen width */
       aspect-ratio: 1024 / 576;
-      /* Based on the background image */
       margin: 0 auto;
       background-image: url('media/images/Switch/New%20skin%20.jpg.jpeg');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-      /* Blend edge */
     }
 
     /* Invisible clickable areas that overlay the image */
@@ -1233,7 +1233,7 @@
     <div class="woofer-overlay right"></div>
 
     <!-- CASSETTE SPIN VIDEO -->
-    <video id="cassette-spin-video" src="media/images/Nested%20Sequence%2002.mp4" muted loop playsinline></video>
+
 
     <!-- Cassette Image Rack (top of player, always visible) -->
     <div id="cassette-rack">
