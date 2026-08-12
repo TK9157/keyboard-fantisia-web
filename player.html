@@ -278,9 +278,17 @@
       height: 2.8%;
     }
 
-    /* Video Screen Area */
+    /* Central Black Display Screen Container */
     .video-container {
-      display: none;
+      position: absolute;
+      top: 11.4%;
+      left: 28.3%;
+      width: 43.3%;
+      height: 31.2%;
+      overflow: hidden;
+      z-index: 10;
+      border-radius: 4px;
+      display: block;
     }
 
     #video-player {
@@ -464,19 +472,19 @@
       color: #ddd;
     }
 
-    /* Song List Overlay — strictly confined to the black display screen area */
+    /* Song List Overlay — strictly snaps 100% inside the central black display screen area */
     #song-list {
       position: absolute;
-      top: 14.5%;
-      left: 29.2%;
-      width: 41.6%;
-      height: 30.5%;
-      max-height: 30.5%;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       background: rgba(0, 0, 0, 0.95);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(0, 255, 65, 0.3);
       border-radius: 4px;
-      z-index: 20;
+      z-index: 30;
       display: none;
       flex-direction: column;
       overflow: hidden;
@@ -1311,6 +1319,15 @@
         </div>
       </div>
 
+      <!-- Song / Track List Overlay (shown when cassette selected) -->
+      <div id="song-list">
+        <div class="song-list__header">
+          <div class="song-list__title" id="song-list-title">Select a Cassette</div>
+          <button class="song-list__close" id="song-list-close">✕</button>
+        </div>
+        <div id="song-list-tracks"></div>
+      </div>
+
     </div>
 
     <!-- Transport Buttons -->
@@ -1318,15 +1335,6 @@
     <div class="transport-btn-area" id="btn-play" title="Play"><span>PLAY</span></div>
     <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
     <div class="transport-btn-area" id="btn-stop" title="Pause"><span>PAUSE</span></div>
-
-    <!-- Song / Track List Overlay (shown when cassette selected) -->
-    <div id="song-list">
-      <div class="song-list__header">
-        <div class="song-list__title" id="song-list-title">Select a Cassette</div>
-        <button class="song-list__close" id="song-list-close">✕</button>
-      </div>
-      <div id="song-list-tracks"></div>
-    </div>
 
     <!-- Volume Dial -->
     <div id="volume-dial" class="volume-dial-area" title="Volume">
