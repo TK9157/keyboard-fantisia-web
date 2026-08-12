@@ -158,16 +158,14 @@
     /* Cassette Spin Video (Bottom tape deck window) */
     #cassette-spin-video {
       position: absolute;
-      top: 67.5%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 47%;
-      height: 22%;
+      top: 52%;
+      left: 28%;
+      width: 44%;
+      height: 35%;
       object-fit: cover;
       z-index: 3;
-      /* Visual Debug Mode */
-      border: 2px solid yellow;
-      background-color: rgba(255, 255, 0, 0.2);
+      display: block;
+      border-radius: 4px;
     }
 
     .cassette-switch {
@@ -1233,7 +1231,7 @@
     <div class="woofer-overlay right"></div>
 
     <!-- CASSETTE SPIN VIDEO -->
-    <video id="cassette-spin-video" src="media/images/Nested%20Sequence%2002.mp3" muted loop playsinline></video>
+    <video id="cassette-spin-video" src="media/images/Nested%20Sequence%2002.mp4" autoplay muted loop playsinline></video>
 
     <!-- Cassette Image Rack (top of player, always visible) -->
     <div id="cassette-rack">

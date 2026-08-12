@@ -507,12 +507,18 @@ class KeyboardFantasiaApp {
         if (playBtn) playBtn.classList.add('is-active');
         if (stopBtn) stopBtn.classList.remove('is-active');
         if (wrapper) wrapper.classList.add('is-playing');
-        if (spinVideo) spinVideo.play().catch(e => console.log('Spin video play error:', e));
+        if (spinVideo) {
+          spinVideo.style.display = 'block';
+          spinVideo.play().catch(e => console.log('Spin video play error:', e));
+        }
       } else {
         if (playBtn) playBtn.classList.remove('is-active');
         if (s.isPaused === false && stopBtn) stopBtn.classList.add('is-active');
         if (wrapper) wrapper.classList.remove('is-playing');
-        if (spinVideo) spinVideo.pause();
+        if (spinVideo) {
+          spinVideo.pause();
+          spinVideo.style.display = 'none';
+        }
       }
     });
 
