@@ -170,13 +170,16 @@ class KeyboardFantasiaApp {
     const stopBtn = document.getElementById('btn-stop');
     const ffBtn = document.getElementById('btn-ff');
 
-    // Play/Pause toggle
-    playBtn?.addEventListener('click', () => player.togglePlayPause());
+    // Play
+    playBtn?.addEventListener('click', () => {
+      if (state.get('currentTrack')) {
+        player.play();
+      }
+    });
 
-    // Stop
+    // Pause
     stopBtn?.addEventListener('click', () => {
-      player.stop();
-      state.set({ currentTrack: null });
+      player.pause();
     });
 
     // Rewind — click for prev, hold for seek
