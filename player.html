@@ -109,17 +109,19 @@
       border-radius: 4px;
     }
 
-    /* Cassette Rack (image thumbnails at top of player) */
+    /* Cassette Rack (image thumbnails at top of player inside glossy header band) */
     #cassette-rack {
       position: absolute;
-      top: 2.0%;
-      left: 28.1%;
+      top: 0.8%;
+      left: 28.3%;
       width: 43.3%;
-      height: 9.2%;
+      height: 9.6%;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      gap: 4px;
+      gap: 3px;
+      padding: 3px 4px;
+      box-sizing: border-box;
       z-index: 5;
     }
 
