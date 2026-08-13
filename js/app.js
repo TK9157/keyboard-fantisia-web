@@ -40,6 +40,7 @@ class KeyboardFantasiaApp {
       this._initSongList();
       this._initPowerAndAdmin();
       this._initArtistProfile();
+      this._initPhotoViewer();
 
       // Subscribe to state changes
       this._bindStateListeners();
@@ -368,6 +369,127 @@ class KeyboardFantasiaApp {
   _updatePhotoScroll() {
     // Photo scroll is removed in the image-based layout
   }
+
+  // ---- Photo Viewer Carousel ----
+
+  _initPhotoViewer() {
+    this.photoIndex = 0;
+    this.photoUrls = [];
+
+    this._photoViewerEl = document.getElementById('photo-viewer-container');
+    this._photoImgEl = document.getElementById('photo-viewer-img');
+    this._photoCounterEl = document.getElementById('photo-counter');
+
+    // 4. Attach navigation click handlers
+    document.getElementById('photo-prev-btn')?.addEventListener('click', () => {
+      this._updatePhotoViewerDisplay(this.photoIndex - 1);
+    });
+
+    document.getElementById('photo-next-btn')?.addEventListener('click', () => {
+      this._updatePhotoViewerDisplay(this.photoIndex + 1);
+    });
+
+    // 1. Load photos from Supabase on app start
+    this._loadGalleryImages();
+
+    // 3. Auto-switch to a track's image when that track starts playing
+    state.on('currentTrack', (s) => {
+      if (s.currentTrack) this._setPhotoViewerToTrackImage(s.currentTrack.imageUrl);
+    });
+
+    // Show the carousel only when the deck is idle (powered on, not booting, nothing playing)
+    state.on(['isBooting', 'currentTrack', 'isPoweredOn', 'isPlaying'], (s) => {
+      const idleShown = s.isPoweredOn && !s.isBooting && !(s.currentTrack && s.isPlaying);
+      this._setPhotoViewerVisible(idleShown && this.photoUrls.length > 0);
+    });
+  },
+
+  // 1. Fetch images from Supabase tracks table
+  async _loadGalleryImages() {
+    let urls = [];
+
+    try {
+      const sb = getSupabase();
+      if (sb) {
+        const { data: tracks, error } = await sb
+          .from('tracks')
+          .select('image_url, title')
+          .not('image_url', 'is', null);
+
+        if (error) {
+          console.error('Error fetching gallery images:', error);
+        } else if (tracks) {
+          urls = tracks
+            .map(t => t.image_url)
+            .filter(url => url && url.trim().length > 0);
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase gallery fetch failed, falling back to loaded data:', err);
+    }
+
+    // Fallback: gather image_url from cassette tracks already loaded in state
+    if (urls.length === 0) {
+      const data = state.get('cassettesData');
+      if (data && Array.isArray(data.cassettes)) {
+        data.cassettes.forEach(c => {
+          (c.tracks || []).forEach(t => {
+            if (t.imageUrl) urls.push(t.imageUrl);
+          });
+        });
+      }
+    }
+
+    this.photoUrls = [...new Set(urls)];
+    this.photoIndex = 0;
+
+    if (this.photoUrls.length > 0) {
+      this._updatePhotoViewerDisplay(0);
+    }
+  },
+
+  // 2. Update image display and counter (with bounds wraparound + fade)
+  _updatePhotoViewerDisplay(index) {
+    if (this.photoUrls.length === 0) return;
+
+    if (index < 0) {
+      this.photoIndex = this.photoUrls.length - 1;
+    } else if (index >= this.photoUrls.length) {
+      this.photoIndex = 0;
+    } else {
+      this.photoIndex = index;
+    }
+
+    if (this._photoImgEl) {
+      this._photoImgEl.style.opacity = '0.3';
+      setTimeout(() => {
+        this._photoImgEl.src = this.photoUrls[this.photoIndex];
+        this._photoImgEl.style.opacity = '1';
+      }, 150);
+    }
+
+    if (this._photoCounterEl) {
+      this._photoCounterEl.textContent = `${this.photoIndex + 1} / ${this.photoUrls.length}`;
+    }
+  },
+
+  // 3. Jump to a specific track's image when played
+  _setPhotoViewerToTrackImage(imageUrl) {
+    if (!imageUrl) return;
+    const matchIndex = this.photoUrls.indexOf(imageUrl);
+    if (matchIndex !== -1) {
+      this._updatePhotoViewerDisplay(matchIndex);
+    } else {
+      this.photoUrls.unshift(imageUrl);
+      this._updatePhotoViewerDisplay(0);
+    }
+  },
+
+  _setPhotoViewerVisible(visible) {
+    if (this._photoViewerEl) {
+      this._photoViewerEl.classList.toggle('is-visible', visible);
+    }
+  },
 
   // ───── State Listeners ─────
 
