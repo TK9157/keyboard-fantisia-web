@@ -28,7 +28,7 @@ class KeyboardFantasiaApp {
       player.setVolume(0);
 
       // Link video element
-      const videoEl = document.getElementById('video-player');
+      const videoEl = document.getElementById('music-video');
       if (videoEl) player.setVideoElement(videoEl);
 
       // Initialize all UI components
@@ -457,15 +457,15 @@ class KeyboardFantasiaApp {
     });
 
     // Screen visibility logic (Boot vs Idle vs Playing)
-    state.on(['isBooting', 'currentTrack', 'isPoweredOn'], (s) => {
+    state.on(['isBooting', 'currentTrack', 'isPoweredOn', 'isPlaying'], (s) => {
       const bootScreen = document.getElementById('boot-screen');
-      const videoPlayer = document.getElementById('video-player');
+      const musicVideo = document.getElementById('music-video');
       const idleScreen = document.getElementById('idle-screen');
       const nowPlaying = document.getElementById('now-playing');
 
       if (!s.isPoweredOn) {
         if (bootScreen) bootScreen.style.display = 'none';
-        if (videoPlayer) videoPlayer.style.display = 'none';
+        if (musicVideo) musicVideo.style.display = 'none';
         if (idleScreen) idleScreen.style.display = 'flex';
         if (nowPlaying) nowPlaying.style.display = 'none';
         return;
@@ -473,7 +473,7 @@ class KeyboardFantasiaApp {
 
       if (s.isBooting) {
         if (bootScreen) bootScreen.style.display = 'flex';
-        if (videoPlayer) videoPlayer.style.display = 'none';
+        if (musicVideo) musicVideo.style.display = 'none';
         if (idleScreen) idleScreen.style.display = 'none';
         if (nowPlaying) nowPlaying.style.display = 'none';
         
@@ -487,12 +487,13 @@ class KeyboardFantasiaApp {
       } else {
         if (bootScreen) bootScreen.style.display = 'none';
         
-        if (s.currentTrack) {
-          if (videoPlayer) videoPlayer.style.display = 'block';
+        const hasMusicVideo = s.currentTrack && s.currentTrack.videoSrc;
+        if (s.currentTrack && s.isPlaying) {
+          if (musicVideo) musicVideo.style.display = hasMusicVideo ? 'block' : 'none';
           if (idleScreen) idleScreen.style.display = 'none';
           if (nowPlaying) nowPlaying.style.display = 'flex';
         } else {
-          if (videoPlayer) videoPlayer.style.display = 'none';
+          if (musicVideo) musicVideo.style.display = 'none';
           if (idleScreen) idleScreen.style.display = 'flex';
           if (nowPlaying) nowPlaying.style.display = 'none';
         }

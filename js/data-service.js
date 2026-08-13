@@ -72,7 +72,8 @@ var DataService = (function() {
             movie: t.movie || '',
             musicDirector: t.music_director || '',
             audioFile: resolveMediaUrl(t.audio_url),
-            videoFile: resolveMediaUrl(t.video_url)
+            videoFile: resolveMediaUrl(t.video_url),
+            videoSrc: t.video_src || null
           };
         });
         cachedTracks[cassetteId] = tracks;
@@ -115,7 +116,8 @@ var DataService = (function() {
               movie: t.movie || '',
               musicDirector: t.music_director || '',
               audioFile: resolveMediaUrl(t.audio_url),
-              videoFile: resolveMediaUrl(t.video_url)
+              videoFile: resolveMediaUrl(t.video_url),
+              videoSrc: t.video_src || null
             };
           });
 

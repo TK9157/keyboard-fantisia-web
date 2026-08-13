@@ -28,6 +28,34 @@ export class PlayerEngine {
   }
 
   /**
+   * Show and play the music video in the central screen, in sync with audio
+   */
+  _showMusicVideo(src) {
+    if (!this.videoElement) return;
+    const musicVideo = this.videoElement;
+    musicVideo.muted = true;
+    musicVideo.loop = true;
+    musicVideo.playsInline = true;
+    console.log("Loading video source:", src);
+    musicVideo.src = src;
+    musicVideo.load();
+    musicVideo.style.display = 'block';
+    musicVideo.play().catch(err => console.error("Video playback failed:", err));
+  }
+
+  /**
+   * Hide the music video and stop/reset its playback
+   */
+  _hideMusicVideo() {
+    if (!this.videoElement) return;
+    this.videoElement.pause();
+    this.videoElement.currentTime = 0;
+    this.videoElement.removeAttribute('src');
+    this.videoElement.load();
+    this.videoElement.style.display = 'none';
+  }
+
+  /**
    * Play a specific track
    */
   playTrack(track) {
@@ -40,10 +68,11 @@ export class PlayerEngine {
     // Set audio source
     this.audio.src = track.audioFile;
 
-    // Set video source
-    if (this.videoElement && track.videoFile) {
-      this.videoElement.src = track.videoFile;
-      this.videoElement.load();
+    // Conditional music video - only tracks with videoSrc (C-1 Track 01) show it
+    if (track.videoSrc) {
+      this._showMusicVideo(track.videoSrc);
+    } else {
+      this._hideMusicVideo();
     }
 
     // Play
@@ -224,7 +253,14 @@ export class PlayerEngine {
       state.set({ duration: this.audio.duration });
     });
 
+    this.audio.addEventListener('pause', () => {
+      if (this.videoElement && !this.videoElement.paused) {
+        this.videoElement.pause();
+      }
+    });
+
     this.audio.addEventListener('ended', () => {
+      this._hideMusicVideo();
       this.skipToNext();
     });
 

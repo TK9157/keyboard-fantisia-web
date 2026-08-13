@@ -28,9 +28,13 @@ CREATE TABLE IF NOT EXISTS tracks (
   music_director TEXT,
   audio_url TEXT,
   video_url TEXT,
+  video_src TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(cassette_id, track_number)
 );
+
+-- Add video_src column for databases created before the music-video feature
+ALTER TABLE tracks ADD COLUMN IF NOT EXISTS video_src TEXT;
 
 -- Visitors table
 CREATE TABLE IF NOT EXISTS visitors (
@@ -118,7 +122,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- C1 Tracks
 INSERT INTO tracks (cassette_id, track_number, title, movie, music_director, audio_url, video_url) VALUES
-  ('C1', 1, 'Roja Kaadhal Rojave', 'Roja (1992)', 'A.R. Rahman', 'media/audio/c1_track01.mp3', 'media/video/c1_track01.mp4'),
+  ('C1', 1, 'Test Video Track', 'Roja (1992)', 'Keyboard Fantasia', 'media/audio/c1_track01.mp3', 'media/video/Test001.mp4'),
   ('C1', 2, 'Ilayanila Pozhigirathe', 'Payanangal Mudivathillai (1982)', 'Ilaiyaraaja', 'media/audio/c1_track02.mp3', 'media/video/c1_track02.mp4'),
   ('C1', 3, 'Poomalai Vaazhum', 'Mann Vasanai (1983)', 'Ilaiyaraaja', 'media/audio/c1_track03.mp3', 'media/video/c1_track03.mp4'),
   ('C1', 4, 'Thendral Vandhu Ennai Thodum', 'Avatharam (1995)', 'Ilaiyaraaja', 'media/audio/c1_track04.mp3', 'media/video/c1_track04.mp4'),
@@ -129,6 +133,16 @@ INSERT INTO tracks (cassette_id, track_number, title, movie, music_director, aud
   ('C1', 9, 'Poove Sempoove', 'Solla Thudikkudhu Manasu (1988)', 'Ilaiyaraaja', 'media/audio/c1_track09.mp3', 'media/video/c1_track09.mp4'),
   ('C1', 10, 'Malargale Malargale', 'Love Birds (1996)', 'A.R. Rahman', 'media/audio/c1_track10.mp3', 'media/video/c1_track10.mp4')
 ON CONFLICT (cassette_id, track_number) DO NOTHING;
+
+-- C-1 Track 01 plays the music video (Test001.mp4)
+-- Updates all fields so re-running the migration fixes existing databases too
+UPDATE tracks
+SET
+  title = 'Test Video Track',
+  music_director = 'Keyboard Fantasia',
+  video_url = 'media/video/Test001.mp4',
+  video_src = 'media/video/Test001.mp4'
+WHERE cassette_id = 'C1' AND track_number = 1;
 
 -- C2 Tracks
 INSERT INTO tracks (cassette_id, track_number, title, movie, music_director, audio_url, video_url) VALUES

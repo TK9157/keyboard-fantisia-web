@@ -9,11 +9,13 @@
       "tracks": [
         {
           "id": 1,
-          "title": "Dheema",
+          "title": "Test Video Track",
           "movie": "LIK 2026",
-          "musicDirector": "A.R. Rahman",
+          "musicDirector": "Keyboard Fantasia",
+          "artist": "Keyboard Fantasia",
           "audioFile": "https://fgydtvjspoxhckmezykw.supabase.co/storage/v1/object/public/PradeepN_songs_tracks/audio/Dheema.mp3",
-          "videoFile": "https://fgydtvjspoxhckmezykw.supabase.co/storage/v1/object/public/PradeepN_songs_tracks/video/Test001.mp4"
+          "videoFile": "media/video/Test001.mp4",
+          "videoSrc": "media/video/Test001.mp4"
         },
         {
           "id": 2,
