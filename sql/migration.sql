@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS tracks (
 
 -- Add video_src column for databases created before the music-video feature
 ALTER TABLE tracks ADD COLUMN IF NOT EXISTS video_src TEXT;
+ALTER TABLE tracks ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 -- Visitors table
 CREATE TABLE IF NOT EXISTS visitors (
@@ -86,6 +87,15 @@ CREATE POLICY "cassettes_public_read" ON cassettes
 -- Tracks: anyone can read
 CREATE POLICY "tracks_public_read" ON tracks
   FOR SELECT USING (true);
+-- Tracks: anonymous writes so the admin panel can save/update/delete songs
+CREATE POLICY "tracks_public_insert" ON tracks
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "tracks_public_update" ON tracks
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY "tracks_public_delete" ON tracks
+  FOR DELETE USING (true);
 
 -- Visitors: authenticated users can insert/update their own record
 CREATE POLICY "visitors_insert" ON visitors
@@ -217,10 +227,39 @@ ON CONFLICT (cassette_id, track_number) DO NOTHING;
 -- ──────────────────────────────────────────────────────────────
 -- 4. STORAGE BUCKETS (run these separately if they error)
 -- ──────────────────────────────────────────────────────────────
--- Note: Storage buckets are best created via the Supabase Dashboard
--- Go to Storage → New Bucket → Name: "audio", Public: ON
--- Go to Storage → New Bucket → Name: "video", Public: ON
--- Go to Storage → New Bucket → Name: "photos", Public: ON
+-- Note: Storage bucket is created via the Supabase Dashboard:
+-- Go to Storage -> New Bucket -> Name: "PradeepN_songs_tracks", Public: ON
+
+-- Storage RLS: public read/upload/update/delete on PradeepN_songs_tracks
+-- (Safe to re-run - policies are dropped before being recreated)
+UPDATE storage.buckets
+SET public = true
+WHERE id = 'PradeepN_songs_tracks';
+
+DROP POLICY IF EXISTS "Public Read Access for PradeepN_songs_tracks" ON storage.objects;
+CREATE POLICY "Public Read Access for PradeepN_songs_tracks"
+ON storage.objects
+FOR SELECT
+USING (bucket_id = 'PradeepN_songs_tracks');
+
+DROP POLICY IF EXISTS "Public Upload Access for PradeepN_songs_tracks" ON storage.objects;
+CREATE POLICY "Public Upload Access for PradeepN_songs_tracks"
+ON storage.objects
+FOR INSERT
+WITH CHECK (bucket_id = 'PradeepN_songs_tracks');
+
+DROP POLICY IF EXISTS "Public Update Access for PradeepN_songs_tracks" ON storage.objects;
+CREATE POLICY "Public Update Access for PradeepN_songs_tracks"
+ON storage.objects
+FOR UPDATE
+USING (bucket_id = 'PradeepN_songs_tracks')
+WITH CHECK (bucket_id = 'PradeepN_songs_tracks');
+
+DROP POLICY IF EXISTS "Public Delete Access for PradeepN_songs_tracks" ON storage.objects;
+CREATE POLICY "Public Delete Access for PradeepN_songs_tracks"
+ON storage.objects
+FOR DELETE
+USING (bucket_id = 'PradeepN_songs_tracks');
 
 -- ──────────────────────────────────────────────────────────────
 -- 5. HELPER FUNCTION — Upsert visitor (handles guest + auth)
