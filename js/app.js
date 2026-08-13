@@ -13,6 +13,8 @@ class KeyboardFantasiaApp {
     this.rotaryDial = null;
     this._photoScrollAnimation = null;
     this.audioPhysics = null;
+    this.galleryImages = [];
+    this.currentImageIndex = 0;
   }
 
   /**
@@ -370,126 +372,65 @@ class KeyboardFantasiaApp {
     // Photo scroll is removed in the image-based layout
   }
 
-  // ---- Photo Viewer Carousel ----
+  // Photo Viewer (top-left display)
 
-  _initPhotoViewer() {
-    this.photoIndex = 0;
-    this.photoUrls = [];
-
-    this._photoViewerEl = document.getElementById('photo-viewer-container');
-    this._photoImgEl = document.getElementById('photo-viewer-img');
-    this._photoCounterEl = document.getElementById('photo-counter');
-
-    // 4. Attach navigation click handlers
-    document.getElementById('photo-prev-btn')?.addEventListener('click', () => {
-      this._updatePhotoViewerDisplay(this.photoIndex - 1);
-    });
-
-    document.getElementById('photo-next-btn')?.addEventListener('click', () => {
-      this._updatePhotoViewerDisplay(this.photoIndex + 1);
-    });
-
-    // 1. Load photos from Supabase on app start
-    this._loadGalleryImages();
-
-    // 3. Auto-switch to a track's image when that track starts playing
-    state.on('currentTrack', (s) => {
-      if (s.currentTrack) this._setPhotoViewerToTrackImage(s.currentTrack.imageUrl);
-    });
-
-    // Show the carousel only when the deck is idle (powered on, not booting, nothing playing)
-    state.on(['isBooting', 'currentTrack', 'isPoweredOn', 'isPlaying'], (s) => {
-      const idleShown = s.isPoweredOn && !s.isBooting && !(s.currentTrack && s.isPlaying);
-      this._setPhotoViewerVisible(idleShown && this.photoUrls.length > 0);
-    });
-  },
-
-  // 1. Fetch images from Supabase tracks table
   async _loadGalleryImages() {
-    let urls = [];
+    const sb = getSupabase();
+    if (!sb) return;
 
-    try {
-      const sb = getSupabase();
-      if (sb) {
-        const { data: tracks, error } = await sb
-          .from('tracks')
-          .select('image_url, title')
-          .not('image_url', 'is', null);
+    const { data: tracks, error } = await sb
+      .from('tracks')
+      .select('image_url')
+      .not('image_url', 'is', null);
 
-        if (error) {
-          console.error('Error fetching gallery images:', error);
-        } else if (tracks) {
-          urls = tracks
-            .map(t => t.image_url)
-            .filter(url => url && url.trim().length > 0);
-        }
-      }
-    } catch (err) {
-      console.warn('Supabase gallery fetch failed, falling back to loaded data:', err);
+    if (error) {
+      console.error('Error fetching gallery images:', error);
+      return;
     }
 
-    // Fallback: gather image_url from cassette tracks already loaded in state
-    if (urls.length === 0) {
-      const data = state.get('cassettesData');
-      if (data && Array.isArray(data.cassettes)) {
-        data.cassettes.forEach(c => {
-          (c.tracks || []).forEach(t => {
-            if (t.imageUrl) urls.push(t.imageUrl);
-          });
-        });
-      }
-    }
+    this.galleryImages = (tracks || [])
+      .map(t => t.image_url)
+      .filter(url => url && url.trim().length > 0);
 
-    this.photoUrls = [...new Set(urls)];
-    this.photoIndex = 0;
-
-    if (this.photoUrls.length > 0) {
+    if (this.galleryImages.length > 0) {
       this._updatePhotoViewerDisplay(0);
     }
-  },
+  }
 
-  // 2. Update image display and counter (with bounds wraparound + fade)
   _updatePhotoViewerDisplay(index) {
-    if (this.photoUrls.length === 0) return;
+    if (this.galleryImages.length === 0) return;
 
-    if (index < 0) {
-      this.photoIndex = this.photoUrls.length - 1;
-    } else if (index >= this.photoUrls.length) {
-      this.photoIndex = 0;
-    } else {
-      this.photoIndex = index;
-    }
+    if (index < 0) this.currentImageIndex = this.galleryImages.length - 1;
+    else if (index >= this.galleryImages.length) this.currentImageIndex = 0;
+    else this.currentImageIndex = index;
 
-    if (this._photoImgEl) {
-      this._photoImgEl.style.opacity = '0.3';
+    const imgElem = document.getElementById('photo-viewer-img');
+    const counterElem = document.getElementById('photo-counter');
+
+    if (imgElem) {
+      imgElem.style.opacity = '0.3';
       setTimeout(() => {
-        this._photoImgEl.src = this.photoUrls[this.photoIndex];
-        this._photoImgEl.style.opacity = '1';
+        imgElem.src = this.galleryImages[this.currentImageIndex];
+        imgElem.style.opacity = '1';
       }, 150);
     }
 
-    if (this._photoCounterEl) {
-      this._photoCounterEl.textContent = `${this.photoIndex + 1} / ${this.photoUrls.length}`;
+    if (counterElem) {
+      counterElem.textContent = `${this.currentImageIndex + 1} / ${this.galleryImages.length}`;
     }
-  },
+  }
 
-  // 3. Jump to a specific track's image when played
-  _setPhotoViewerToTrackImage(imageUrl) {
-    if (!imageUrl) return;
-    const matchIndex = this.photoUrls.indexOf(imageUrl);
-    if (matchIndex !== -1) {
-      this._updatePhotoViewerDisplay(matchIndex);
-    } else {
-      this.photoUrls.unshift(imageUrl);
-      this._updatePhotoViewerDisplay(0);
-    }
-  },
+  _initPhotoViewer() {
+    document.getElementById('photo-prev-btn')?.addEventListener('click', () => {
+      this._updatePhotoViewerDisplay(this.currentImageIndex - 1);
+    });
 
-  _setPhotoViewerVisible(visible) {
-    if (this._photoViewerEl) {
-      this._photoViewerEl.classList.toggle('is-visible', visible);
-    }
-  },
+    document.getElementById('photo-next-btn')?.addEventListener('click', () => {
+      this._updatePhotoViewerDisplay(this.currentImageIndex + 1);
+    });
+
+    this._loadGalleryImages();
+  }
 
   // ───── State Listeners ─────
 
