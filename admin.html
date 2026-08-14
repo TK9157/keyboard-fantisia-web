@@ -118,6 +118,88 @@
       border-radius: 4px;
     }
 
+    .admin-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .admin-form-group label {
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      color: var(--silver-dark);
+    }
+
+    .admin-form-group input,
+    .admin-form-group select {
+      background: #000;
+      border: 1px solid var(--steel-dark);
+      color: #fff;
+      padding: 10px;
+      font-family: var(--font-body);
+      border-radius: 4px;
+    }
+
+    .upload-status {
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      color: var(--silver-dark);
+      margin-top: 2px;
+    }
+
+    .admin-submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--led-green);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .admin-grid-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .admin-card {
+      flex: 1 1 340px;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: var(--gap-md);
+      border-radius: var(--radius-md);
+    }
+
+    .admin-card h3 {
+      font-family: var(--font-display);
+      color: var(--led-cyan);
+      margin-bottom: var(--gap-md);
+      margin-top: 0;
+      font-size: 1rem;
+    }
+
+    .asset-status-summary {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--steel-dark);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+    }
+
+    .asset-status-summary p {
+      margin: 4px 0;
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+    }
+
     .auth-error {
       color: var(--led-red);
       font-family: var(--font-tech);
@@ -188,18 +270,6 @@
       padding: 8px 16px;
       cursor: pointer;
       border-radius: 4px;
-    }
-
-    .admin-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--gap-lg);
-    }
-
-    @media (min-width: 768px) {
-      .admin-grid {
-        grid-template-columns: 1fr 1fr;
-      }
     }
 
     .admin-panel {
@@ -354,57 +424,77 @@
       <button class="admin-close" onclick="AdminModule.closeDashboard(); window.location.reload();">LOGOUT</button>
     </div>
 
-    <div class="admin-grid">
-      <!-- Upload Media -->
-      <div class="admin-panel">
+    <div class="admin-grid-container">
+      <!-- LEFT CARD: Upload Media to Storage -->
+      <div class="admin-card">
         <h3>Upload Media to Storage</h3>
 
-        <div class="admin-input-group">
-          <label>Audio File (.mp3, .wav)</label>
-          <input type="file" id="audio-file-input" accept="audio/*">
+        <!-- 1. Audio Upload -->
+        <div class="admin-form-group">
+          <label>Audio File (.mp3, .wav):</label>
+          <input type="file" id="upload-audio-file" accept="audio/*" />
+          <button type="button" class="admin-btn" onclick="uploadStorageFile('audio')">Upload Audio</button>
         </div>
-        <button class="admin-btn" onclick="AdminModule.uploadAudio()">Upload Audio</button>
-        <div id="upload-audio-status" style="margin-top:8px; font-family:var(--font-tech); font-size:0.8rem;"></div>
 
-        <div class="admin-input-group" style="margin-top:16px;">
-          <label>Video File (.mp4, .webm)</label>
-          <input type="file" id="video-file-input" accept="video/*">
+        <!-- 2. Video Upload -->
+        <div class="admin-form-group">
+          <label>Video File (.mp4, .webm):</label>
+          <input type="file" id="upload-video-file" accept="video/*" />
+          <button type="button" class="admin-btn" onclick="uploadStorageFile('video')">Upload Video</button>
         </div>
-        <button class="admin-btn" onclick="AdminModule.uploadVideo()">Upload Video</button>
-        <div id="upload-video-status" style="margin-top:8px; font-family:var(--font-tech); font-size:0.8rem;"></div>
 
-        <div class="admin-input-group" style="margin-top:16px;">
-          <label>Image File (.jpg, .png, .jpeg)</label>
-          <input type="file" id="image-file-input" accept="image/*">
+        <!-- 3. Thumbnail / Image Upload -->
+        <div class="admin-form-group">
+          <label>Image File (.jpg, .png, .jpeg):</label>
+          <input type="file" id="upload-image-file" accept="image/*" />
+          <button type="button" class="admin-btn" onclick="uploadStorageFile('images')">Upload Image</button>
         </div>
-        <button class="admin-btn" onclick="AdminModule.uploadImage()">Upload Image</button>
-        <div id="upload-image-status" style="margin-top:8px; font-family:var(--font-tech); font-size:0.8rem;"></div>
       </div>
 
-      <!-- Add New Song -->
-      <div class="admin-panel">
+      <!-- RIGHT CARD: Add New Song (Metadata & Links Only) -->
+      <div class="admin-card">
         <h3>Add New Song</h3>
-        <div class="admin-input-group">
-          <label>Cassette ID (e.g. C1)</label>
-          <input type="text" id="cassette-id-input" value="C1">
+
+        <div class="admin-form-group">
+          <label for="cassette-select">Select Cassette ID:</label>
+          <select id="cassette-select" class="admin-input">
+            <option value="C-1">Cassette 1 (C-1)</option>
+            <option value="C-2">Cassette 2 (C-2)</option>
+            <option value="C-3">Cassette 3 (C-3)</option>
+            <option value="C-4">Cassette 4 (C-4)</option>
+            <option value="C-5">Cassette 5 (C-5)</option>
+            <option value="C-6">Cassette 6 (C-6)</option>
+          </select>
         </div>
-        <div class="admin-input-group">
-          <label>Title</label>
-          <input type="text" id="title-input">
+
+        <div class="admin-form-group">
+          <label for="song-title">Song / Track Title:</label>
+          <input type="text" id="song-title" class="admin-input" placeholder="e.g. Keyboard Fantasia Vol 1" />
         </div>
-        <div class="admin-input-group">
-          <label>Audio URL</label>
-          <input type="text" id="audio-url-input">
+
+        <!-- Dedicated Song Thumbnail Uploader -->
+        <div class="admin-form-group">
+          <label for="song-thumbnail-file">Song Thumbnail Image (.jpg, .png):</label>
+          <input type="file" id="song-thumbnail-file" accept="image/*" class="admin-input" onchange="uploadSongThumbnail(this)" />
+          <input type="hidden" id="song-thumbnail-url" />
+          <span id="thumbnail-upload-status" style="font-size: 12px; color: #aaa;">No thumbnail selected</span>
         </div>
-        <div class="admin-input-group">
-          <label>Video URL</label>
-          <input type="text" id="video-url-input">
+
+        <!-- Linked Media Indicators from Left Card -->
+        <input type="hidden" id="audio-url-input" />
+        <input type="hidden" id="video-url-input" />
+
+        <div class="asset-status-summary" style="margin: 10px 0;">
+          <p id="status-audio">Audio: <span style="color:#888;">Not uploaded</span></p>
+          <p id="status-video">Video: <span style="color:#888;">Not uploaded</span></p>
         </div>
-        <div class="admin-input-group">
-          <label>Image URL</label>
-          <input type="text" id="image-url-input">
+
+        <div class="admin-form-group">
+          <label for="youtube-url-input">Linked YouTube URL (Optional):</label>
+          <input type="url" id="youtube-url-input" class="admin-input" placeholder="https://www.youtube.com/watch?v=..." />
         </div>
-        <button class="admin-btn" onclick="AdminModule.addSong()">Save Song</button>
+
+        <button type="button" class="admin-submit-btn" onclick="saveCassetteTrack()">Save Track</button>
       </div>
     </div>
 

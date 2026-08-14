@@ -13,8 +13,6 @@ class KeyboardFantasiaApp {
     this.rotaryDial = null;
     this._photoScrollAnimation = null;
     this.audioPhysics = null;
-    this.galleryImages = [];
-    this.currentImageIndex = 0;
   }
 
   /**
@@ -30,7 +28,7 @@ class KeyboardFantasiaApp {
       player.setVolume(0);
 
       // Link video element
-      const videoEl = document.getElementById('music-video');
+      const videoEl = document.getElementById('main-screen-video');
       if (videoEl) player.setVideoElement(videoEl);
 
       // Initialize all UI components
@@ -42,7 +40,7 @@ class KeyboardFantasiaApp {
       this._initSongList();
       this._initPowerAndAdmin();
       this._initArtistProfile();
-      this._initPhotoViewer();
+      this._initYouTubeLightbox();
 
       // Subscribe to state changes
       this._bindStateListeners();
@@ -341,7 +339,7 @@ class KeyboardFantasiaApp {
         <span class="song-list__track-num">${String(t.id).padStart(2, '0')}</span>
         <div class="song-list__track-info">
           <div class="song-list__track-title">${t.title}</div>
-          <div class="song-list__track-meta">${t.movie} • ${t.musicDirector}</div>
+          <div class="song-list__track-meta">${t.musicDirector}</div>
         </div>
         <div class="song-list__track-playing-indicator">
           <span></span><span></span><span></span>
@@ -364,72 +362,6 @@ class KeyboardFantasiaApp {
         setTimeout(() => artistModal.classList.add('is-visible'), 10);
       });
     }
-  }
-
-  // ───── Photo Scroll ─────
-
-  _updatePhotoScroll() {
-    // Photo scroll is removed in the image-based layout
-  }
-
-  // Photo Viewer (top-left display)
-
-  async _loadGalleryImages() {
-    const sb = getSupabase();
-    if (!sb) return;
-
-    const { data: tracks, error } = await sb
-      .from('tracks')
-      .select('image_url')
-      .not('image_url', 'is', null);
-
-    if (error) {
-      console.error('Error fetching gallery images:', error);
-      return;
-    }
-
-    this.galleryImages = (tracks || [])
-      .map(t => t.image_url)
-      .filter(url => url && url.trim().length > 0);
-
-    if (this.galleryImages.length > 0) {
-      this._updatePhotoViewerDisplay(0);
-    }
-  }
-
-  _updatePhotoViewerDisplay(index) {
-    if (this.galleryImages.length === 0) return;
-
-    if (index < 0) this.currentImageIndex = this.galleryImages.length - 1;
-    else if (index >= this.galleryImages.length) this.currentImageIndex = 0;
-    else this.currentImageIndex = index;
-
-    const imgElem = document.getElementById('photo-viewer-img');
-    const counterElem = document.getElementById('photo-counter');
-
-    if (imgElem) {
-      imgElem.style.opacity = '0.3';
-      setTimeout(() => {
-        imgElem.src = this.galleryImages[this.currentImageIndex];
-        imgElem.style.opacity = '1';
-      }, 150);
-    }
-
-    if (counterElem) {
-      counterElem.textContent = `${this.currentImageIndex + 1} / ${this.galleryImages.length}`;
-    }
-  }
-
-  _initPhotoViewer() {
-    document.getElementById('photo-prev-btn')?.addEventListener('click', () => {
-      this._updatePhotoViewerDisplay(this.currentImageIndex - 1);
-    });
-
-    document.getElementById('photo-next-btn')?.addEventListener('click', () => {
-      this._updatePhotoViewerDisplay(this.currentImageIndex + 1);
-    });
-
-    this._loadGalleryImages();
   }
 
   // ───── State Listeners ─────
@@ -475,7 +407,7 @@ class KeyboardFantasiaApp {
       });
 
       // Update cassette deck label
-      const deckLabel = document.getElementById('deck-label');
+      const deckLabel = document.getElementById('screen-title');
       if (deckLabel) {
         const cassette = s.activeCassette ? state.getCassette(s.activeCassette) : null;
         deckLabel.textContent = cassette ? cassette.fullLabel : 'NO CASSETTE';
@@ -485,9 +417,6 @@ class KeyboardFantasiaApp {
       if (s.songListOpen && s.activeCassette) {
         this._renderSongList(s.activeCassette);
       }
-
-      // Update photos
-      this._updatePhotoScroll();
     });
 
     // Song list open/close
@@ -522,13 +451,15 @@ class KeyboardFantasiaApp {
     // Screen visibility logic (Boot vs Idle vs Playing)
     state.on(['isBooting', 'currentTrack', 'isPoweredOn', 'isPlaying'], (s) => {
       const bootScreen = document.getElementById('boot-screen');
-      const musicVideo = document.getElementById('music-video');
+      const musicVideo = document.getElementById('main-screen-video');
+      const thumbnail = document.getElementById('main-screen-thumbnail');
       const idleScreen = document.getElementById('idle-screen');
       const nowPlaying = document.getElementById('now-playing');
 
       if (!s.isPoweredOn) {
         if (bootScreen) bootScreen.style.display = 'none';
-        if (musicVideo) musicVideo.style.display = 'none';
+        if (musicVideo) musicVideo.classList.add('hidden');
+        if (thumbnail) thumbnail.style.display = 'none';
         if (idleScreen) idleScreen.style.display = 'flex';
         if (nowPlaying) nowPlaying.style.display = 'none';
         return;
@@ -536,10 +467,11 @@ class KeyboardFantasiaApp {
 
       if (s.isBooting) {
         if (bootScreen) bootScreen.style.display = 'flex';
-        if (musicVideo) musicVideo.style.display = 'none';
+        if (musicVideo) musicVideo.classList.add('hidden');
+        if (thumbnail) thumbnail.style.display = 'none';
         if (idleScreen) idleScreen.style.display = 'none';
         if (nowPlaying) nowPlaying.style.display = 'none';
-        
+
         // Restart boot animation
         const texts = document.querySelectorAll('.boot-text');
         texts.forEach(t => {
@@ -549,14 +481,19 @@ class KeyboardFantasiaApp {
         });
       } else {
         if (bootScreen) bootScreen.style.display = 'none';
-        
-        const hasMusicVideo = s.currentTrack && s.currentTrack.videoSrc;
+
+        // Show the uploaded track video (video_url) when a track with video is playing,
+        // otherwise show the track image (image_url) when a track with an image is playing
+        const hasVideo = s.currentTrack && (s.currentTrack.videoFile || s.currentTrack.videoSrc);
+        const hasImage = s.currentTrack && s.currentTrack.imageFile;
         if (s.currentTrack && s.isPlaying) {
-          if (musicVideo) musicVideo.style.display = hasMusicVideo ? 'block' : 'none';
+          if (musicVideo) musicVideo.classList.toggle('hidden', !hasVideo);
+          if (thumbnail) thumbnail.style.display = (hasVideo || !hasImage) ? 'none' : 'block';
           if (idleScreen) idleScreen.style.display = 'none';
           if (nowPlaying) nowPlaying.style.display = 'flex';
         } else {
-          if (musicVideo) musicVideo.style.display = 'none';
+          if (musicVideo) musicVideo.classList.add('hidden');
+          if (thumbnail) thumbnail.style.display = 'none';
           if (idleScreen) idleScreen.style.display = 'flex';
           if (nowPlaying) nowPlaying.style.display = 'none';
         }
@@ -634,10 +571,166 @@ class KeyboardFantasiaApp {
       }
     });
   }
+
+  // ───── YouTube Lightbox ─────
+
+  _initYouTubeLightbox() {
+    // Clicking the active video / image thumbnail opens the track's linked
+    // YouTube URL in a new browser tab.
+    const wrapper = document.getElementById('screen-media-wrapper');
+    wrapper?.addEventListener('click', (e) => {
+      // Don't trigger from the song list overlay if it somehow receives the click
+      if (e.target.closest('#song-list')) return;
+
+      const track = state.get('currentTrack');
+      const url = (track && (track.youtubeVideo || track.youtubeAudio)) || null;
+      if (url) window.open(url, '_blank', 'noopener');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this._closeYouTubeLightbox();
+    });
+  }
+
+  _openYouTubeLightbox(url, title) {
+    const id = this._extractYouTubeId(url);
+    const box = document.getElementById('youtube-lightbox');
+    const frame = document.getElementById('youtube-lightbox-frame');
+    const titleEl = document.getElementById('youtube-lightbox-title');
+
+    if (!id) {
+      window.open(url, '_blank');
+      return;
+    }
+    if (!box || !frame) return;
+
+    frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+    if (titleEl) titleEl.textContent = title || '';
+    box.style.display = 'flex';
+  }
+
+  _closeYouTubeLightbox() {
+    const box = document.getElementById('youtube-lightbox');
+    const frame = document.getElementById('youtube-lightbox-frame');
+    if (frame) frame.src = '';
+    if (box) box.style.display = 'none';
+  }
+
+  _extractYouTubeId(url) {
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+}
+
+// ==========================================
+// STANDALONE PHOTO GALLERY MODULE
+// ==========================================
+
+// Dynamic Gallery State
+window.galleryPhotosList = [];
+window.currentPhotoIndex = 0;
+
+async function loadSupabaseGallery() {
+  console.log('[Gallery] Initializing photo gallery directly from Supabase Storage...');
+  try {
+    const supabase = getSupabase();
+
+    // 1. Fetch all files from the 'images' folder in storage bucket
+    const { data: storageFiles, error: storageErr } = await supabase
+      .storage
+      .from('PradeepN_songs_tracks')
+      .list('images', { limit: 100 });
+
+    if (storageErr) {
+      console.error('[Gallery Storage Error]:', storageErr);
+      return;
+    }
+
+    if (!storageFiles || storageFiles.length === 0) {
+      console.warn('[Gallery] No files found in images/ storage folder.');
+      return;
+    }
+
+    const bucketBaseUrl = 'https://fgydtvjspoxhckmezykw.supabase.co/storage/v1/object/public/PradeepN_songs_tracks/images/';
+
+    // 2. Filter for valid WEB images only (ignoring .TIF, .DS_Store, etc.)
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+
+    const validUrls = storageFiles
+      .filter(file => {
+        if (!file.name || file.name.startsWith('.')) return false;
+        const lowerName = file.name.toLowerCase();
+        return validExtensions.some(ext => lowerName.endsWith(ext));
+      })
+      .map(file => bucketBaseUrl + file.name);
+
+    window.galleryPhotosList = [...new Set(validUrls)];
+
+    console.log(`[Gallery Success] Loaded ${window.galleryPhotosList.length} web-compatible photos:`, window.galleryPhotosList);
+
+    if (window.galleryPhotosList.length > 0) {
+      window.currentPhotoIndex = 0;
+      updateGalleryDisplay();
+    } else {
+      console.warn('[Gallery] Found files in storage, but none are web-supported formats (.jpg, .png, .webp).');
+    }
+  } catch (err) {
+    console.error('[Gallery Error]:', err);
+  }
+}
+
+function updateGalleryDisplay() {
+  const imgElem = document.getElementById('viewer-img-display');
+  if (!imgElem) return;
+
+  if (window.galleryPhotosList.length === 0) {
+    console.warn("[Gallery] Cannot update display: Photo list is empty.");
+    return;
+  }
+
+  // Handle bounds & looping
+  if (window.currentPhotoIndex >= window.galleryPhotosList.length) {
+    window.currentPhotoIndex = 0;
+  } else if (window.currentPhotoIndex < 0) {
+    window.currentPhotoIndex = window.galleryPhotosList.length - 1;
+  }
+
+  const currentUrl = window.galleryPhotosList[window.currentPhotoIndex];
+  console.log(`[Gallery] Showing Photo ${window.currentPhotoIndex + 1}/${window.galleryPhotosList.length}:`, currentUrl);
+
+  imgElem.src = currentUrl;
+}
+
+window.nextGalleryPhoto = function(direction) {
+  if (window.galleryPhotosList.length <= 1) {
+    console.log("[Gallery] Clicked arrow, but only 1 unique photo exists in the database list.");
+  }
+  window.currentPhotoIndex += direction;
+  updateGalleryDisplay();
+};
+
+// Listen for Left / Right arrow keys
+document.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+  if (e.key === 'ArrowLeft') window.nextGalleryPhoto(-1);
+  if (e.key === 'ArrowRight') window.nextGalleryPhoto(1);
+});
+
+// Run on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadSupabaseGallery);
+} else {
+  loadSupabaseGallery();
 }
 
 // ───── Boot ─────
 document.addEventListener('DOMContentLoaded', () => {
   const app = new KeyboardFantasiaApp();
+  window.app = app;
+
+  // Global close for the YouTube lightbox (inline onclick in the HTML)
+  window.closeYouTubeLightbox = () => app._closeYouTubeLightbox();
+
   app.init();
 });

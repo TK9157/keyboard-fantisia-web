@@ -128,18 +128,8 @@ const AdminModule = {
       return;
     }
 
-    statusEl.textContent = 'Upload Success! URL:';
+    statusEl.textContent = 'Upload Success!';
     statusEl.style.color = 'var(--led-green)';
-
-    const urlInput = document.createElement('input');
-    urlInput.type = 'text';
-    urlInput.value = publicUrl;
-    urlInput.readOnly = true;
-    urlInput.style.width = '100%';
-    urlInput.style.marginTop = '4px';
-
-    statusEl.appendChild(document.createElement('br'));
-    statusEl.appendChild(urlInput);
 
     const target = document.getElementById(targetInputId);
     if (target) {
@@ -160,6 +150,10 @@ const AdminModule = {
     const audioUrl = document.getElementById('audio-url-input').value.trim();
     const videoUrl = document.getElementById('video-url-input').value.trim();
     const imageUrl = document.getElementById('image-url-input').value.trim();
+    const ytVidEl = document.getElementById('youtube-video-url');
+    const ytAudEl = document.getElementById('youtube-audio-url');
+    const youtubeVideoUrl = ytVidEl ? ytVidEl.value.trim() : '';
+    const youtubeAudioUrl = ytAudEl ? ytAudEl.value.trim() : '';
 
     if (!cassetteId) {
       alert('Cassette ID is required.');
@@ -169,8 +163,8 @@ const AdminModule = {
       alert('Title is required.');
       return;
     }
-    if (!audioUrl && !videoUrl && !imageUrl) {
-      alert('Please upload or provide at least one media URL (Audio, Video, or Image).');
+    if (!audioUrl && !videoUrl && !imageUrl && !youtubeVideoUrl && !youtubeAudioUrl) {
+      alert('Please upload or provide at least one media URL (Audio, Video, Image, or YouTube).');
       return;
     }
 
@@ -196,6 +190,8 @@ const AdminModule = {
     if (audioUrl) payload.audio_url = audioUrl;
     if (videoUrl) payload.video_url = videoUrl;
     if (imageUrl) payload.image_url = imageUrl;
+    if (youtubeVideoUrl) payload.youtube_video_url = youtubeVideoUrl;
+    if (youtubeAudioUrl) payload.youtube_audio_url = youtubeAudioUrl;
 
     const { error } = await sb
       .from('tracks')
@@ -209,7 +205,247 @@ const AdminModule = {
       document.getElementById('audio-url-input').value = '';
       document.getElementById('video-url-input').value = '';
       document.getElementById('image-url-input').value = '';
+      if (ytVidEl) ytVidEl.value = '';
+      if (ytAudEl) ytAudEl.value = '';
       this.loadSongs(); // Refresh list
+    }
+  },
+
+  async uploadThumbnailFile(fileInput) {
+    return this.uploadSongThumbnail(fileInput);
+  },
+
+  async uploadSongThumbnail(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const statusElem = document.getElementById('thumbnail-upload-status');
+    const urlHiddenInput = document.getElementById('song-thumbnail-url');
+
+    if (statusElem) statusElem.innerHTML = '<span style="color:orange;">Uploading thumbnail...</span>';
+
+    try {
+      const supabase = getSupabase();
+      if (!supabase) throw new Error('Supabase client is not initialized.');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `thumb_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `images/${fileName}`;
+
+      // Upload thumbnail to storage bucket
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filePath);
+
+      if (urlHiddenInput) urlHiddenInput.value = publicUrlData.publicUrl;
+      if (statusElem) statusElem.innerHTML = '<span style="color:#00ffcc;">✓ Thumbnail attached</span>';
+    } catch (err) {
+      console.error('Song Thumbnail Upload Error:', err);
+      if (statusElem) statusElem.innerHTML = '<span style="color:red;">❌ Upload failed</span>';
+    }
+  },
+
+  async uploadAdminFile(fileInput, folderName) {
+    const cfgMap = {
+      audio:  { status: 'audio-upload-status', target: 'audio-url-input' },
+      images: { status: 'thumb-upload-status', target: 'image-url-input' },
+      video:  { status: 'video-upload-status', target: 'video-url-input' }
+    };
+    const cfg = cfgMap[folderName];
+    if (!cfg) return;
+
+    const statusEl = document.getElementById(cfg.status);
+    const file = fileInput.files[0];
+
+    if (!file) {
+      if (statusEl) {
+        statusEl.textContent = 'Please select a file first.';
+        statusEl.style.color = 'var(--led-red)';
+      }
+      return;
+    }
+
+    if (statusEl) {
+      statusEl.textContent = 'Uploading...';
+      statusEl.style.color = '#ffcc00';
+    }
+
+    const publicUrl = await this.uploadFileToSupabase(file, folderName);
+
+    if (!publicUrl) {
+      if (statusEl) {
+        statusEl.textContent = 'Upload failed - see alert above.';
+        statusEl.style.color = 'var(--led-red)';
+      }
+      return;
+    }
+
+    if (statusEl) {
+      statusEl.textContent = 'Upload Success!';
+      statusEl.style.color = 'var(--led-green)';
+    }
+
+    const target = document.getElementById(cfg.target);
+    if (target) {
+      target.value = publicUrl;
+    }
+  },
+
+  async saveCassetteTrack() {
+    const cassetteEl = document.getElementById('cassette-select');
+    const titleEl = document.getElementById('song-title');
+    if (!cassetteEl || !titleEl) {
+      alert('Form elements not found. This form only exists on the Admin Panel (admin.html).');
+      return;
+    }
+
+    const cassetteId = cassetteEl.value.trim().replace('-', '');
+    const title = titleEl.value.trim();
+    const audioUrl = document.getElementById('audio-url-input')?.value;
+    const videoUrl = document.getElementById('video-url-input')?.value;
+    const imageUrl = document.getElementById('song-thumbnail-url')?.value;
+    const youtubeUrl = document.getElementById('youtube-url-input')?.value;
+
+    if (!title || !cassetteId) {
+      alert('Please enter a track title and select a cassette.');
+      return;
+    }
+
+    const sb = getSupabase();
+    if (!sb) {
+      alert('Supabase client is not initialized. Check that js/supabase-config.js loaded and initSupabase() ran.');
+      return;
+    }
+
+    // Get max track number for this cassette (keeps playback ordering correct)
+    const { data: existingTracks } = await sb
+      .from('tracks')
+      .select('track_number')
+      .eq('cassette_id', cassetteId)
+      .order('track_number', { ascending: false })
+      .limit(1);
+
+    const nextTrackNum = existingTracks && existingTracks.length > 0
+      ? existingTracks[0].track_number + 1
+      : 1;
+
+    const payload = {
+      cassette_id: cassetteId,
+      track_number: nextTrackNum,
+      title: title,
+      audio_url: audioUrl || null,
+      video_url: videoUrl || null,
+      image_url: imageUrl || null,
+      youtube_video_url: youtubeUrl || null
+    };
+
+    try {
+      const { error } = await sb
+        .from('tracks')
+        .upsert(payload, { onConflict: 'cassette_id,track_number' });
+
+      if (error) throw error;
+
+      alert(`✓ Successfully saved track with custom thumbnail to Cassette ${cassetteId}!`);
+    } catch (err) {
+      console.error('Error saving track:', err);
+      alert('Error saving track: ' + err.message);
+      return;
+    }
+
+    // Reset form
+    titleEl.value = '';
+    const audioUrlEl = document.getElementById('audio-url-input');
+    const videoUrlEl = document.getElementById('video-url-input');
+    if (audioUrlEl) audioUrlEl.value = '';
+    if (videoUrlEl) videoUrlEl.value = '';
+    const ytEl = document.getElementById('youtube-url-input');
+    if (ytEl) ytEl.value = '';
+    const thumbUrlEl = document.getElementById('song-thumbnail-url');
+    if (thumbUrlEl) thumbUrlEl.value = '';
+    const fileIds = ['upload-audio-file', 'upload-video-file', 'upload-image-file', 'song-thumbnail-file'];
+    fileIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const statusDefaults = {
+      'status-audio': 'Audio',
+      'status-video': 'Video'
+    };
+    Object.keys(statusDefaults).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `${statusDefaults[id]}: <span style="color:#888;">Not uploaded</span>`;
+    });
+    const thumbStatusEl = document.getElementById('thumbnail-upload-status');
+    if (thumbStatusEl) {
+      thumbStatusEl.innerHTML = 'No thumbnail selected';
+    }
+    this.loadSongs(); // Refresh list
+  },
+
+  async uploadStorageFile(type) {
+    let fileInputId, statusElemId, targetUrlInputId;
+
+    if (type === 'audio') {
+      fileInputId = 'upload-audio-file';
+      statusElemId = 'status-audio';
+      targetUrlInputId = 'audio-url-input';
+    } else if (type === 'video') {
+      fileInputId = 'upload-video-file';
+      statusElemId = 'status-video';
+      targetUrlInputId = 'video-url-input';
+    } else if (type === 'images') {
+      fileInputId = 'upload-image-file';
+      statusElemId = 'thumbnail-upload-status';
+      targetUrlInputId = 'song-thumbnail-url';
+    } else {
+      return;
+    }
+
+    const fileInput = document.getElementById(fileInputId);
+    const statusElem = document.getElementById(statusElemId);
+    const targetUrlInput = document.getElementById(targetUrlInputId);
+
+    const file = fileInput?.files[0];
+    if (!file) {
+      alert(`Please select a ${type} file first.`);
+      return;
+    }
+
+    if (statusElem) statusElem.innerHTML = `${type}: <span style="color:orange;">Uploading...</span>`;
+
+    try {
+      const supabase = getSupabase();
+      if (!supabase) throw new Error('Supabase client is not initialized.');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${type}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
+      if (targetUrlInput) targetUrlInput.value = publicUrl;
+      if (statusElem) statusElem.innerHTML = `${type}: <span style="color:#00ffcc;">✓ Ready (${file.name})</span>`;
+
+    } catch (err) {
+      console.error(`Upload error for ${type}:`, err);
+      if (statusElem) statusElem.innerHTML = `${type}: <span style="color:red;">❌ Upload failed</span>`;
     }
   },
 
@@ -334,6 +570,11 @@ const AdminModule = {
 };
 
 window.AdminModule = AdminModule;
+window.uploadAdminFile = (fileInput, folderName) => AdminModule.uploadAdminFile(fileInput, folderName);
+window.uploadThumbnailFile = (fileInput) => AdminModule.uploadThumbnailFile(fileInput);
+window.uploadSongThumbnail = (fileInput) => AdminModule.uploadSongThumbnail(fileInput);
+window.uploadStorageFile = (folderName) => AdminModule.uploadStorageFile(folderName);
+window.saveCassetteTrack = () => AdminModule.saveCassetteTrack();
 
 // Initialization for dedicated /admin.html page
 document.addEventListener('DOMContentLoaded', async () => {

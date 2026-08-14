@@ -73,7 +73,10 @@ var DataService = (function() {
             musicDirector: t.music_director || '',
             audioFile: resolveMediaUrl(t.audio_url),
             videoFile: resolveMediaUrl(t.video_url),
-            videoSrc: t.video_src || null
+            videoSrc: t.video_src || null,
+            imageFile: resolveMediaUrl(t.image_url),
+            youtubeVideo: t.youtube_video_url || null,
+            youtubeAudio: t.youtube_audio_url || null
           };
         });
         cachedTracks[cassetteId] = tracks;
@@ -117,7 +120,10 @@ var DataService = (function() {
               musicDirector: t.music_director || '',
               audioFile: resolveMediaUrl(t.audio_url),
               videoFile: resolveMediaUrl(t.video_url),
-              videoSrc: t.video_src || null
+              videoSrc: t.video_src || null,
+              imageFile: resolveMediaUrl(t.image_url),
+              youtubeVideo: t.youtube_video_url || null,
+              youtubeAudio: t.youtube_audio_url || null
             };
           });
 

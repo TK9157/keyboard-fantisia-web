@@ -39,7 +39,7 @@ export class PlayerEngine {
     console.log("Loading video source:", src);
     musicVideo.src = src;
     musicVideo.load();
-    musicVideo.style.display = 'block';
+    musicVideo.classList.remove('hidden');
     musicVideo.play().catch(err => console.error("Video playback failed:", err));
   }
 
@@ -52,7 +52,27 @@ export class PlayerEngine {
     this.videoElement.currentTime = 0;
     this.videoElement.removeAttribute('src');
     this.videoElement.load();
-    this.videoElement.style.display = 'none';
+    this.videoElement.classList.add('hidden');
+  }
+
+  /**
+   * Show a track image thumbnail in the central screen
+   */
+  _showThumbnail(src) {
+    const thumb = document.getElementById('main-screen-thumbnail');
+    if (thumb) {
+      thumb.src = src;
+      thumb.style.display = 'block';
+    }
+    if (this.videoElement) this.videoElement.classList.add('hidden');
+  }
+
+  /**
+   * Hide the central screen image thumbnail
+   */
+  _hideThumbnail() {
+    const thumb = document.getElementById('main-screen-thumbnail');
+    if (thumb) thumb.style.display = 'none';
   }
 
   /**
@@ -68,11 +88,18 @@ export class PlayerEngine {
     // Set audio source
     this.audio.src = track.audioFile;
 
-    // Conditional music video - only tracks with videoSrc (C-1 Track 01) show it
-    if (track.videoSrc) {
-      this._showMusicVideo(track.videoSrc);
+    // Play the uploaded track video (video_url → videoFile) in the center screen,
+    // otherwise show the track image (image_url → imageFile) if available
+    const videoSrc = track.videoFile || track.videoSrc;
+    if (videoSrc) {
+      this._showMusicVideo(videoSrc);
+      this._hideThumbnail();
+    } else if (track.imageFile) {
+      this._hideMusicVideo();
+      this._showThumbnail(track.imageFile);
     } else {
       this._hideMusicVideo();
+      this._hideThumbnail();
     }
 
     // Play

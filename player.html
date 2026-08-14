@@ -88,6 +88,8 @@
       /* Add this to clip overflowing elements */
       width: 100%;
       max-width: 100vw;
+      height: calc(100vw * 576 / 1024);
+      /* Definite height so percentage heights inside always resolve */
       aspect-ratio: 1024 / 576;
       margin: 0 auto;
       background-image: url('media/images/Switch/New%20skin%20.jpg.jpeg');
@@ -284,15 +286,46 @@
       display: block;
     }
 
-    #music-video {
+    /* Center screen video player — embeds the uploaded track video (video_url) */
+    #main-screen-video {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      z-index: 2;
+      z-index: 1;
+      display: block;
+      background: #000;
+    }
+
+    #main-screen-video.hidden {
       display: none;
+    }
+
+    /* Clickable media wrapper (active video / image thumbnail) */
+    #screen-media-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      cursor: pointer;
+      display: block;
+      overflow: hidden;
+    }
+
+    /* Center screen image thumbnail (track cover art) */
+    #main-screen-thumbnail {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      z-index: 1;
     }
 
     .video-overlay {
@@ -309,6 +342,20 @@
 
     #idle-screen {
       /* Background removed per request */
+    }
+
+    /* Idle screen content layer (title + visualizer + subtitle) */
+    .screen-idle-layer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      padding: 10px;
     }
 
     /* EQ Visualizer */
@@ -737,6 +784,172 @@
 
     .woofer-overlay.right {
       left: 78.5%;
+    }
+
+    /* ── Top-Left Display ── */
+    /* Outer Black Bezel Frame — expanded to cover the entire black screen surface
+       of the skin: x ≈ 0.6%–27% (up to the chrome divider), y ≈ 1.2%–22.8%
+       (down to the silver speaker ring). Same height as the top-right panel. */
+    .left-top-screen,
+    #left-screen-container,
+    .left-screen-box {
+      position: absolute;
+      top: 1.2%;
+      left: 0.6%;
+      width: 26.4%;
+      height: 21.6%;
+      min-height: 21.6%;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #000000 !important;
+      overflow: hidden !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      z-index: 8;
+    }
+
+    .image-viewer-frame {
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #111;
+      box-sizing: border-box;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6), inset 0 0 8px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Inner Photo Viewer Wrapper (Forced 100% Full Bleed inside the bezel) */
+    .photo-viewer-wrapper,
+    #photo-viewer-container,
+    #image-viewer-container,
+    .display-layout-wrapper {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #000000 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+    }
+
+    /* Center Image Display */
+    .photo-viewer-wrapper img,
+    #album-art,
+    #viewer-img-display {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      object-fit: contain !important;
+      /* Preserves aspect ratio while using full box height */
+      display: block !important;
+      transition: opacity 0.2s ease-in-out;
+      pointer-events: none !important; /* Prevents image from blocking button clicks */
+    }
+
+    /* Arrow Navigation Buttons */
+    .nav-arrow {
+      position: absolute !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      background: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 16px;
+      padding: 8px 12px;
+      cursor: pointer;
+      z-index: 999;
+      font-family: monospace;
+      font-weight: bold;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .nav-arrow:hover {
+      background: #00ff66;
+      color: #000;
+    }
+
+    /* Float Arrows at the left and right edges */
+    .left-arrow,
+    .nav-arrow.left,
+    #prev-btn {
+      left: 8px !important;
+    }
+
+    .right-arrow,
+    .nav-arrow.right,
+    #next-btn {
+      right: 8px !important;
+    }
+
+    /* YouTube Lightbox Modal */
+    .youtube-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.85);
+    }
+    .youtube-lightbox__card {
+      position: relative;
+      width: min(880px, 92vw);
+      background: #000;
+      border: 1px solid rgba(0, 255, 204, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 0 40px rgba(0, 255, 204, 0.15);
+    }
+    .youtube-lightbox__close {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--led-red);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      z-index: 1;
+    }
+    .youtube-lightbox__title {
+      font-family: var(--font-display);
+      color: var(--led-green);
+      font-size: 0.85rem;
+      margin: 0 0 10px;
+      text-align: center;
+    }
+    .youtube-lightbox__frame {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      display: block;
+      background: #000;
     }
 
     /* Flashing Animations */
@@ -1292,6 +1505,14 @@
           <label>Image URL</label>
           <input type="text" id="image-url-input">
         </div>
+        <div class="admin-input-group">
+          <label>YouTube Video URL (Optional)</label>
+          <input type="text" id="youtube-video-url" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+        <div class="admin-input-group">
+          <label>YouTube Audio URL (Optional)</label>
+          <input type="text" id="youtube-audio-url" placeholder="https://music.youtube.com/watch?v=...">
+        </div>
         <button class="admin-btn" onclick="AdminModule.addSong()">Save Song</button>
       </div>
     </div>
@@ -1353,6 +1574,19 @@
     <div class="woofer-overlay left"></div>
     <div class="woofer-overlay right"></div>
 
+    <!-- TOP-LEFT SCREEN CONTAINER + IMAGE VIEWER (images uploaded via admin → image_url) -->
+    <div id="left-screen-container" class="left-top-screen">
+      <div class="photo-viewer-wrapper">
+        <!-- UI Navigation Buttons -->
+        <button type="button" class="nav-arrow left-arrow" onclick="window.nextGalleryPhoto(-1)">&lt;</button>
+
+        <!-- Blank src by default - Populated dynamically from Supabase -->
+        <img id="viewer-img-display" src="" alt="Album Art / Track Photo" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />
+
+        <button type="button" class="nav-arrow right-arrow" onclick="window.nextGalleryPhoto(1)">&gt;</button>
+      </div>
+    </div>
+
     <!-- CASSETTE DECK WINDOW (static tape image + spinning video overlay) -->
     <div id="cassette-deck-window">
       <!-- Static Cassette Image (dark TDK cassette door graphic, shown when idle/paused/stopped) -->
@@ -1388,21 +1622,25 @@
       <div class="cassette-switch" id="cassette-C6" data-cassette="C6" title="Cassette 6">C6</div>
     </div>
 
-    <!-- Video Display Area -->
-    <div class="video-container">
-      <video id="music-video" muted loop playsinline></video>
+    <!-- Video Display Area (center screen) -->
+    <div class="video-container center-screen-container" id="main-screen-display">
+      <div id="screen-media-wrapper" class="screen-media-wrapper" style="cursor: pointer;">
+        <video id="main-screen-video" class="center-video-player hidden" playsinline muted loop></video>
+        <img id="main-screen-thumbnail" src="" alt="Track Cover Art" style="display:none;" />
+      </div>
 
       <div id="idle-screen" class="video-overlay">
         <!-- AI Piano Video Placeholder -->
         <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline
           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
 
-        <div style="z-index: 1; display: flex; flex-direction: column; align-items: center;">
-          <div class="video-display__idle-title" id="deck-label" style="cursor:pointer;" title="Click for Admin Access"
-            onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</div>
+        <div id="idle-screen-content" class="screen-idle-layer">
+          <h2 id="screen-title" class="video-display__idle-title" style="cursor:pointer;"
+            title="Click for Admin Access"
+            onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</h2>
 
           <!-- DECORATIVE EQ -->
-          <div class="decor-eq">
+          <div id="visualizer-bars" class="visualizer-container decor-eq">
             <div class="decor-bar"></div>
             <div class="decor-bar"></div>
             <div class="decor-bar"></div>
@@ -1413,7 +1651,7 @@
             <div class="decor-bar"></div>
           </div>
 
-          <div class="video-display__idle-subtitle">SELECT A CASSETTE TO PLAY</div>
+          <p id="screen-subtitle" class="video-display__idle-subtitle">SELECT A CASSETTE TO PLAY</p>
         </div>
       </div>
 
@@ -1471,6 +1709,17 @@
 
 
 
+  </div>
+
+  <!-- YOUTUBE LIGHTBOX MODAL -->
+  <div id="youtube-lightbox" class="youtube-lightbox" style="display:none;">
+    <div class="youtube-lightbox__card">
+      <button class="youtube-lightbox__close" onclick="window.closeYouTubeLightbox()" aria-label="Close">✕</button>
+      <h4 id="youtube-lightbox-title" class="youtube-lightbox__title"></h4>
+      <iframe id="youtube-lightbox-frame" class="youtube-lightbox__frame" src="" title="YouTube Player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
   </div>
 
   <script src="js/supabase-config.js"></script>
