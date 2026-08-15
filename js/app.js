@@ -256,6 +256,16 @@ class KeyboardFantasiaApp {
     const stopBtn = document.getElementById('btn-stop');
     const ffBtn = document.getElementById('btn-ff');
 
+    // Tactile press feedback: toggle .pressed during the press so the
+    // key visibly displaces into the chassis (touch-safe, not only :active)
+    [rewindBtn, playBtn, stopBtn, ffBtn].forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
+      btn.addEventListener('pointerup', () => btn.classList.remove('pressed'));
+      btn.addEventListener('pointerleave', () => btn.classList.remove('pressed'));
+      btn.addEventListener('pointercancel', () => btn.classList.remove('pressed'));
+    });
+
     // Play
     playBtn?.addEventListener('click', () => {
       if (state.get('currentTrack')) {

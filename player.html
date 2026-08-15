@@ -650,11 +650,17 @@
 
     .transport-btn-area {
       position: absolute;
-      cursor: pointer;
       border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
+
+      /* Tactile button properties: raised look by default */
+      cursor: pointer !important;
+      user-select: none !important;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background-color 0.1s ease !important;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+      border: 1px solid rgba(0, 0, 0, 0.8) !important;
     }
 
     .transport-btn-area span {
@@ -675,11 +681,143 @@
 
     .transport-btn-area:hover {
       background: rgba(255, 255, 255, 0.2);
+      filter: brightness(1.15) !important;
     }
 
-    .transport-btn-area:active,
+    /* Active transport channel indicator highlight */
     .transport-btn-area.is-active {
       background: rgba(0, 255, 65, 0.3);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 0 5px rgba(50, 205, 50, 0.5) !important;
+      border-color: rgba(50, 205, 50, 0.6) !important;
+    }
+
+    /* Click state: press down displacement + dark inset recessed shadow */
+    .transport-btn-area:active,
+    .transport-btn-area.pressed {
+      transform: translateY(2px) !important;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85),
+                  inset 0 1px 3px rgba(0, 0, 0, 0.9),
+                  0 0 2px rgba(0, 0, 0, 0.4) !important;
+      filter: brightness(0.9) !important;
+      background: rgba(0, 255, 65, 0.3);
+    }
+
+    /* ── Curved Metallic Console Controls (REW / PLAY / FWD / PAUSE) ──
+       Base interactive styles matching the rounded bezel contour around the dial */
+    #btn-rewind, #btn-play, #btn-ff, #btn-stop,
+    .transport-btn-area {
+      cursor: pointer !important;
+      user-select: none !important;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, filter 0.05s ease !important;
+      border: 1px solid rgba(0, 0, 0, 0.5) !important;
+      background: transparent; /* Retains retro chassis image textures */
+    }
+
+    /* 1. TOP LEFT BUTTON: REW (Curved Top-Left Outer Edge) */
+    #btn-rewind {
+      border-top-left-radius: 14px !important;
+      border-top-right-radius: 4px !important;
+      border-bottom-left-radius: 2px !important;
+      border-bottom-right-radius: 6px !important;
+    }
+
+    /* 2. BOTTOM LEFT BUTTON: PLAY (Curved Bottom-Left Outer Edge) */
+    #btn-play {
+      border-top-left-radius: 2px !important;
+      border-top-right-radius: 6px !important;
+      border-bottom-left-radius: 14px !important;
+      border-bottom-right-radius: 4px !important;
+    }
+
+    /* 3. TOP RIGHT BUTTON: FWD (Curved Top-Right Outer Edge) */
+    #btn-ff {
+      border-top-left-radius: 4px !important;
+      border-top-right-radius: 14px !important;
+      border-bottom-left-radius: 6px !important;
+      border-bottom-right-radius: 2px !important;
+    }
+
+    /* 4. BOTTOM RIGHT BUTTON: PAUSE (Curved Bottom-Right Outer Edge) */
+    #btn-stop {
+      border-top-left-radius: 6px !important;
+      border-top-right-radius: 2px !important;
+      border-bottom-left-radius: 4px !important;
+      border-bottom-right-radius: 14px !important;
+    }
+
+    /* HOVER FEEDBACK */
+    #btn-rewind:hover, #btn-play:hover, #btn-ff:hover, #btn-stop:hover {
+      filter: brightness(1.2) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4)) !important;
+    }
+
+    /* CLICK STATE: Physical press depth + inset shadow matching the chassis curve */
+    #btn-rewind:active, #btn-play:active, #btn-ff:active, #btn-stop:active,
+    .transport-btn-area:active {
+      transform: scale(0.97) translateY(1px) !important;
+      box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.8),
+                  inset -1px -1px 4px rgba(0, 0, 0, 0.6) !important;
+      filter: brightness(0.85) !important;
+    }
+
+    /* ── Exact Chassis Shapes via clip-path (REW / PLAY / FWD / PAUSE) ── */
+    #btn-rewind, #btn-play, #btn-ff, #btn-stop,
+    .transport-btn-area {
+      cursor: pointer !important;
+      user-select: none !important;
+      border: none !important;
+      background: transparent; /* Retains retro chassis image textures */
+      transition: transform 0.06s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.06s ease !important;
+    }
+
+    /* 1. REW (Top-Left Curved Quadrant — inline SVG radial clip-path) */
+    #btn-rewind {
+      clip-path: url(#clip-rew) !important;
+    }
+
+    /* 2. PLAY (Bottom-Left Curved Quadrant — inline SVG radial clip-path) */
+    #btn-play {
+      clip-path: url(#clip-play) !important;
+    }
+
+    /* 3. FWD (Top-Right Curved Quadrant — inline SVG radial clip-path) */
+    #btn-ff {
+      clip-path: url(#clip-fwd) !important;
+    }
+
+    /* 4. PAUSE (Bottom-Right Curved Quadrant — inline SVG radial clip-path) */
+    #btn-stop {
+      clip-path: url(#clip-pause) !important;
+    }
+
+    /* Interactive Hover State */
+    #btn-rewind:hover, #btn-play:hover, #btn-ff:hover, #btn-stop:hover {
+      filter: brightness(1.3) contrast(1.1) !important;
+    }
+
+    /* Mechanical Click Action: Depresses inward toward dial center with inset shadow */
+    #btn-rewind:active {
+      transform: translate(2px, 2px) scale(0.97) !important;
+      filter: brightness(0.75) contrast(1.3);
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.9);
+    }
+
+    #btn-play:active {
+      transform: translate(2px, -2px) scale(0.97) !important;
+      filter: brightness(0.75) contrast(1.3);
+      box-shadow: inset 2px -2px 5px rgba(0, 0, 0, 0.9);
+    }
+
+    #btn-ff:active {
+      transform: translate(-2px, 2px) scale(0.97) !important;
+      filter: brightness(0.75) contrast(1.3);
+      box-shadow: inset -2px 2px 5px rgba(0, 0, 0, 0.9);
+    }
+
+    #btn-stop:active {
+      transform: translate(-2px, -2px) scale(0.97) !important;
+      filter: brightness(0.75) contrast(1.3);
+      box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.9);
     }
 
     /* Volume Dial */
@@ -716,31 +854,35 @@
       display: none;
     }
 
-    /* ── Digital Volume Percentage Readout (centered on the dial cap) ── */
+    /* Compact Center Black Box Display */
     .volume-percentage-display {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 66%;
-      padding: 5% 0;
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      background: #000000 !important;
+      border-radius: 4px;
+
+      /* Reduced width boundaries */
+      width: auto !important;
+      min-width: 36px !important;
+      max-width: 50px !important;
+      padding: 2px 4px !important;
+
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 8px;
-      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.6);
-      pointer-events: none; /* Never block dial drag / wheel events */
-      z-index: 5;
+      pointer-events: none;
+      z-index: 20;
+      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.2), 0 0 4px rgba(0, 0, 0, 0.8);
     }
 
     #volume-text {
-      font-family: var(--font-display);
-      font-size: 0.75rem;
-      line-height: 1;
-      color: var(--led-green);
-      text-shadow: var(--shadow-glow-green);
+      font-family: 'Courier New', monospace, sans-serif;
+      font-weight: bold;
+      font-size: 13px;
+      color: #ffffff !important; /* Pure white text */
+      text-shadow: 0 0 2px rgba(255, 255, 255, 0.5); /* Subtle white LED glow */
       letter-spacing: 1px;
       pointer-events: none;
     }
@@ -1066,7 +1208,7 @@
       pointer-events: none !important; /* Prevents image from blocking button clicks */
     }
 
-    /* Arrow Navigation Buttons */
+    /* Arrow Navigation Buttons — borderless/frameless (no background box) */
     .nav-arrow {
       position: absolute !important;
       top: 50% !important;
@@ -1075,22 +1217,30 @@
       align-items: center;
       justify-content: center;
       line-height: 1;
-      background: rgba(0, 0, 0, 0.6);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      font-size: 16px;
-      padding: 8px 12px;
+      background: transparent !important;
+      color: #ffffff !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      font-size: 24px;
+      padding: 0;
+      width: auto;
+      height: auto;
       cursor: pointer;
+      opacity: 0.8;
       z-index: 999;
       font-family: monospace;
       font-weight: bold;
       user-select: none;
-      transition: background 0.2s;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
+    /* Subtle hover feedback without showing a container box */
     .nav-arrow:hover {
-      background: #00ff66;
-      color: #000;
+      background: transparent !important;
+      border: none !important;
+      opacity: 1;
+      transform: translateY(-50%) scale(1.15); /* Slightly enlarges arrow on hover */
     }
 
     /* Float Arrows at the left and right edges */
@@ -1979,6 +2129,31 @@
   <script src="js/data-service.js"></script>
   <script src="js/webaudio.js"></script>
   <script type="module" src="js/app.js"></script>
+
+  <!-- Vector Mask Definitions for Curved Console Buttons -->
+  <svg width="0" height="0" style="position: absolute;">
+    <defs>
+      <!-- REW Button Curve -->
+      <clipPath id="clip-rew" clipPathUnits="objectBoundingBox">
+        <path d="M 0.1,0.05 C 0.5,-0.02 0.9,0.1 0.98,0.2 L 0.8,0.95 C 0.5,0.95 0.2,0.92 0,0.85 Z" />
+      </clipPath>
+
+      <!-- PLAY Button Curve -->
+      <clipPath id="clip-play" clipPathUnits="objectBoundingBox">
+        <path d="M 0,0.15 C 0.2,0.08 0.5,0.05 0.8,0.05 L 0.98,0.8 C 0.9,0.9 0.5,1.02 0.1,0.95 Z" />
+      </clipPath>
+
+      <!-- FWD Button Curve -->
+      <clipPath id="clip-fwd" clipPathUnits="objectBoundingBox">
+        <path d="M 0.02,0.2 C 0.1,0.1 0.5,-0.02 0.9,0.05 L 1,0.85 C 0.8,0.92 0.5,0.95 0.2,0.95 Z" />
+      </clipPath>
+
+      <!-- PAUSE Button Curve -->
+      <clipPath id="clip-pause" clipPathUnits="objectBoundingBox">
+        <path d="M 0.2,0.05 C 0.5,0.05 0.8,0.08 1,0.15 L 0.9,0.95 C 0.5,1.02 0.1,0.9 0.02,0.8 Z" />
+      </clipPath>
+    </defs>
+  </svg>
 
 </body>
 
