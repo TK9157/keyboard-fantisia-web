@@ -12,10 +12,7 @@ export class WebAudioPhysics {
     this.source = null;
     this.dataArray = null;
     this.animationId = null;
-    
-    this.canvas = document.getElementById('eq-visualizer');
-    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
-    
+
     this.isInitialized = false;
   }
 
@@ -65,39 +62,7 @@ export class WebAudioPhysics {
     
     // Write to CSS variable so woofers scale physically
     document.documentElement.style.setProperty('--bass-scale', bassScale);
-    
-    // 2. Draw EQ Visualizer
-    if (this.ctx && this.canvas) {
-      const width = this.canvas.width = this.canvas.offsetWidth;
-      const height = this.canvas.height = this.canvas.offsetHeight;
-      
-      this.ctx.clearRect(0, 0, width, height);
-      
-      const barCount = 48; // More bars for a smoother look
-      const barWidth = width / barCount;
-      const binStep = Math.floor(this.analyser.frequencyBinCount / barCount);
-      const centerY = height / 2;
-      
-      for (let i = 0; i < barCount; i++) {
-        // Average a small window of bins for this bar
-        let sum = 0;
-        for (let j = 0; j < binStep; j++) {
-          sum += this.dataArray[i * binStep + j];
-        }
-        let avg = sum / binStep;
-        
-        // Max height is a bit less than half the canvas height to leave margins
-        const barHeight = (avg / 255) * (height / 2) * 0.85;
-        
-        // Sleek green digital bars
-        this.ctx.fillStyle = 'rgba(0, 255, 65, 0.4)';
-        
-        // Draw symmetric bars up and down from the center
-        // (x, y, width, height)
-        this.ctx.fillRect(i * barWidth + 1, centerY - barHeight, barWidth - 2, barHeight * 2);
-      }
-    }
-    
+
     this.animationId = requestAnimationFrame(() => this._loop());
   }
 }

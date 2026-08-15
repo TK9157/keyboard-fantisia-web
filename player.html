@@ -72,7 +72,28 @@
     }
 
     .image-player.is-off {
-      /* Removed pointer-events: none so elements remain clickable when off */
+      /* Power OFF: blank ONLY the two display screens (top-left photo viewer +
+         center screen) to black. The surrounding hardware chassis stays lit. */
+    }
+
+    /* Top-left photo viewer screen → blank to black */
+    .image-player.is-off #left-screen-container .photo-viewer-wrapper,
+    .image-player.is-off #left-screen-container .nav-arrow {
+      visibility: hidden;
+    }
+
+    /* Center screen display → blank to black */
+    .image-player.is-off #main-screen-display {
+      background: #000;
+    }
+
+    .image-player.is-off #main-screen-display > * {
+      visibility: hidden;
+    }
+
+    /* Top-right artist profile screen → blank to black */
+    .image-player.is-off #artist-profile-screen #artist-profile-img {
+      visibility: hidden;
     }
 
     .image-player.is-off #power-btn {
@@ -356,19 +377,6 @@
       width: 100%;
       height: 100%;
       padding: 10px;
-    }
-
-    /* EQ Visualizer */
-    #eq-visualizer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      /* Behind text */
-      pointer-events: none;
-      opacity: 0.8;
     }
 
     /* Volume Progress SVG */
@@ -708,16 +716,94 @@
       display: none;
     }
 
-    #volume-value {
+    /* ── Digital Volume Percentage Readout (centered on the dial cap) ── */
+    .volume-percentage-display {
       position: absolute;
-      top: -20%;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
+      width: 66%;
+      padding: 5% 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.6);
+      pointer-events: none; /* Never block dial drag / wheel events */
+      z-index: 5;
+    }
+
+    #volume-text {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      line-height: 1;
+      color: var(--led-green);
+      text-shadow: var(--shadow-glow-green);
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+
+    /* ── Top Display Bar (volume number, above the dial) ── */
+    .display-bar-header {
+      position: absolute;
+      top: 49%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    #volume-value {
       font-family: var(--font-display);
       font-size: 0.8rem;
       color: var(--led-green);
       text-shadow: var(--shadow-glow-green);
       pointer-events: none;
+    }
+
+    /* Hide the old outer volume text (replaced by the on-dial readout) */
+    .knob-value-display,
+    .knob-text,
+    .volume-outer-label,
+    #knob-value,
+    #volume-value {
+      display: none !important;
+    }
+
+    /* ── Center Control Panel ── */
+    /* Static wrapper around the control-deck elements so their absolute
+       coordinates keep resolving against .image-player. */
+    .center-control-panel {
+      position: static;
+    }
+
+    /* ── Mini Retro LED Spectrum Visualizer ── */
+    /* Precise vertical alignment into the control panel display cutout */
+    .center-control-panel .mini-eq-container,
+    .mini-eq-container {
+      position: absolute !important;
+      top: 343px !important;            /* Nudges down ~18px directly into the red box */
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 230px !important;
+      height: 18px !important;
+      z-index: 1000 !important;
+      pointer-events: none;
+      background: transparent !important;
+    }
+
+    #mini-eq-canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      image-rendering: pixelated;
     }
 
     /* ── Hardware Elements ── */
@@ -784,6 +870,123 @@
 
     .woofer-overlay.right {
       left: 78.5%;
+    }
+
+    /* ── Top-Right Artist Profile Display ── */
+    /* Mirrors the top-left screen bezel: black glass slot above the right
+       speaker tower. Same size/height as the left panel for symmetry. */
+    .right-screen-container {
+      position: absolute;
+      top: 1.2%;
+      left: 73%;
+      width: 26.4%;
+      height: 21.6%;
+      background: #000;
+      overflow: hidden;
+      border-radius: 4px;
+      z-index: 8;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6), inset 0 0 8px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Static artist image — fills the screen edge-to-edge without spilling out */
+    #artist-profile-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      background: #000;
+      cursor: pointer;
+    }
+
+    /* Hide the <img> when the artist image is unavailable (missing file / 404),
+       leaving the black glass bezel visible. */
+    #artist-profile-img.is-hidden {
+      display: none;
+    }
+
+    /* ── Artist Bio Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.is-visible {
+      opacity: 1;
+    }
+
+    .modal-content {
+      position: relative;
+      width: 580px;
+      max-width: 92vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: linear-gradient(145deg, rgba(30, 33, 37, 0.98) 0%, rgba(15, 15, 20, 0.98) 100%);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-radius: var(--radius-xl);
+      padding: var(--gap-xl);
+      box-shadow: 0 0 60px rgba(0, 255, 65, 0.08), 0 25px 80px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--steel-dark);
+      background: transparent;
+      color: var(--silver-dark);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--led-red);
+      border-color: var(--led-red);
+      background: rgba(255, 0, 0, 0.1);
+    }
+
+    .modal-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--led-green);
+      text-shadow: var(--shadow-glow-green);
+      margin-bottom: var(--gap-md);
+      padding-right: 40px;
+      letter-spacing: 1px;
+    }
+
+    .modal-body p {
+      font-family: var(--font-body);
+      color: #ddd;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .modal-footer-note {
+      color: var(--led-green);
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      text-shadow: var(--shadow-glow-green);
+      margin-top: 4px;
     }
 
     /* ── Top-Left Display ── */
@@ -859,7 +1062,7 @@
       object-fit: contain !important;
       /* Preserves aspect ratio while using full box height */
       display: block !important;
-      transition: opacity 0.2s ease-in-out;
+      transition: opacity 0.3s ease-in-out;
       pointer-events: none !important; /* Prevents image from blocking button clicks */
     }
 
@@ -1587,6 +1790,15 @@
       </div>
     </div>
 
+    <!-- TOP-RIGHT ARTIST PROFILE DISPLAY -->
+    <div class="right-screen-container" id="artist-profile-screen">
+      <img
+        id="artist-profile-img"
+        src="media/images/artist-profile.png"
+        alt="KeyNotes Fantasia Artist Profile"
+      />
+    </div>
+
     <!-- CASSETTE DECK WINDOW (static tape image + spinning video overlay) -->
     <div id="cassette-deck-window">
       <!-- Static Cassette Image (dark TDK cassette door graphic, shown when idle/paused/stopped) -->
@@ -1667,7 +1879,6 @@
       </div>
 
       <div id="now-playing" class="video-overlay" style="display:none;">
-        <canvas id="eq-visualizer"></canvas>
         <div class="now-playing__text-container">
           <div class="now-playing__title" id="np-title">Song Title</div>
           <div class="now-playing__movie" id="np-movie">Movie</div>
@@ -1687,24 +1898,43 @@
 
     </div>
 
-    <!-- Transport Buttons -->
-    <div class="transport-btn-area" id="btn-rewind" title="Rewind"><span>REW</span></div>
-    <div class="transport-btn-area" id="btn-play" title="Play"><span>PLAY</span></div>
-    <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
-    <div class="transport-btn-area" id="btn-stop" title="Pause"><span>PAUSE</span></div>
+    <!-- CENTER CONTROL PANEL (transport buttons, volume dial, display bar, mini EQ) -->
+    <div class="center-control-panel">
 
-    <!-- Volume Dial -->
-    <div id="volume-dial" class="volume-dial-area" title="Volume">
-      <!-- Volume Circular Graph -->
-      <svg class="volume-progress-svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" class="volume-track"></circle>
-        <circle cx="50" cy="50" r="45" class="volume-fill" id="volume-fill"></circle>
-      </svg>
+      <!-- Transport Buttons -->
+      <div class="transport-btn-area" id="btn-rewind" title="Rewind"><span>REW</span></div>
+      <div class="transport-btn-area" id="btn-play" title="Play"><span>PLAY</span></div>
+      <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
+      <div class="transport-btn-area" id="btn-stop" title="Pause"><span>PAUSE</span></div>
 
-      <div id="dial-body" class="dial-body">
-        <div class="dial-indicator"></div>
+      <!-- Volume Dial -->
+      <div id="volume-dial" class="volume-dial-area" title="Volume">
+        <!-- Volume Circular Graph -->
+        <svg class="volume-progress-svg" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" class="volume-track"></circle>
+          <circle cx="50" cy="50" r="45" class="volume-fill" id="volume-fill"></circle>
+        </svg>
+
+        <div id="dial-body" class="dial-body">
+          <div class="dial-indicator"></div>
+        </div>
+
+        <!-- Center Volume Percentage Display (digital readout on the dial cap) -->
+        <div class="volume-percentage-display">
+          <span id="volume-text">0%</span>
+        </div>
       </div>
-      <div id="volume-value">50</div>
+
+      <!-- TOP DISPLAY BAR: volume number (above the dial) -->
+      <div class="display-bar-header">
+        <div id="volume-value">50</div>
+      </div>
+
+      <!-- MINI RETRO LED SPECTRUM VISUALIZER (upper-left black screen slot, above REW/PLAY) -->
+      <div class="mini-eq-container">
+        <canvas id="mini-eq-canvas" width="260" height="20"></canvas>
+      </div>
+
     </div>
 
 
@@ -1719,6 +1949,27 @@
       <iframe id="youtube-lightbox-frame" class="youtube-lightbox__frame" src="" title="YouTube Player"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <!-- ARTIST BIO MODAL POPUP -->
+  <div id="artist-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <button id="modal-close-btn" class="modal-close">&times;</button>
+      <div class="modal-header">
+        <h2>Keyboard Fantasia</h2>
+      </div>
+      <div class="modal-body">
+        <p>Keyboard Fantasia is a musical space shaped with love and dedication by Pradeep. This platform brings together some of his finest keyboard performances, fulfilling a dream he carried for years: to revive old melodies and present new ones, all played and recorded by himself.</p>
+
+        <p>A Graduate in Electronics & Communication from CET Class of 85 with a passion for music from younger days. After retiring as a Senior Scientist from Vikram Sarabhai Space Centre after 36 years, having worked in the areas of Test & Evaluation, Design of Modules and their Test Systems for Launch Vehicles, Pradeep chose to return to the passion that stayed with him throughout his life… Music.</p>
+
+        <p>His 50 year musical journey began with the Bulbul in School, an instrument many from today’s generation may barely remember, later graduating to the Keyboards. What started as a simple curiosity grew into a vast personal collection of songs, carefully played, recorded, and preserved over the years. Now, he is ready to share that treasure with everyone.</p>
+
+        <p>Keyboard Fantasia is not just a website—it is a window into pure, heartfelt music. A chance to rediscover forgotten sounds, relive nostalgia, and enjoy melodies created with sincerity.</p>
+
+        <p class="modal-footer-note">Welcome... a beautiful musical chapter unfolds.</p>
+      </div>
     </div>
   </div>
 

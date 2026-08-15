@@ -6,7 +6,80 @@
 import { state } from './state-manager.js';
 import { player, PlayerEngine } from './player-engine.js';
 import { RotaryDial } from './rotary-dial.js';
-import { createAudioPhysics } from './webaudio.js';
+import { createAudioPhysics, audioPhysics } from './webaudio.js';
+
+// ───── Dynamic Web Audio Routing (audio + video sources) ─────
+let audioCtx = null;
+let globalAnalyser = null;
+let masterGain = null;
+
+function initAudioContext() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+
+    globalAnalyser = audioCtx.createAnalyser();
+    globalAnalyser.fftSize = 64;
+    globalAnalyser.smoothingTimeConstant = 0.8;
+
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1.0;
+
+    // Route: Analyser -> Master Gain -> Speakers
+    globalAnalyser.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function setupMediaAudio(mediaElement) {
+  if (!mediaElement) return globalAnalyser;
+
+  initAudioContext();
+
+  // The standalone audio element is already wired into webaudio.js's
+  // physics engine — reuse its analyser instead of double-connecting it
+  // (createMediaElementSource can only be called once per element).
+  if (mediaElement === player.audio && audioPhysics?.analyser) {
+    return audioPhysics.analyser;
+  }
+
+  // Attach source only once per element using a custom property reference
+  if (!mediaElement._webAudioSource) {
+    try {
+      mediaElement.crossOrigin = 'anonymous';
+      const source = audioCtx.createMediaElementSource(mediaElement);
+      source.connect(globalAnalyser);
+      mediaElement._webAudioSource = source;
+    } catch (e) {
+      console.warn('Media source routing note:', e);
+    }
+  }
+
+  return globalAnalyser;
+}
+
+// Automatically bind any active video or audio tag on play
+['play', 'playing'].forEach(eventName => {
+  document.addEventListener(eventName, (e) => {
+    const target = e.target;
+    if (target && (target.tagName === 'VIDEO' || target.tagName === 'AUDIO')) {
+      setupMediaAudio(target);
+    }
+  }, { capture: true, passive: true });
+});
+
+// Gesture listeners keep the AudioContext from being locked by the browser
+// autoplay policy (context created outside a user gesture stays suspended)
+['click', 'touchstart', 'keydown'].forEach(eventType => {
+  document.addEventListener(eventType, () => {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }, { passive: true });
+});
 
 class KeyboardFantasiaApp {
   constructor() {
@@ -36,6 +109,7 @@ class KeyboardFantasiaApp {
       this._initCassetteSwitches();
       this._initTransportControls();
       this._initVolumeDial();
+      this._initMiniEQ();
       this._initProgressBar();
       this._initSongList();
       this._initPowerAndAdmin();
@@ -84,9 +158,20 @@ class KeyboardFantasiaApp {
             this.audioPhysics = createAudioPhysics(player.audio);
             this.audioPhysics.init();
           }
+
+          // Resume ambient background video on the idle screen
+          const welcomeVideo = document.getElementById('welcome-video');
+          if (welcomeVideo) welcomeVideo.play().catch(() => {});
         } else {
           // If turning off, stop playback
           player.stop();
+
+          // Halt any ambient/background media so nothing keeps running while off
+          ['welcome-video', 'cassette-spin-video', 'main-screen-video'].forEach(id => {
+            const vid = document.getElementById(id);
+            if (vid) vid.pause();
+          });
+
           state.set({ currentTrack: null, activeCassette: null, songListOpen: false });
           if (this.rotaryDial) {
             this.rotaryDial.setValue(0);
@@ -242,6 +327,12 @@ class KeyboardFantasiaApp {
 
     if (!dialBody || !dialContainer) return;
 
+    // Initialize the on-cap digital readout with the current volume state
+    const textReadout = document.getElementById('volume-text');
+    if (textReadout) {
+      textReadout.textContent = `${Math.round(state.get('volume'))}%`;
+    }
+
     this.rotaryDial = new RotaryDial(
       dialBody,
       dialContainer,
@@ -261,6 +352,13 @@ class KeyboardFantasiaApp {
           valDisp.style.color = color;
         }
 
+        // Digital readout on the dial cap (percentage)
+        const textReadout = document.getElementById('volume-text');
+        if (textReadout) {
+          textReadout.textContent = `${Math.round(value)}%`;
+          textReadout.style.color = color;
+        }
+
         // Update Volume SVG fill
         const fill = document.getElementById('volume-fill');
         if (fill) {
@@ -274,6 +372,98 @@ class KeyboardFantasiaApp {
       },
       0
     );
+  }
+
+  // ───── Mini Retro LED Equalizer ─────
+
+  _initMiniEQ() {
+    const canvas = document.getElementById('mini-eq-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+
+    // RETRO EQUALIZER RENDER ENGINE (state-aware: OFF / IDLE / PLAYING)
+    const renderEqualizer = () => {
+      const numBars = 16;            // Thin retro bars
+      const gap = 3;                 // Space between bars
+      const width = canvas.width;
+      const height = canvas.height;
+      const barWidth = Math.floor((width - (numBars - 1) * gap) / numBars);
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. POWER OFF STATE: Canvas stays completely dark
+      if (!state.get('isPoweredOn')) {
+        requestAnimationFrame(renderEqualizer);
+        return;
+      }
+
+      // 2. Auto-detect the active media element (audio OR video tag).
+      //    Only the real playback sources are considered — the decorative
+      //    muted videos (welcome / cassette spin) are ignored.
+      const videoEl = document.getElementById('main-screen-video');
+      let activeMedia = null;
+
+      if (videoEl && !videoEl.paused && !videoEl.ended && videoEl.readyState > 2) {
+        activeMedia = videoEl;
+      } else if (!player.audio.paused && !player.audio.ended && player.audio.readyState > 2) {
+        activeMedia = player.audio;
+      }
+
+      const isPlaying = !!activeMedia;
+
+      // 3. Frequency Data Collection
+      const dataArray = new Uint8Array(numBars);
+      if (isPlaying && activeMedia) {
+        const activeAnalyser = setupMediaAudio(activeMedia);
+        if (activeAnalyser) {
+          const rawData = new Uint8Array(activeAnalyser.frequencyBinCount);
+          activeAnalyser.getByteFrequencyData(rawData);
+          // Downsample frequency bins to match bar count
+          const step = Math.floor(rawData.length / numBars);
+          for (let i = 0; i < numBars; i++) {
+            dataArray[i] = rawData[i * step];
+          }
+        }
+      }
+
+      // 4. DRAW BARS
+      for (let i = 0; i < numBars; i++) {
+        // IDLE / PAUSED: Flat 2px baseline line. PLAYING: Reactive height.
+        const barHeight = isPlaying
+          ? Math.max(2, Math.floor((dataArray[i] / 255) * height))
+          : 2;
+
+        const x = i * (barWidth + gap);
+        const y = height - barHeight;
+
+        // Segmented LED Segment Effect
+        const segmentHeight = 3;
+        const segmentGap = 1;
+        const totalSegments = Math.floor(barHeight / (segmentHeight + segmentGap));
+
+        if (totalSegments > 0) {
+          for (let s = 0; s < totalSegments; s++) {
+            const segY = height - ((s + 1) * (segmentHeight + segmentGap));
+
+            // Classic VFD/Retro Color Spectrum (Green to Amber top)
+            ctx.fillStyle = (s > totalSegments - 2 && totalSegments > 3)
+              ? '#ff3300' // Peak Red/Amber
+              : '#00ffcc'; // Vintage Neon Mint Green
+
+            ctx.fillRect(x, segY, barWidth, segmentHeight);
+          }
+        } else {
+          // Too short to segment — draw the baseline retro line directly
+          ctx.fillStyle = '#00ffcc';
+          ctx.fillRect(x, y, barWidth, barHeight);
+        }
+      }
+
+      requestAnimationFrame(renderEqualizer);
+    };
+
+    renderEqualizer();
   }
 
   // ───── Progress Bar ─────
@@ -362,6 +552,49 @@ class KeyboardFantasiaApp {
         setTimeout(() => artistModal.classList.add('is-visible'), 10);
       });
     }
+
+    // ── Top-Right Artist Profile Screen ──
+    const profileImg = document.getElementById('artist-profile-img');
+
+    // If the static artist image file is missing, hide the <img> so only the
+    // black glass bezel remains visible. Restore it once the image loads.
+    profileImg?.addEventListener('error', () => profileImg.classList.add('is-hidden'));
+    profileImg?.addEventListener('load', () => profileImg.classList.remove('is-hidden'));
+
+    // ── Artist Bio Modal (click the profile image to open) ──
+    const artistBioModal = document.getElementById('artist-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    const openArtistBio = () => {
+      if (!artistBioModal) return;
+      artistBioModal.style.display = 'flex';
+      // Small delay so the opacity transition animates in
+      setTimeout(() => artistBioModal.classList.add('is-visible'), 10);
+    };
+
+    const closeArtistBio = () => {
+      if (!artistBioModal) return;
+      artistBioModal.classList.remove('is-visible');
+      setTimeout(() => { artistBioModal.style.display = 'none'; }, 300);
+    };
+
+    // Only open while the player is powered on (screen is blank when off)
+    profileImg?.addEventListener('click', () => {
+      if (!state.get('isPoweredOn')) return;
+      openArtistBio();
+    });
+
+    modalCloseBtn?.addEventListener('click', closeArtistBio);
+
+    // Clicking the dimmed backdrop closes the modal
+    artistBioModal?.addEventListener('click', (e) => {
+      if (e.target === artistBioModal) closeArtistBio();
+    });
+
+    // Escape key closes the modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && artistBioModal?.classList.contains('is-visible')) closeArtistBio();
+    });
   }
 
   // ───── State Listeners ─────
@@ -485,10 +718,9 @@ class KeyboardFantasiaApp {
         // Show the uploaded track video (video_url) when a track with video is playing,
         // otherwise show the track image (image_url) when a track with an image is playing
         const hasVideo = s.currentTrack && (s.currentTrack.videoFile || s.currentTrack.videoSrc);
-        const hasImage = s.currentTrack && s.currentTrack.imageFile;
         if (s.currentTrack && s.isPlaying) {
           if (musicVideo) musicVideo.classList.toggle('hidden', !hasVideo);
-          if (thumbnail) thumbnail.style.display = (hasVideo || !hasImage) ? 'none' : 'block';
+          if (thumbnail) thumbnail.style.display = hasVideo ? 'none' : 'block';
           if (idleScreen) idleScreen.style.display = 'none';
           if (nowPlaying) nowPlaying.style.display = 'flex';
         } else {
@@ -671,6 +903,7 @@ async function loadSupabaseGallery() {
     if (window.galleryPhotosList.length > 0) {
       window.currentPhotoIndex = 0;
       updateGalleryDisplay();
+      startGallerySlideshow();
     } else {
       console.warn('[Gallery] Found files in storage, but none are web-supported formats (.jpg, .png, .webp).');
     }
@@ -678,6 +911,8 @@ async function loadSupabaseGallery() {
     console.error('[Gallery Error]:', err);
   }
 }
+
+let galleryFadeTimeout = null;
 
 function updateGalleryDisplay() {
   const imgElem = document.getElementById('viewer-img-display');
@@ -698,7 +933,44 @@ function updateGalleryDisplay() {
   const currentUrl = window.galleryPhotosList[window.currentPhotoIndex];
   console.log(`[Gallery] Showing Photo ${window.currentPhotoIndex + 1}/${window.galleryPhotosList.length}:`, currentUrl);
 
-  imgElem.src = currentUrl;
+  // Smooth crossfade: fade out → swap src → fade in
+  if (galleryFadeTimeout) clearTimeout(galleryFadeTimeout);
+  imgElem.style.transition = 'opacity 0.3s ease-in-out';
+  imgElem.style.opacity = '0';
+
+  galleryFadeTimeout = setTimeout(() => {
+    imgElem.src = currentUrl;
+    // Keep hidden while the system is powered OFF (screen blanks to black)
+    imgElem.style.opacity = state.get('isPoweredOn') ? '1' : '0';
+    galleryFadeTimeout = null;
+  }, 300);
+}
+
+// ── Automatic Slideshow (Crossfade Timer) ──
+let slideshowInterval = null;
+const SLIDESHOW_DELAY = 4000; // Time per slide in milliseconds (4 seconds)
+
+function startGallerySlideshow() {
+  stopGallerySlideshow();
+  slideshowInterval = setInterval(() => {
+    // Only advance while powered ON and more than one photo exists
+    if (window.galleryPhotosList.length > 1 && state.get('isPoweredOn')) {
+      window.currentPhotoIndex += 1;
+      updateGalleryDisplay();
+    }
+  }, SLIDESHOW_DELAY);
+}
+
+function stopGallerySlideshow() {
+  if (slideshowInterval) {
+    clearInterval(slideshowInterval);
+    slideshowInterval = null;
+  }
+}
+
+function resetGallerySlideshow() {
+  stopGallerySlideshow();
+  startGallerySlideshow();
 }
 
 window.nextGalleryPhoto = function(direction) {
@@ -707,6 +979,8 @@ window.nextGalleryPhoto = function(direction) {
   }
   window.currentPhotoIndex += direction;
   updateGalleryDisplay();
+  // Manual navigation pauses the auto-play cycle
+  resetGallerySlideshow();
 };
 
 // Listen for Left / Right arrow keys

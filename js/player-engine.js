@@ -5,6 +5,9 @@
 
 import { state } from './state-manager.js';
 
+// Default thumbnail shown on the main display when a track has no uploaded image
+const DEFAULT_FALLBACK_IMAGE = "https://fgydtvjspoxhckmezykw.supabase.co/storage/v1/object/public/PradeepN_songs_tracks/images/1786732024687_vmjp68.jpg";
+
 export class PlayerEngine {
   constructor() {
     this.audio = new Audio();
@@ -17,6 +20,10 @@ export class PlayerEngine {
     this._isSeekingRwd = false;
     this._seekInterval = null;
 
+    // When true, the <video> element is the exclusive audio source
+    // and the standalone <audio> element is kept silent.
+    this._isVideoSource = false;
+
     this._bindEvents();
   }
 
@@ -25,17 +32,35 @@ export class PlayerEngine {
    */
   setVideoElement(el) {
     this.videoElement = el;
+
+    // When the video is the exclusive audio source, drive track duration
+    // and auto-advance from the video element.
+    el.addEventListener('loadedmetadata', () => {
+      if (this._isVideoSource) state.set({ duration: el.duration });
+    });
+
+    el.addEventListener('ended', () => {
+      if (this._isVideoSource) {
+        this._hideMusicVideo();
+        this.skipToNext();
+      }
+    });
   }
 
   /**
    * Show and play the music video in the central screen, in sync with audio
    */
-  _showMusicVideo(src) {
+  _showMusicVideo(src, poster) {
     if (!this.videoElement) return;
     const musicVideo = this.videoElement;
-    musicVideo.muted = true;
-    musicVideo.loop = true;
+    musicVideo.muted = false; // Video audio is the exclusive audio output
+    musicVideo.loop = false;  // Allow 'ended' to fire so we advance to next track
     musicVideo.playsInline = true;
+    if (poster) {
+      musicVideo.setAttribute('poster', poster);
+    } else {
+      musicVideo.removeAttribute('poster');
+    }
     console.log("Loading video source:", src);
     musicVideo.src = src;
     musicVideo.load();
@@ -79,27 +104,36 @@ export class PlayerEngine {
    * Play a specific track
    */
   playTrack(track) {
+    if (!track) return;
+
     // Stop current playback
     this.stop();
 
     // Update state
     state.set({ currentTrack: track });
 
-    // Set audio source
-    this.audio.src = track.audioFile;
-
-    // Play the uploaded track video (video_url → videoFile) in the center screen,
-    // otherwise show the track image (image_url → imageFile) if available
+    // Video tracks rely exclusively on the <video> element's audio output.
+    // The standalone <audio> element is paused/cleared so there is no dual audio.
     const videoSrc = track.videoFile || track.videoSrc;
+    this._isVideoSource = !!videoSrc;
+
     if (videoSrc) {
-      this._showMusicVideo(videoSrc);
+      // Silence + clear the standalone audio element completely
+      this.audio.pause();
+      this.audio.currentTime = 0;
+      this.audio.removeAttribute('src');
+      this.audio.load();
+
+      // Play the video (unmuted) in the center screen
+      this._showMusicVideo(videoSrc, track.imageFile || null);
       this._hideThumbnail();
-    } else if (track.imageFile) {
-      this._hideMusicVideo();
-      this._showThumbnail(track.imageFile);
     } else {
+      // Audio-only: the standalone audio element drives playback,
+      // with the track image shown on the center screen
+      this.audio.src = track.audioFile;
+
       this._hideMusicVideo();
-      this._hideThumbnail();
+      this._showThumbnail(track.imageFile || DEFAULT_FALLBACK_IMAGE);
     }
 
     // Play
@@ -110,11 +144,15 @@ export class PlayerEngine {
    * Play / resume
    */
   play() {
-    const playPromise = this.audio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(err => {
-        console.warn('Audio play failed:', err.message);
-      });
+    // When the video is the exclusive audio source, don't play the
+    // standalone <audio> element.
+    if (!this._isVideoSource) {
+      const playPromise = this.audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.warn('Audio play failed:', err.message);
+        });
+      }
     }
 
     if (this.videoElement && this.videoElement.src) {
@@ -159,6 +197,8 @@ export class PlayerEngine {
       this.videoElement.currentTime = 0;
     }
 
+    this._isVideoSource = false;
+
     state.set({
       isPlaying: false,
       isPaused: false,
@@ -170,15 +210,46 @@ export class PlayerEngine {
   }
 
   /**
+   * Whether the <video> element is the current audio source
+   */
+  _useVideoSource() {
+    return this._isVideoSource && this.videoElement;
+  }
+
+  /**
+   * Current playback position from whichever element is the active source
+   */
+  _getCurrentTime() {
+    return this._useVideoSource() ? this.videoElement.currentTime : this.audio.currentTime;
+  }
+
+  /**
+   * Set the playback position on whichever element is the active source
+   */
+  _setCurrentTime(t) {
+    if (this._useVideoSource()) {
+      this.videoElement.currentTime = t;
+    } else {
+      this.audio.currentTime = t;
+    }
+  }
+
+  /**
+   * Track duration from whichever element is the active source
+   */
+  _getDuration() {
+    return this._useVideoSource() ? this.videoElement.duration : this.audio.duration;
+  }
+
+  /**
    * Fast forward — hold to seek
    */
   startFastForward() {
     if (!state.get('currentTrack')) return;
     this._isSeekingFwd = true;
     this._seekInterval = setInterval(() => {
-      if (this.audio.currentTime + 5 < this.audio.duration) {
-        this.audio.currentTime += 5;
-        if (this.videoElement) this.videoElement.currentTime = this.audio.currentTime;
+      if (this._getCurrentTime() + 5 < this._getDuration()) {
+        this._setCurrentTime(this._getCurrentTime() + 5);
       } else {
         this.skipToNext();
       }
@@ -192,12 +263,10 @@ export class PlayerEngine {
     if (!state.get('currentTrack')) return;
     this._isSeekingRwd = true;
     this._seekInterval = setInterval(() => {
-      if (this.audio.currentTime - 5 > 0) {
-        this.audio.currentTime -= 5;
-        if (this.videoElement) this.videoElement.currentTime = this.audio.currentTime;
+      if (this._getCurrentTime() - 5 > 0) {
+        this._setCurrentTime(this._getCurrentTime() - 5);
       } else {
-        this.audio.currentTime = 0;
-        if (this.videoElement) this.videoElement.currentTime = 0;
+        this._setCurrentTime(0);
       }
     }, 300);
   }
@@ -238,9 +307,8 @@ export class PlayerEngine {
    */
   skipToPrevious() {
     // If we're more than 3 seconds in, restart current track
-    if (this.audio.currentTime > 3) {
-      this.audio.currentTime = 0;
-      if (this.videoElement) this.videoElement.currentTime = 0;
+    if (this._getCurrentTime() > 3) {
+      this._setCurrentTime(0);
       return;
     }
 
@@ -248,8 +316,7 @@ export class PlayerEngine {
     if (prevTrack) {
       this.playTrack(prevTrack);
     } else {
-      this.audio.currentTime = 0;
-      if (this.videoElement) this.videoElement.currentTime = 0;
+      this._setCurrentTime(0);
     }
   }
 
@@ -259,6 +326,7 @@ export class PlayerEngine {
   setVolume(vol) {
     const clamped = Math.max(0, Math.min(100, vol));
     this.audio.volume = clamped / 100;
+    if (this.videoElement) this.videoElement.volume = clamped / 100;
     state.set({ volume: clamped });
   }
 
@@ -266,10 +334,8 @@ export class PlayerEngine {
    * Seek to position (0-1)
    */
   seekTo(fraction) {
-    if (!this.audio.duration) return;
-    const time = fraction * this.audio.duration;
-    this.audio.currentTime = time;
-    if (this.videoElement) this.videoElement.currentTime = time;
+    if (!this._getDuration()) return;
+    this._setCurrentTime(fraction * this._getDuration());
   }
 
   /**
@@ -302,7 +368,7 @@ export class PlayerEngine {
   _startProgressTracking() {
     this._stopProgressTracking();
     this._progressInterval = setInterval(() => {
-      state.set({ currentTime: this.audio.currentTime });
+      state.set({ currentTime: this._getCurrentTime() });
     }, 250);
   }
 
