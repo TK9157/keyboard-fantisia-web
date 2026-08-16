@@ -458,8 +458,9 @@ class KeyboardFantasiaApp {
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. POWER OFF STATE: Canvas stays completely dark
-      if (!state.get('isPoweredOn')) {
+      // 1. POWER OFF & BOOTING STATE: Canvas stays completely dark
+      if (!state.get('isPoweredOn') || state.get('isBooting')) {
+        ctx.clearRect(0, 0, width, height);
         requestAnimationFrame(renderEqualizer);
         return;
       }
@@ -754,6 +755,7 @@ class KeyboardFantasiaApp {
       const thumbnail = document.getElementById('main-screen-thumbnail');
       const idleScreen = document.getElementById('idle-screen');
       const nowPlaying = document.getElementById('now-playing');
+      const miniEqContainer = document.querySelector('.mini-eq-container');
 
       if (!s.isPoweredOn) {
         if (bootScreen) bootScreen.style.display = 'none';
@@ -761,6 +763,7 @@ class KeyboardFantasiaApp {
         if (thumbnail) thumbnail.style.display = 'none';
         if (idleScreen) idleScreen.style.display = 'flex';
         if (nowPlaying) nowPlaying.style.display = 'none';
+        if (miniEqContainer) miniEqContainer.style.display = 'none';
         return;
       }
 
@@ -770,6 +773,7 @@ class KeyboardFantasiaApp {
         if (thumbnail) thumbnail.style.display = 'none';
         if (idleScreen) idleScreen.style.display = 'none';
         if (nowPlaying) nowPlaying.style.display = 'none';
+        if (miniEqContainer) miniEqContainer.style.display = 'none';
 
         // Restart boot animation
         const texts = document.querySelectorAll('.boot-text');
@@ -780,6 +784,7 @@ class KeyboardFantasiaApp {
         });
       } else {
         if (bootScreen) bootScreen.style.display = 'none';
+        if (miniEqContainer) miniEqContainer.style.display = 'block';
 
         // Show the uploaded track video (video_url) when a track with video is playing,
         // otherwise show the track image (image_url) when a track with an image is playing
