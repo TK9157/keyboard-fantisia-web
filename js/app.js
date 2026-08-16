@@ -590,10 +590,10 @@ class KeyboardFantasiaApp {
 
     const currentTrack = state.get('currentTrack');
 
-    tracksContainer.innerHTML = cassette.tracks.map(t => `
+    tracksContainer.innerHTML = cassette.tracks.map((t, index) => `
       <div class="song-list__track ${currentTrack && currentTrack.id === t.id ? 'is-playing' : ''}"
            data-track-id="${t.id}">
-        <span class="song-list__track-num">${String(t.id).padStart(2, '0')}</span>
+        <span class="song-list__track-num">${String(index + 1).padStart(2, '0')}</span>
         <div class="song-list__track-info">
           <div class="song-list__track-title">${t.title}</div>
           <div class="song-list__track-meta">${t.musicDirector}</div>

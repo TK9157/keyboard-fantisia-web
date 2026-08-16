@@ -29,13 +29,16 @@ CREATE TABLE IF NOT EXISTS tracks (
   audio_url TEXT,
   video_url TEXT,
   video_src TEXT,
+  image_url TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(cassette_id, track_number)
 );
 
--- Add video_src column for databases created before the music-video feature
+-- Add missing columns for databases created earlier
 ALTER TABLE tracks ADD COLUMN IF NOT EXISTS video_src TEXT;
 ALTER TABLE tracks ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE tracks ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 -- Visitors table
 CREATE TABLE IF NOT EXISTS visitors (

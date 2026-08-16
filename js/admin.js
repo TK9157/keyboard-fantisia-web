@@ -184,7 +184,8 @@ const AdminModule = {
     const payload = {
       cassette_id: cassetteId,
       track_number: nextTrackNum,
-      title: cleanedTitle
+      title: cleanedTitle,
+      is_active: true
     };
 
     if (audioUrl) payload.audio_url = audioUrl;
@@ -343,7 +344,8 @@ const AdminModule = {
       audio_url: audioUrl || null,
       video_url: videoUrl || null,
       image_url: imageUrl || null,
-      youtube_video_url: youtubeUrl || null
+      youtube_video_url: youtubeUrl || null,
+      is_active: true
     };
 
     try {
@@ -508,7 +510,7 @@ const AdminModule = {
                   const autoNumber = index + 1;
                   const displayTitle = this.cleanSongTitle(song.title);
                   const safeTitle = this.escapeHtml(displayTitle);
-                  const isEnabled = song.enabled !== false;
+                  const isEnabled = song.is_active !== false && song.enabled !== false;
 
                   return `
                     <div class="song-item ${isEnabled ? 'enabled' : 'disabled'}">
@@ -536,7 +538,7 @@ const AdminModule = {
 
     // Attach Enable/Disable toggle event listeners
     listEl.querySelectorAll('[data-action="toggle"]').forEach(toggleBtn => {
-      toggleBtn.addEventListener('click', (e) => {
+      toggleBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -545,9 +547,13 @@ const AdminModule = {
         const song = songs.find(s => String(s.id) === String(songId));
         if (!song) return;
 
-        song.enabled = !(song.enabled !== false);
+        const currentStatus = song.is_active !== false && song.enabled !== false;
+        const newStatus = !currentStatus;
 
-        if (song.enabled) {
+        song.is_active = newStatus;
+        song.enabled = newStatus;
+
+        if (newStatus) {
           item.classList.remove('disabled');
           item.classList.add('enabled');
           toggleBtn.classList.remove('btn-disabled');
@@ -559,6 +565,22 @@ const AdminModule = {
           toggleBtn.classList.remove('btn-enabled');
           toggleBtn.classList.add('btn-disabled');
           toggleBtn.textContent = 'Disabled';
+        }
+
+        const sb = getSupabase();
+        if (sb) {
+          const { error } = await sb
+            .from('tracks')
+            .update({ is_active: newStatus })
+            .eq('id', songId);
+
+          if (error) {
+            console.error('Error updating track status:', error);
+            alert(`Failed to update song status: ${error.message}`);
+            song.is_active = currentStatus;
+            song.enabled = currentStatus;
+            this.loadSongs();
+          }
         }
       });
     });

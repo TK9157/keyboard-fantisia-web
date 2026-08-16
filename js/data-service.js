@@ -57,16 +57,19 @@ var DataService = (function() {
       .from('tracks')
       .select('*')
       .eq('cassette_id', cassetteId)
+      .eq('is_active', true)
       .order('track_number', { ascending: true })
       .then(function(result) {
         if (result.error) {
           console.error('Failed to fetch tracks:', result.error.message);
           return null;
         }
-        // Transform to match the existing data format used by the player
-        var tracks = result.data.map(function(t) {
+        // Transform to match the existing data format used by the player (dynamic index renumbering 1, 2, 3...)
+        var activeTracks = (result.data || []).filter(function(t) { return t.is_active !== false; });
+        var tracks = activeTracks.map(function(t, index) {
           return {
-            id: t.track_number,
+            id: index + 1,
+            trackNumber: t.track_number,
             dbId: t.id,
             title: t.title,
             movie: t.movie || '',
@@ -97,7 +100,7 @@ var DataService = (function() {
 
     return Promise.all([
       sb.from('cassettes').select('*').order('sort_order', { ascending: true }),
-      sb.from('tracks').select('*').order('track_number', { ascending: true })
+      sb.from('tracks').select('*').eq('is_active', true).order('track_number', { ascending: true })
     ]).then(function(results) {
       var cassetteResult = results[0];
       var trackResult = results[1];
@@ -109,11 +112,12 @@ var DataService = (function() {
 
       // Transform to the format expected by the player's CASSETTE_DATA structure
       var cassettes = cassetteResult.data.map(function(c) {
-        var cassetteTracks = trackResult.data
-          .filter(function(t) { return t.cassette_id === c.id; })
-          .map(function(t) {
+        var cassetteTracks = (trackResult.data || [])
+          .filter(function(t) { return t.cassette_id === c.id && t.is_active !== false; })
+          .map(function(t, index) {
             return {
-              id: t.track_number,
+              id: index + 1,
+              trackNumber: t.track_number,
               dbId: t.id,
               title: t.title,
               movie: t.movie || '',
