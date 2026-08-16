@@ -120,6 +120,41 @@
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
     }
 
+    /*  Responsive Viewport Auto-Scaling  */
+    /* The chassis is designed at a fixed 1024×576 canvas; the viewport scales
+       it up/down so it always fills the available screen on both PC & mobile. */
+    .player-viewport {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .player-chassis {
+      width: 1024px;
+      height: 576px;
+      flex-shrink: 0;
+      container-type: inline-size;
+      transform-origin: center center;
+      transform: scale(min(100vw / 1024px, 100vh / 576px));
+    }
+
+    @supports (height: 1dvh) {
+      .player-chassis {
+        transform: scale(min(100vw / 1024px, 100dvh / 576px));
+      }
+    }
+
+    .player-chassis .image-player {
+      width: 1024px;
+      height: 576px;
+      max-width: none;
+      margin: 0;
+    }
+
     /* Invisible clickable areas that overlay the image */
     .overlay-area {
       position: absolute;
@@ -616,186 +651,134 @@
       color: #aaa;
     }
 
-    /* Transport Controls */
-    /* Based on image: Left block of buttons and Right block of buttons around the central dial */
+    /* ── Transport Controls ──
+       Left & right button clusters flanking the central volume dial.
+       Buttons are absolutely positioned in the 1024×576 design space, so the
+       container intentionally stays static and coordinates resolve against
+       .image-player. */
 
-    #btn-rewind {
-      top: 50.2%;
-      left: 40.7%;
-      width: 4%;
-      height: 9%;
+    .chassis-controls-container {
+      position: static;
+      margin: 0;
+      padding: 0;
     }
 
-    #btn-play {
-      top: 58.5%;
-      left: 41.3%;
-      width: 3%;
-      height: 8%;
-    }
-
-    #btn-ff {
-      top: 50.2%;
-      left: 55.5%;
-      width: 4%;
-      height: 9%;
-    }
-
-    /*stop to pause */
-    #btn-stop {
-      top: 58.8%;
-      left: 56.4%;
-      width: 2%;
-      height: 7%;
-    }
-
-    .transport-btn-area {
+    /* Base switch: transparent so the chassis texture shows through, raised
+       metallic bezel look by default, layered above the chassis image. */
+    .curved-switch-btn {
       position: absolute;
-      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-
-      /* Tactile button properties: raised look by default */
+      appearance: none;
+      margin: 0;
+      padding: 0;
+      border: none !important;
+      background: transparent;
+      font-family: inherit;
       cursor: pointer !important;
       user-select: none !important;
-      transition: transform 0.05s ease, box-shadow 0.05s ease, background-color 0.1s ease !important;
-      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
-      border: 1px solid rgba(0, 0, 0, 0.8) !important;
+      z-index: 5;
+      transition: transform 0.06s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.06s ease,
+                  box-shadow 0.06s ease !important;
     }
 
-    .transport-btn-area span {
-      font-size: 0.88rem;
-      font-family: monospace;
-      font-weight: 800;
-      color: #000;
-      pointer-events: none;
-      transition: all 0.2s;
+    /* 1. REW (Top-Left Curved Quadrant) */
+    #btn-rewind {
+      top: 48.5% !important;
+      left: 36.8% !important;
+      width: 4.8cqw !important;
+      height: 4.8cqw !important;
+      clip-path: url(#clip-rew) !important;
+    }
+
+    /* 2. PLAY (Bottom-Left Curved Quadrant) */
+    #btn-play {
+      top: 59.5% !important;
+      left: 36.8% !important;
+      width: 4.8cqw !important;
+      height: 4.8cqw !important;
+      clip-path: url(#clip-play) !important;
+    }
+
+    /* 3. FWD (Top-Right Curved Quadrant) */
+    #btn-ff {
+      top: 48.5% !important;
+      left: 58.4% !important;
+      width: 4.8cqw !important;
+      height: 4.8cqw !important;
+      clip-path: url(#clip-fwd) !important;
+    }
+
+    /* 4. PAUSE (Bottom-Right Curved Quadrant) */
+    #btn-stop {
+      top: 59.5% !important;
+      left: 58.4% !important;
+      width: 4.8cqw !important;
+      height: 4.8cqw !important;
+      clip-path: url(#clip-pause) !important;
+    }
+
+    /* Container for text elements inside the curved switch buttons */
+    .btn-text {
+      position: relative;
+      z-index: 2;
+      display: block;
+      font-family: 'Arial Black', sans-serif !important;
+      /* Reduced fluid size to fit perfectly inside the switch boundaries */
+      font-size: clamp(8px, 1.1cqw, 14px) !important;
+      font-weight: 900 !important;
+      color: #111111 !important;
+      letter-spacing: 0.02em !important;
+      text-transform: uppercase !important;
+      text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.6) !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      white-space: nowrap !important;
+      line-height: 1 !important;
       text-align: center;
-      line-height: 1.1;
+      transition: all 0.2s;
     }
 
-    .transport-btn-area:hover span {
+    /* Adjust switch hitboxes slightly to give text more breathing room */
+    #btn-rewind, #btn-play, #btn-ff, #btn-stop {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 2px !important;
+    }
+
+    /* Alignment Nudges per Switch Facet */
+    #btn-rewind .btn-text { transform: translate(-1px, 0); }
+    #btn-play .btn-text { transform: translate(-1px, 0); }
+    #btn-ff .btn-text { transform: translate(1px, 0); }
+    #btn-stop .btn-text { transform: translate(1px, 0); }
+
+    /* Tactile press movement */
+    .curved-switch-btn:active .btn-text,
+    .curved-switch-btn.pressed .btn-text {
+      transform: translateY(2px) scale(0.95) !important;
+      color: #000000 !important;
+    }
+
+    /* Hover: brighten the textured switch + subtle label glow */
+    .curved-switch-btn:hover {
+      filter: brightness(1.3) contrast(1.1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4)) !important;
+    }
+
+    .curved-switch-btn:hover .btn-text {
       color: #000;
       text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 
-    .transport-btn-area:hover {
-      background: rgba(255, 255, 255, 0.2);
-      filter: brightness(1.15) !important;
-    }
-
     /* Active transport channel indicator highlight */
-    .transport-btn-area.is-active {
+    .curved-switch-btn.is-active {
       background: rgba(0, 255, 65, 0.3);
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 0 5px rgba(50, 205, 50, 0.5) !important;
-      border-color: rgba(50, 205, 50, 0.6) !important;
     }
 
-    /* Click state: press down displacement + dark inset recessed shadow */
-    .transport-btn-area:active,
-    .transport-btn-area.pressed {
-      transform: translateY(2px) !important;
-      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85),
-                  inset 0 1px 3px rgba(0, 0, 0, 0.9),
-                  0 0 2px rgba(0, 0, 0, 0.4) !important;
-      filter: brightness(0.9) !important;
-      background: rgba(0, 255, 65, 0.3);
-    }
-
-    /* ── Curved Metallic Console Controls (REW / PLAY / FWD / PAUSE) ──
-       Base interactive styles matching the rounded bezel contour around the dial */
-    #btn-rewind, #btn-play, #btn-ff, #btn-stop,
-    .transport-btn-area {
-      cursor: pointer !important;
-      user-select: none !important;
-      transition: transform 0.05s ease, box-shadow 0.05s ease, filter 0.05s ease !important;
-      border: 1px solid rgba(0, 0, 0, 0.5) !important;
-      background: transparent; /* Retains retro chassis image textures */
-    }
-
-    /* 1. TOP LEFT BUTTON: REW (Curved Top-Left Outer Edge) */
-    #btn-rewind {
-      border-top-left-radius: 14px !important;
-      border-top-right-radius: 4px !important;
-      border-bottom-left-radius: 2px !important;
-      border-bottom-right-radius: 6px !important;
-    }
-
-    /* 2. BOTTOM LEFT BUTTON: PLAY (Curved Bottom-Left Outer Edge) */
-    #btn-play {
-      border-top-left-radius: 2px !important;
-      border-top-right-radius: 6px !important;
-      border-bottom-left-radius: 14px !important;
-      border-bottom-right-radius: 4px !important;
-    }
-
-    /* 3. TOP RIGHT BUTTON: FWD (Curved Top-Right Outer Edge) */
-    #btn-ff {
-      border-top-left-radius: 4px !important;
-      border-top-right-radius: 14px !important;
-      border-bottom-left-radius: 6px !important;
-      border-bottom-right-radius: 2px !important;
-    }
-
-    /* 4. BOTTOM RIGHT BUTTON: PAUSE (Curved Bottom-Right Outer Edge) */
-    #btn-stop {
-      border-top-left-radius: 6px !important;
-      border-top-right-radius: 2px !important;
-      border-bottom-left-radius: 4px !important;
-      border-bottom-right-radius: 14px !important;
-    }
-
-    /* HOVER FEEDBACK */
-    #btn-rewind:hover, #btn-play:hover, #btn-ff:hover, #btn-stop:hover {
-      filter: brightness(1.2) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4)) !important;
-    }
-
-    /* CLICK STATE: Physical press depth + inset shadow matching the chassis curve */
-    #btn-rewind:active, #btn-play:active, #btn-ff:active, #btn-stop:active,
-    .transport-btn-area:active {
-      transform: scale(0.97) translateY(1px) !important;
-      box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.8),
-                  inset -1px -1px 4px rgba(0, 0, 0, 0.6) !important;
-      filter: brightness(0.85) !important;
-    }
-
-    /* ── Exact Chassis Shapes via clip-path (REW / PLAY / FWD / PAUSE) ── */
-    #btn-rewind, #btn-play, #btn-ff, #btn-stop,
-    .transport-btn-area {
-      cursor: pointer !important;
-      user-select: none !important;
-      border: none !important;
-      background: transparent; /* Retains retro chassis image textures */
-      transition: transform 0.06s cubic-bezier(0.4, 0, 0.2, 1),
-                  filter 0.06s ease !important;
-    }
-
-    /* 1. REW (Top-Left Curved Quadrant — inline SVG radial clip-path) */
-    #btn-rewind {
-      clip-path: url(#clip-rew) !important;
-    }
-
-    /* 2. PLAY (Bottom-Left Curved Quadrant — inline SVG radial clip-path) */
-    #btn-play {
-      clip-path: url(#clip-play) !important;
-    }
-
-    /* 3. FWD (Top-Right Curved Quadrant — inline SVG radial clip-path) */
-    #btn-ff {
-      clip-path: url(#clip-fwd) !important;
-    }
-
-    /* 4. PAUSE (Bottom-Right Curved Quadrant — inline SVG radial clip-path) */
-    #btn-stop {
-      clip-path: url(#clip-pause) !important;
-    }
-
-    /* Interactive Hover State */
-    #btn-rewind:hover, #btn-play:hover, #btn-ff:hover, #btn-stop:hover {
-      filter: brightness(1.3) contrast(1.1) !important;
-    }
-
-    /* Mechanical Click Action: Depresses inward toward dial center with inset shadow */
+    /* Mechanical click: depresses inward toward the dial center */
     #btn-rewind:active {
       transform: translate(2px, 2px) scale(0.97) !important;
       filter: brightness(0.75) contrast(1.3);
@@ -818,6 +801,14 @@
       transform: translate(-2px, -2px) scale(0.97) !important;
       filter: brightness(0.75) contrast(1.3);
       box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Touch-safe pressed state (mirrors :active for pointer events) */
+    .curved-switch-btn.pressed {
+      transform: scale(0.97) translateY(1px) !important;
+      box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.8),
+                  inset -1px -1px 4px rgba(0, 0, 0, 0.6) !important;
+      filter: brightness(0.85) !important;
     }
 
     /* Volume Dial */
@@ -1918,6 +1909,8 @@
   </div>
 
   <!-- IMAGE PLAYER WRAPPER -->
+  <div class="player-viewport">
+    <div class="player-chassis">
   <div class="image-player is-off" id="image-player-wrapper">
 
     <!-- POWER BUTTON (Green button on lower right) -->
@@ -2051,11 +2044,13 @@
     <!-- CENTER CONTROL PANEL (transport buttons, volume dial, display bar, mini EQ) -->
     <div class="center-control-panel">
 
-      <!-- Transport Buttons -->
-      <div class="transport-btn-area" id="btn-rewind" title="Rewind"><span>REW</span></div>
-      <div class="transport-btn-area" id="btn-play" title="Play"><span>PLAY</span></div>
-      <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
-      <div class="transport-btn-area" id="btn-stop" title="Pause"><span>PAUSE</span></div>
+      <!-- Interactive Control Switches with Custom Labels -->
+      <div class="chassis-controls-container">
+        <button id="btn-rewind" class="curved-switch-btn" title="Rewind"><span class="btn-text">REW</span></button>
+        <button id="btn-play" class="curved-switch-btn" title="Play"><span class="btn-text">PLAY</span></button>
+        <button id="btn-ff" class="curved-switch-btn" title="Fast Forward"><span class="btn-text">FWD</span></button>
+        <button id="btn-stop" class="curved-switch-btn" title="Pause"><span class="btn-text">PAUSE</span></button>
+      </div>
 
       <!-- Volume Dial -->
       <div id="volume-dial" class="volume-dial-area" title="Volume">
@@ -2089,6 +2084,8 @@
 
 
 
+  </div>
+  </div>
   </div>
 
   <!-- YOUTUBE LIGHTBOX MODAL -->

@@ -508,11 +508,13 @@ const AdminModule = {
                   const autoNumber = index + 1;
                   const displayTitle = this.cleanSongTitle(song.title);
                   const safeTitle = this.escapeHtml(displayTitle);
+                  const isEnabled = song.enabled !== false;
 
                   return `
-                    <div class="song-item">
+                    <div class="song-item ${isEnabled ? 'enabled' : 'disabled'}">
                       <span class="song-title"><strong>${autoNumber}.</strong> ${safeTitle}</span>
                       <div class="song-actions">
+                        <button class="toggle-btn ${isEnabled ? 'btn-enabled' : 'btn-disabled'}" data-action="toggle" data-id="${this.escapeHtml(song.id)}">${isEnabled ? 'Enabled' : 'Disabled'}</button>
                         <button class="admin-delete-btn delete-btn" data-id="${this.escapeHtml(song.id)}" data-title="${safeTitle}">Delete</button>
                       </div>
                     </div>
@@ -529,6 +531,35 @@ const AdminModule = {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         this.deleteSong(btn.getAttribute('data-id'), btn.getAttribute('data-title'));
+      });
+    });
+
+    // Attach Enable/Disable toggle event listeners
+    listEl.querySelectorAll('[data-action="toggle"]').forEach(toggleBtn => {
+      toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const item = toggleBtn.closest('.song-item');
+        const songId = toggleBtn.getAttribute('data-id');
+        const song = songs.find(s => String(s.id) === String(songId));
+        if (!song) return;
+
+        song.enabled = !(song.enabled !== false);
+
+        if (song.enabled) {
+          item.classList.remove('disabled');
+          item.classList.add('enabled');
+          toggleBtn.classList.remove('btn-disabled');
+          toggleBtn.classList.add('btn-enabled');
+          toggleBtn.textContent = 'Enabled';
+        } else {
+          item.classList.remove('enabled');
+          item.classList.add('disabled');
+          toggleBtn.classList.remove('btn-enabled');
+          toggleBtn.classList.add('btn-disabled');
+          toggleBtn.textContent = 'Disabled';
+        }
       });
     });
   },
