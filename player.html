@@ -87,7 +87,7 @@
       background: #000;
     }
 
-    .image-player.is-off #main-screen-display > * {
+    .image-player.is-off #main-screen-display>* {
       visibility: hidden;
     }
 
@@ -118,41 +118,6 @@
       background-position: center;
       background-repeat: no-repeat;
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-    }
-
-    /*  Responsive Viewport Auto-Scaling  */
-    /* The chassis is designed at a fixed 1024×576 canvas; the viewport scales
-       it up/down so it always fills the available screen on both PC & mobile. */
-    .player-viewport {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .player-chassis {
-      width: 1024px;
-      height: 576px;
-      flex-shrink: 0;
-      container-type: inline-size;
-      transform-origin: center center;
-      transform: scale(min(100vw / 1024px, 100vh / 576px));
-    }
-
-    @supports (height: 1dvh) {
-      .player-chassis {
-        transform: scale(min(100vw / 1024px, 100dvh / 576px));
-      }
-    }
-
-    .player-chassis .image-player {
-      width: 1024px;
-      height: 576px;
-      max-width: none;
-      margin: 0;
     }
 
     /* Invisible clickable areas that overlay the image */
@@ -651,134 +616,225 @@
       color: #aaa;
     }
 
-    /* ── Transport Controls ──
-       Left & right button clusters flanking the central volume dial.
-       Buttons are absolutely positioned in the 1024×576 design space, so the
-       container intentionally stays static and coordinates resolve against
-       .image-player. */
+    /* Transport Controls */
+    /* Based on image: Left block of buttons and Right block of buttons around the central dial */
 
-    .chassis-controls-container {
-      position: static;
-      margin: 0;
-      padding: 0;
+    #btn-rewind {
+      top: 50.2%;
+      left: 40.7%;
+      width: 4%;
+      height: 9%;
     }
 
-    /* Base switch: transparent so the chassis texture shows through, raised
-       metallic bezel look by default, layered above the chassis image. */
-    .curved-switch-btn {
+    #btn-play {
+      top: 58.5%;
+      left: 41.3%;
+      width: 3%;
+      height: 8%;
+    }
+
+    #btn-ff {
+      top: 50.2%;
+      left: 55.5%;
+      width: 4%;
+      height: 9%;
+    }
+
+    /* Shift PAUSE down from C5 and slightly left onto the lower curved switch */
+    #btn-pause,
+    #btn-stop,
+    button[aria-label*="Pause"],
+    button[aria-label*="PAUSE"],
+    .pause-btn {
+      position: absolute !important;
+      top: 57.0% !important;
+      left: 58.0% !important;
+      transform: translate(-50%, -50%) !important;
+      width: auto !important;
+      height: auto !important;
+      z-index: 20 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* Maintain clean styling */
+    #btn-pause *,
+    #btn-stop *,
+    button[aria-label*="Pause"] *,
+    button[aria-label*="PAUSE"] * {
+      font-family: 'Arial Black', sans-serif !important;
+      font-size: clamp(7px, 0.8cqw, 11px) !important;
+      font-weight: 900 !important;
+      color: #0c0c0c !important;
+      white-space: nowrap !important;
+      display: block !important;
+    }
+
+    .transport-btn-area {
       position: absolute;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      appearance: none;
-      margin: 0;
-      padding: 0;
-      border: none !important;
-      background: transparent;
-      font-family: inherit;
+
+      /* Tactile button properties: raised look by default */
       cursor: pointer !important;
       user-select: none !important;
-      z-index: 5;
-      transition: transform 0.06s cubic-bezier(0.4, 0, 0.2, 1),
-                  filter 0.06s ease,
-                  box-shadow 0.06s ease !important;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background-color 0.1s ease !important;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+      border: 1px solid rgba(0, 0, 0, 0.8) !important;
     }
 
-    /* 1. REW (Top-Left Curved Quadrant) */
-    #btn-rewind {
-      top: 48.5% !important;
-      left: 36.8% !important;
-      width: 4.8cqw !important;
-      height: 4.8cqw !important;
-      clip-path: url(#clip-rew) !important;
-    }
-
-    /* 2. PLAY (Bottom-Left Curved Quadrant) */
-    #btn-play {
-      top: 59.5% !important;
-      left: 36.8% !important;
-      width: 4.8cqw !important;
-      height: 4.8cqw !important;
-      clip-path: url(#clip-play) !important;
-    }
-
-    /* 3. FWD (Top-Right Curved Quadrant) */
-    #btn-ff {
-      top: 48.5% !important;
-      left: 58.4% !important;
-      width: 4.8cqw !important;
-      height: 4.8cqw !important;
-      clip-path: url(#clip-fwd) !important;
-    }
-
-    /* 4. PAUSE (Bottom-Right Curved Quadrant) */
-    #btn-stop {
-      top: 59.5% !important;
-      left: 58.4% !important;
-      width: 4.8cqw !important;
-      height: 4.8cqw !important;
-      clip-path: url(#clip-pause) !important;
-    }
-
-    /* Container for text elements inside the curved switch buttons */
-    .btn-text {
-      position: relative;
-      z-index: 2;
-      display: block;
-      font-family: 'Arial Black', sans-serif !important;
-      /* Reduced fluid size to fit perfectly inside the switch boundaries */
-      font-size: clamp(8px, 1.1cqw, 14px) !important;
-      font-weight: 900 !important;
-      color: #111111 !important;
-      letter-spacing: 0.02em !important;
-      text-transform: uppercase !important;
-      text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.6) !important;
-      pointer-events: none !important;
-      user-select: none !important;
-      white-space: nowrap !important;
-      line-height: 1 !important;
-      text-align: center;
+    .transport-btn-area span {
+      font-size: 0.88rem;
+      font-family: monospace;
+      font-weight: 800;
+      color: #000;
+      pointer-events: none;
       transition: all 0.2s;
+      text-align: center;
+      line-height: 1.1;
     }
 
-    /* Adjust switch hitboxes slightly to give text more breathing room */
-    #btn-rewind, #btn-play, #btn-ff, #btn-stop {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      padding: 2px !important;
-    }
-
-    /* Alignment Nudges per Switch Facet */
-    #btn-rewind .btn-text { transform: translate(-1px, 0); }
-    #btn-play .btn-text { transform: translate(-1px, 0); }
-    #btn-ff .btn-text { transform: translate(1px, 0); }
-    #btn-stop .btn-text { transform: translate(1px, 0); }
-
-    /* Tactile press movement */
-    .curved-switch-btn:active .btn-text,
-    .curved-switch-btn.pressed .btn-text {
-      transform: translateY(2px) scale(0.95) !important;
-      color: #000000 !important;
-    }
-
-    /* Hover: brighten the textured switch + subtle label glow */
-    .curved-switch-btn:hover {
-      filter: brightness(1.3) contrast(1.1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4)) !important;
-    }
-
-    .curved-switch-btn:hover .btn-text {
+    .transport-btn-area:hover span {
       color: #000;
       text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 
-    /* Active transport channel indicator highlight */
-    .curved-switch-btn.is-active {
-      background: rgba(0, 255, 65, 0.3);
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 0 5px rgba(50, 205, 50, 0.5) !important;
+    .transport-btn-area:hover {
+      background: rgba(255, 255, 255, 0.2);
+      filter: brightness(1.15) !important;
     }
 
-    /* Mechanical click: depresses inward toward the dial center */
+    /* Active transport channel indicator highlight */
+    .transport-btn-area.is-active {
+      background: rgba(0, 255, 65, 0.3);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 0 5px rgba(50, 205, 50, 0.5) !important;
+      border-color: rgba(50, 205, 50, 0.6) !important;
+    }
+
+    /* Click state: press down displacement + dark inset recessed shadow */
+    .transport-btn-area:active,
+    .transport-btn-area.pressed {
+      transform: translateY(2px) !important;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85),
+        inset 0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 2px rgba(0, 0, 0, 0.4) !important;
+      filter: brightness(0.9) !important;
+      background: rgba(0, 255, 65, 0.3);
+    }
+
+    /* ── Curved Metallic Console Controls (REW / PLAY / FWD / PAUSE) ──
+       Base interactive styles matching the rounded bezel contour around the dial */
+    #btn-rewind,
+    #btn-play,
+    #btn-ff,
+    #btn-stop,
+    .transport-btn-area {
+      cursor: pointer !important;
+      user-select: none !important;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, filter 0.05s ease !important;
+      border: 1px solid rgba(0, 0, 0, 0.5) !important;
+      background: transparent;
+      /* Retains retro chassis image textures */
+    }
+
+    /* 1. TOP LEFT BUTTON: REW (Curved Top-Left Outer Edge) */
+    #btn-rewind {
+      border-top-left-radius: 14px !important;
+      border-top-right-radius: 4px !important;
+      border-bottom-left-radius: 2px !important;
+      border-bottom-right-radius: 6px !important;
+    }
+
+    /* 2. BOTTOM LEFT BUTTON: PLAY (Curved Bottom-Left Outer Edge) */
+    #btn-play {
+      border-top-left-radius: 2px !important;
+      border-top-right-radius: 6px !important;
+      border-bottom-left-radius: 14px !important;
+      border-bottom-right-radius: 4px !important;
+    }
+
+    /* 3. TOP RIGHT BUTTON: FWD (Curved Top-Right Outer Edge) */
+    #btn-ff {
+      border-top-left-radius: 4px !important;
+      border-top-right-radius: 14px !important;
+      border-bottom-left-radius: 6px !important;
+      border-bottom-right-radius: 2px !important;
+    }
+
+    /* 4. BOTTOM RIGHT BUTTON: PAUSE (Curved Bottom-Right Outer Edge) */
+    #btn-stop {
+      border-top-left-radius: 6px !important;
+      border-top-right-radius: 2px !important;
+      border-bottom-left-radius: 4px !important;
+      border-bottom-right-radius: 14px !important;
+    }
+
+    /* HOVER FEEDBACK */
+    #btn-rewind:hover,
+    #btn-play:hover,
+    #btn-ff:hover,
+    #btn-stop:hover {
+      filter: brightness(1.2) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4)) !important;
+    }
+
+    /* CLICK STATE: Physical press depth + inset shadow matching the chassis curve */
+    #btn-rewind:active,
+    #btn-play:active,
+    #btn-ff:active,
+    #btn-stop:active,
+    .transport-btn-area:active {
+      transform: scale(0.97) translateY(1px) !important;
+      box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.8),
+        inset -1px -1px 4px rgba(0, 0, 0, 0.6) !important;
+      filter: brightness(0.85) !important;
+    }
+
+    /* ── Exact Chassis Shapes via clip-path (REW / PLAY / FWD / PAUSE) ── */
+    #btn-rewind,
+    #btn-play,
+    #btn-ff,
+    #btn-stop,
+    .transport-btn-area {
+      cursor: pointer !important;
+      user-select: none !important;
+      border: none !important;
+      background: transparent;
+      /* Retains retro chassis image textures */
+      transition: transform 0.06s cubic-bezier(0.4, 0, 0.2, 1),
+        filter 0.06s ease !important;
+    }
+
+    /* 1. REW (Top-Left Curved Quadrant — inline SVG radial clip-path) */
+    #btn-rewind {
+      clip-path: url(#clip-rew) !important;
+    }
+
+    /* 2. PLAY (Bottom-Left Curved Quadrant — inline SVG radial clip-path) */
+    #btn-play {
+      clip-path: url(#clip-play) !important;
+    }
+
+    /* 3. FWD (Top-Right Curved Quadrant — inline SVG radial clip-path) */
+    #btn-ff {
+      clip-path: url(#clip-fwd) !important;
+    }
+
+    /* 4. PAUSE (Bottom-Right Curved Quadrant — inline SVG radial clip-path) */
+    #btn-stop {
+      clip-path: url(#clip-pause) !important;
+    }
+
+    /* Interactive Hover State */
+    #btn-rewind:hover,
+    #btn-play:hover,
+    #btn-ff:hover,
+    #btn-stop:hover {
+      filter: brightness(1.3) contrast(1.1) !important;
+    }
+
+    /* Mechanical Click Action: Depresses inward toward dial center with inset shadow */
     #btn-rewind:active {
       transform: translate(2px, 2px) scale(0.97) !important;
       filter: brightness(0.75) contrast(1.3);
@@ -801,14 +857,6 @@
       transform: translate(-2px, -2px) scale(0.97) !important;
       filter: brightness(0.75) contrast(1.3);
       box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.9);
-    }
-
-    /* Touch-safe pressed state (mirrors :active for pointer events) */
-    .curved-switch-btn.pressed {
-      transform: scale(0.97) translateY(1px) !important;
-      box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.8),
-                  inset -1px -1px 4px rgba(0, 0, 0, 0.6) !important;
-      filter: brightness(0.85) !important;
     }
 
     /* Volume Dial */
@@ -872,8 +920,10 @@
       font-family: 'Courier New', monospace, sans-serif;
       font-weight: bold;
       font-size: 13px;
-      color: #ffffff !important; /* Pure white text */
-      text-shadow: 0 0 2px rgba(255, 255, 255, 0.5); /* Subtle white LED glow */
+      color: #ffffff !important;
+      /* Pure white text */
+      text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+      /* Subtle white LED glow */
       letter-spacing: 1px;
       pointer-events: none;
     }
@@ -922,7 +972,8 @@
     .center-control-panel .mini-eq-container,
     .mini-eq-container {
       position: absolute !important;
-      top: 343px !important;            /* Nudges down ~18px directly into the red box */
+      top: 343px !important;
+      /* Nudges down ~18px directly into the red box */
       left: 50% !important;
       transform: translateX(-50%) !important;
       width: 230px !important;
@@ -1196,7 +1247,8 @@
       /* Preserves aspect ratio while using full box height */
       display: block !important;
       transition: opacity 0.3s ease-in-out;
-      pointer-events: none !important; /* Prevents image from blocking button clicks */
+      pointer-events: none !important;
+      /* Prevents image from blocking button clicks */
     }
 
     /* Arrow Navigation Buttons — borderless/frameless (no background box) */
@@ -1231,7 +1283,8 @@
       background: transparent !important;
       border: none !important;
       opacity: 1;
-      transform: translateY(-50%) scale(1.15); /* Slightly enlarges arrow on hover */
+      transform: translateY(-50%) scale(1.15);
+      /* Slightly enlarges arrow on hover */
     }
 
     /* Float Arrows at the left and right edges */
@@ -1257,6 +1310,7 @@
       justify-content: center;
       background: rgba(0, 0, 0, 0.85);
     }
+
     .youtube-lightbox__card {
       position: relative;
       width: min(880px, 92vw);
@@ -1266,6 +1320,7 @@
       padding: 12px;
       box-shadow: 0 0 40px rgba(0, 255, 204, 0.15);
     }
+
     .youtube-lightbox__close {
       position: absolute;
       top: -16px;
@@ -1281,6 +1336,7 @@
       line-height: 1;
       z-index: 1;
     }
+
     .youtube-lightbox__title {
       font-family: var(--font-display);
       color: var(--led-green);
@@ -1288,6 +1344,7 @@
       margin: 0 0 10px;
       text-align: center;
     }
+
     .youtube-lightbox__frame {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -1338,7 +1395,8 @@
       border-radius: 4px;
       z-index: 10;
       pointer-events: none;
-      background-color: #000; /* Dark background to prevent bright gaps */
+      background-color: #000;
+      /* Dark background to prevent bright gaps */
     }
 
     /* Static Cassette Image & Video Element Overlap (identical bounding box, edge-to-edge) */
@@ -1348,9 +1406,11 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 101%;  /* Slight overbleed to eliminate left/right side gaps */
+      width: 101%;
+      /* Slight overbleed to eliminate left/right side gaps */
       height: 100%;
-      object-fit: fill; /* Force edge-to-edge fill, no letterboxing gaps */
+      object-fit: fill;
+      /* Force edge-to-edge fill, no letterboxing gaps */
       object-position: center;
       margin: 0;
       padding: 0;
@@ -1369,7 +1429,8 @@
       z-index: 2;
       pointer-events: none;
       border-radius: 4px;
-      display: none; /* Hidden when player is idle */
+      display: none;
+      /* Hidden when player is idle */
       opacity: 0;
       transition: opacity 0.3s ease;
     }
@@ -1509,6 +1570,7 @@
       cursor: pointer;
       border-radius: 4px;
     }
+
     .cassette-category-block {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(0, 255, 204, 0.2);
@@ -1569,6 +1631,7 @@
     .song-actions {
       flex-shrink: 0;
     }
+
     .cassette-empty {
       color: var(--silver-dark);
       font-family: var(--font-tech);
@@ -1909,8 +1972,6 @@
   </div>
 
   <!-- IMAGE PLAYER WRAPPER -->
-  <div class="player-viewport">
-    <div class="player-chassis">
   <div class="image-player is-off" id="image-player-wrapper">
 
     <!-- POWER BUTTON (Green button on lower right) -->
@@ -1927,7 +1988,8 @@
         <button type="button" class="nav-arrow left-arrow" onclick="window.nextGalleryPhoto(-1)">&lt;</button>
 
         <!-- Blank src by default - Populated dynamically from Supabase -->
-        <img id="viewer-img-display" src="" alt="Album Art / Track Photo" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />
+        <img id="viewer-img-display" src="" alt="Album Art / Track Photo"
+          style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />
 
         <button type="button" class="nav-arrow right-arrow" onclick="window.nextGalleryPhoto(1)">&gt;</button>
       </div>
@@ -1935,11 +1997,7 @@
 
     <!-- TOP-RIGHT ARTIST PROFILE DISPLAY -->
     <div class="right-screen-container" id="artist-profile-screen">
-      <img
-        id="artist-profile-img"
-        src="media/images/artist-profile.png"
-        alt="KeyNotes Fantasia Artist Profile"
-      />
+      <img id="artist-profile-img" src="media/images/artist-profile.png" alt="KeyNotes Fantasia Artist Profile" />
     </div>
 
     <!-- CASSETTE DECK WINDOW (static tape image + spinning video overlay) -->
@@ -1979,6 +2037,12 @@
 
     <!-- Video Display Area (center screen) -->
     <div class="video-container center-screen-container" id="main-screen-display">
+
+      <!-- Boot Video Element -->
+      <video id="boot-screen-video"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: fill; z-index: 999; display: none;"
+        muted playsinline preload="auto"></video>
+
       <div id="screen-media-wrapper" class="screen-media-wrapper" style="cursor: pointer;">
         <video id="main-screen-video" class="center-video-player hidden" playsinline muted loop></video>
         <img id="main-screen-thumbnail" src="" alt="Track Cover Art" style="display:none;" />
@@ -1990,8 +2054,7 @@
           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
 
         <div id="idle-screen-content" class="screen-idle-layer">
-          <h2 id="screen-title" class="video-display__idle-title" style="cursor:pointer;"
-            title="Click for Admin Access"
+          <h2 id="screen-title" class="video-display__idle-title" style="cursor:pointer;" title="Click for Admin Access"
             onclick="AdminModule.openLogin()">KEYBOARD FANTASIA</h2>
 
           <!-- DECORATIVE EQ -->
@@ -2044,13 +2107,33 @@
     <!-- CENTER CONTROL PANEL (transport buttons, volume dial, display bar, mini EQ) -->
     <div class="center-control-panel">
 
-      <!-- Interactive Control Switches with Custom Labels -->
-      <div class="chassis-controls-container">
-        <button id="btn-rewind" class="curved-switch-btn" title="Rewind"><span class="btn-text">REW</span></button>
-        <button id="btn-play" class="curved-switch-btn" title="Play"><span class="btn-text">PLAY</span></button>
-        <button id="btn-ff" class="curved-switch-btn" title="Fast Forward"><span class="btn-text">FWD</span></button>
-        <button id="btn-stop" class="curved-switch-btn" title="Pause"><span class="btn-text">PAUSE</span></button>
-      </div>
+      <!-- Transport Buttons -->
+      <div class="transport-btn-area" id="btn-rewind" title="Rewind"><span>REW</span></div>
+      <div class="transport-btn-area" id="btn-play" title="Play"><span>PLAY</span></div>
+      <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
+      <button id="btn-pause" class="curved-switch-btn" aria-label="PAUSE" title="Pause" style="
+          position: absolute !important;
+          top: 61.5% !important;
+          left: 57.0% !important;
+          transform: translate(-50%, -50%) !important;
+          z-index: 20 !important;
+          background: transparent !important;
+          border: none !important;
+          outline: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          cursor: pointer !important;">
+        <span style="
+          font-family: inherit !important;
+          font-size: clamp(6px, 0.75cqw, 10px) !important;
+          font-weight: 700 !important;
+          color: #0c0c0c !important;
+          background: transparent !important;
+          white-space: nowrap !important;
+          letter-spacing: -0.02em !important;
+          display: block !important;">PAUSE</span>
+      </button>
 
       <!-- Volume Dial -->
       <div id="volume-dial" class="volume-dial-area" title="Volume">
@@ -2085,8 +2168,6 @@
 
 
   </div>
-  </div>
-  </div>
 
   <!-- YOUTUBE LIGHTBOX MODAL -->
   <div id="youtube-lightbox" class="youtube-lightbox" style="display:none;">
@@ -2107,13 +2188,22 @@
         <h2>Keyboard Fantasia</h2>
       </div>
       <div class="modal-body">
-        <p>Keyboard Fantasia is a musical space shaped with love and dedication by Pradeep. This platform brings together some of his finest keyboard performances, fulfilling a dream he carried for years: to revive old melodies and present new ones, all played and recorded by himself.</p>
+        <p>Keyboard Fantasia is a musical space shaped with love and dedication by Pradeep. This platform brings
+          together some of his finest keyboard performances, fulfilling a dream he carried for years: to revive old
+          melodies and present new ones, all played and recorded by himself.</p>
 
-        <p>A Graduate in Electronics & Communication from CET Class of 85 with a passion for music from younger days. After retiring as a Senior Scientist from Vikram Sarabhai Space Centre after 36 years, having worked in the areas of Test & Evaluation, Design of Modules and their Test Systems for Launch Vehicles, Pradeep chose to return to the passion that stayed with him throughout his life… Music.</p>
+        <p>A Graduate in Electronics & Communication from CET Class of 85 with a passion for music from younger days.
+          After retiring as a Senior Scientist from Vikram Sarabhai Space Centre after 36 years, having worked in the
+          areas of Test & Evaluation, Design of Modules and their Test Systems for Launch Vehicles, Pradeep chose to
+          return to the passion that stayed with him throughout his life… Music.</p>
 
-        <p>His 50 year musical journey began with the Bulbul in School, an instrument many from today’s generation may barely remember, later graduating to the Keyboards. What started as a simple curiosity grew into a vast personal collection of songs, carefully played, recorded, and preserved over the years. Now, he is ready to share that treasure with everyone.</p>
+        <p>His 50 year musical journey began with the Bulbul in School, an instrument many from today’s generation may
+          barely remember, later graduating to the Keyboards. What started as a simple curiosity grew into a vast
+          personal collection of songs, carefully played, recorded, and preserved over the years. Now, he is ready to
+          share that treasure with everyone.</p>
 
-        <p>Keyboard Fantasia is not just a website—it is a window into pure, heartfelt music. A chance to rediscover forgotten sounds, relive nostalgia, and enjoy melodies created with sincerity.</p>
+        <p>Keyboard Fantasia is not just a website—it is a window into pure, heartfelt music. A chance to rediscover
+          forgotten sounds, relive nostalgia, and enjoy melodies created with sincerity.</p>
 
         <p class="modal-footer-note">Welcome... a beautiful musical chapter unfolds.</p>
       </div>

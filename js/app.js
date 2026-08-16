@@ -132,7 +132,7 @@ class KeyboardFantasiaApp {
   }
 
   // ───── Power & Admin ─────
-  
+
   _initPowerAndAdmin() {
     // Power Button
     const powerBtn = document.getElementById('power-btn');
@@ -145,13 +145,66 @@ class KeyboardFantasiaApp {
         if (isBooting) return;
 
         state.set({ isPoweredOn: !isCurrentlyOn });
-        
+
         if (!isCurrentlyOn) {
-          // Turning ON: Trigger boot animation
+          // Turning ON: Play boot video overlay
           state.set({ isBooting: true });
-          setTimeout(() => {
+          const bootVideo = document.getElementById('boot-screen-video');
+
+          const finishBoot = () => {
+            if (bootVideo) {
+              bootVideo.pause();
+              bootVideo.onended = null;
+              bootVideo.onerror = null;
+              bootVideo.style.display = 'none';
+            }
             state.set({ isBooting: false });
-          }, 1500);
+          };
+
+          const BOOT_SOURCES = [
+            'media/video/boot-video.mp4',
+            'media/images/boot-video.mp4',
+            'media/boot-video.mp4',
+            'boot-video.mp4'
+          ];
+
+          const tryBootSource = (index) => {
+            if (index >= BOOT_SOURCES.length) {
+              // All sources failed — skip boot entirely
+              finishBoot();
+              return;
+            }
+            if (!bootVideo) {
+              state.set({ isBooting: false });
+              return;
+            }
+
+            bootVideo.src = BOOT_SOURCES[index];
+            bootVideo.style.display = 'block';
+            bootVideo.currentTime = 0;
+
+            bootVideo.onended = finishBoot;
+            bootVideo.onerror = () => tryBootSource(index + 1);
+
+            bootVideo.play().then(() => {
+              // Autoplay succeeded, listen for end
+              bootVideo.onended = finishBoot;
+            }).catch(() => {
+              // Autoplay blocked or source failed, try next
+              tryBootSource(index + 1);
+            });
+          };
+
+          if (bootVideo) {
+            tryBootSource(0);
+
+            // Safety net in case neither onended nor onerror fires
+            setTimeout(() => {
+              if (state.get('isBooting')) finishBoot();
+            }, 12000);
+          } else {
+            setTimeout(() => state.set({ isBooting: false }), 1500);
+          }
 
           // Initialize WebAudio Physics on first user interaction (Power ON)
           if (!this.audioPhysics) {
@@ -161,7 +214,7 @@ class KeyboardFantasiaApp {
 
           // Resume ambient background video on the idle screen
           const welcomeVideo = document.getElementById('welcome-video');
-          if (welcomeVideo) welcomeVideo.play().catch(() => {});
+          if (welcomeVideo) welcomeVideo.play().catch(() => { });
         } else {
           // If turning off, stop playback
           player.stop();
@@ -255,10 +308,11 @@ class KeyboardFantasiaApp {
     const playBtn = document.getElementById('btn-play');
     const stopBtn = document.getElementById('btn-stop');
     const ffBtn = document.getElementById('btn-ff');
+    const pauseBtn = document.getElementById('btn-pause');
 
     // Tactile press feedback: toggle .pressed during the press so the
     // key visibly displaces into the chassis (touch-safe, not only :active)
-    [rewindBtn, playBtn, stopBtn, ffBtn].forEach((btn) => {
+    [rewindBtn, playBtn, stopBtn, ffBtn, pauseBtn].forEach((btn) => {
       if (!btn) return;
       btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
       btn.addEventListener('pointerup', () => btn.classList.remove('pressed'));
@@ -274,8 +328,10 @@ class KeyboardFantasiaApp {
     });
 
     // Pause
-    stopBtn?.addEventListener('click', () => {
+    (stopBtn || pauseBtn)?.addEventListener('click', () => {
       player.pause();
+      document.querySelectorAll('.curved-switch-btn').forEach(btn => btn.classList.remove('active'));
+      (pauseBtn || stopBtn).classList.add('active');
     });
 
     // Rewind — click for prev, hold for seek
@@ -355,7 +411,7 @@ class KeyboardFantasiaApp {
 
         const label = document.getElementById('volume-label');
         if (label) label.textContent = `VOL ${Math.round(value)}`;
-        
+
         const valDisp = document.getElementById('volume-value');
         if (valDisp) {
           valDisp.textContent = Math.round(value);
@@ -614,19 +670,19 @@ class KeyboardFantasiaApp {
     state.on('isPoweredOn', (s) => {
       const wrapper = document.getElementById('image-player-wrapper');
       const powerBtn = document.getElementById('power-btn');
-      
+
       if (wrapper) {
         if (s.isPoweredOn) {
           wrapper.classList.remove('is-off');
           powerBtn?.classList.remove('power-flash');
-          
+
           if (!state.get('activeCassette')) {
             document.querySelectorAll('.cassette-switch').forEach(sw => sw.classList.add('cassette-flash'));
           }
         } else {
           wrapper.classList.add('is-off');
           powerBtn?.classList.add('power-flash');
-          
+
           document.querySelectorAll('.cassette-switch').forEach(sw => sw.classList.remove('cassette-flash'));
         }
       }
@@ -746,12 +802,14 @@ class KeyboardFantasiaApp {
     state.on('isPlaying', (s) => {
       const playBtn = document.getElementById('btn-play');
       const stopBtn = document.getElementById('btn-stop');
+      const pauseBtn = document.getElementById('btn-pause');
       const wrapper = document.getElementById('image-player-wrapper');
       const spinVideo = document.getElementById('cassette-spin-video');
-      
+
       if (s.isPlaying) {
         if (playBtn) playBtn.classList.add('is-active');
         if (stopBtn) stopBtn.classList.remove('is-active');
+        if (pauseBtn) pauseBtn.classList.remove('active');
         if (wrapper) wrapper.classList.add('is-playing');
         if (spinVideo) {
           spinVideo.style.display = 'block';
@@ -983,7 +1041,7 @@ function resetGallerySlideshow() {
   startGallerySlideshow();
 }
 
-window.nextGalleryPhoto = function(direction) {
+window.nextGalleryPhoto = function (direction) {
   if (window.galleryPhotosList.length <= 1) {
     console.log("[Gallery] Clicked arrow, but only 1 unique photo exists in the database list.");
   }
