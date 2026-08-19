@@ -1524,15 +1524,15 @@ body {
    PAUSE BUTTON — positioned on lower-right curved switch facet
    ============================================================ */
 
-/* Nudge PAUSE down slightly to align with PLAY */
+/* Nudge PAUSE down and right so baseline mirrors PLAY in the lower curved switch */
 #btn-pause,
 #btn-stop,
 button[aria-label*="Pause"],
 button[aria-label*="PAUSE"],
 .pause-btn {
   position: absolute !important;
-  top: 59.5% !important;
-  left: 58.0% !important;
+  top: 61.5% !important;
+  left: 60.5% !important;
   transform: translate(-50%, -50%) !important;
   width: auto !important;
   height: auto !important;
@@ -1546,13 +1546,17 @@ button[aria-label*="PAUSE"],
 #btn-pause *,
 button[aria-label*="Pause"] *,
 .pause-btn * {
-  font-family: 'Arial Black', sans-serif !important;
-  font-size: clamp(8px, 0.9cqw, 12px) !important;
-  font-weight: 900 !important;
-  color: #0c0c0c !important;
-  letter-spacing: 0.01em !important;
-  text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.7) !important;
+  font-family: monospace !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  color: #000 !important;
+  letter-spacing: normal !important;
+  text-shadow: none !important;
   white-space: nowrap !important;
+  text-align: center !important;
+  line-height: 1.1 !important;
+  pointer-events: none !important;
+  transition: all 0.2s !important;
   margin: 0 !important;
   padding: 0 !important;
 }

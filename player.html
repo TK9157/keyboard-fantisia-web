@@ -640,15 +640,15 @@
       height: 9%;
     }
 
-    /* Shift PAUSE down from C5 and slightly left onto the lower curved switch */
+    /* Shift PAUSE down and right to align baseline with PLAY in the lower curved switch */
     #btn-pause,
     #btn-stop,
     button[aria-label*="Pause"],
     button[aria-label*="PAUSE"],
     .pause-btn {
       position: absolute !important;
-      top: 57.0% !important;
-      left: 58.0% !important;
+      top: 61.5% !important;
+      left: 60.5% !important;
       transform: translate(-50%, -50%) !important;
       width: auto !important;
       height: auto !important;
@@ -662,12 +662,15 @@
     #btn-stop *,
     button[aria-label*="Pause"] *,
     button[aria-label*="PAUSE"] * {
-      font-family: 'Arial Black', sans-serif !important;
-      font-size: clamp(7px, 0.8cqw, 11px) !important;
-      font-weight: 900 !important;
-      color: #0c0c0c !important;
+      font-family: monospace !important;
+      font-size: 0.88rem !important;
+      font-weight: 800 !important;
+      color: #000 !important;
       white-space: nowrap !important;
-      display: block !important;
+      text-align: center !important;
+      line-height: 1.1 !important;
+      pointer-events: none !important;
+      transition: all 0.2s !important;
     }
 
     .transport-btn-area {
@@ -2152,9 +2155,12 @@
       <div class="transport-btn-area" id="btn-ff" title="Fast Forward"><span>FWD</span></div>
       <button id="btn-pause" class="curved-switch-btn" aria-label="PAUSE" title="Pause" style="
           position: absolute !important;
-          top: 61.5% !important;
-          left: 57.0% !important;
+          top: 62.7% !important;
+          left:  57.5% !important;
           transform: translate(-50%, -50%) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
           z-index: 20 !important;
           background: transparent !important;
           border: none !important;
@@ -2164,14 +2170,17 @@
           margin: 0 !important;
           cursor: pointer !important;">
         <span style="
-          font-family: inherit !important;
-          font-size: clamp(6px, 0.75cqw, 10px) !important;
-          font-weight: 700 !important;
-          color: #0c0c0c !important;
+          font-family: monospace !important;
+          font-size: 0.75rem !important;
+          font-weight: 800 !important;
+          color: #000 !important;
           background: transparent !important;
           white-space: nowrap !important;
-          letter-spacing: -0.02em !important;
-          display: block !important;">PAUSE</span>
+          text-align: center !important;
+          line-height: 1.1 !important;
+          pointer-events: none !important;
+          transition: all 0.2s !important;
+          display: inline !important;">PAUSE</span>
       </button>
 
       <!-- Volume Dial -->
