@@ -638,6 +638,62 @@
     .cyber-list::-webkit-scrollbar-thumb:hover {
       background: rgba(0, 240, 255, 0.5);
     }
+
+    /* ── Cassette Row Select (Inline Assignment Dropdown) ── */
+    .cassette-row-select {
+      background: #09121d;
+      border: 1px solid rgba(0, 240, 255, 0.33);
+      color: #00f0ff;
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-width: 72px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cassette-row-select:hover {
+      border-color: #00f0ff;
+      box-shadow: 0 0 6px rgba(0, 240, 255, 0.2);
+    }
+
+    .cassette-row-select:focus {
+      border-color: #00f0ff;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
+    }
+
+    .cassette-row-select option {
+      background: #09121d;
+      color: #00f0ff;
+    }
+
+    /* ── Toast Notification ── */
+    .kf-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(9, 18, 29, 0.95);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      color: #00f0ff;
+      font-family: var(--font-tech);
+      font-size: 0.82rem;
+      padding: 8px 20px;
+      border-radius: 6px;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.15);
+      z-index: 10001;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .kf-toast--visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

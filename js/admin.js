@@ -651,6 +651,62 @@ function _savePhotoToggleState(state) {
   localStorage.setItem('kf_photo_toggle_state', JSON.stringify(state));
 }
 
+// ── localStorage Cassette Assignment Persistence ──
+
+var CASSETTE_IDS = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
+
+function _loadCassetteAssignments() {
+  try {
+    return JSON.parse(localStorage.getItem('kf_photo_cassette_assign') || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function _saveCassetteAssignments(assignments) {
+  localStorage.setItem('kf_photo_cassette_assign', JSON.stringify(assignments));
+}
+
+function _getCassetteForPhoto(fileName) {
+  var assignments = _loadCassetteAssignments();
+  if (assignments[fileName]) return assignments[fileName];
+  if (fileName.indexOf('/') !== -1) {
+    var parts = fileName.split('/');
+    if (parts.length >= 2) {
+      var candidate = parts[parts.length - 2].toLowerCase();
+      if (CASSETTE_IDS.indexOf(candidate) !== -1) return candidate;
+    }
+  }
+  return 'c1';
+}
+
+function _setCassetteForPhoto(fileName, cassetteId) {
+  var assignments = _loadCassetteAssignments();
+  assignments[fileName] = cassetteId;
+  _saveCassetteAssignments(assignments);
+}
+
+// ── Toast Notification ──
+
+function _showToast(message) {
+  var existing = document.querySelector('.kf-toast');
+  if (existing) existing.remove();
+
+  var toast = document.createElement('div');
+  toast.className = 'kf-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(function () {
+    toast.classList.add('kf-toast--visible');
+  });
+
+  setTimeout(function () {
+    toast.classList.remove('kf-toast--visible');
+    setTimeout(function () { toast.remove(); }, 400);
+  }, 2500);
+}
+
 function _escapeHtml(value) {
   return String(value == null ? '' : value)
     .replace(/&/g, '&amp;')
@@ -710,7 +766,8 @@ async function loadStoragePhotos() {
         id: f.name,
         name: f.name,
         src: publicUrl,
-        enabled: isEnabled
+        enabled: isEnabled,
+        cassette_id: _getCassetteForPhoto(f.name)
       };
     });
 
@@ -797,6 +854,85 @@ function toggleManagedPhoto(photoId) {
   renderPhotoList();
 }
 
+// ── Supabase Reassignment: Move file between cassette folders ──
+
+async function reassignPhoto(fileName, newCassetteId) {
+  var sb = getSupabase();
+  if (!sb) { console.warn('[PhotoManager] Supabase not available.'); return; }
+
+  var currentCassette = _getCassetteForPhoto(fileName);
+  if (currentCassette === newCassetteId) return;
+
+  var statusEl = document.getElementById('photo-upload-status');
+  if (statusEl) statusEl.textContent = 'Moving ' + fileName + ' to ' + newCassetteId + '...';
+
+  var srcPath = PHOTO_STORAGE_FOLDER + '/' + currentCassette + '/' + fileName;
+  var destPath = PHOTO_STORAGE_FOLDER + '/' + newCassetteId + '/' + fileName;
+  var srcPathFlat = PHOTO_STORAGE_FOLDER + '/' + fileName;
+
+  try {
+    var downloadResult = await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .download(srcPath);
+
+    if (downloadResult.error) {
+      downloadResult = await sb.storage
+        .from(PHOTO_STORAGE_BUCKET)
+        .download(srcPathFlat);
+    }
+
+    if (downloadResult.error) {
+      console.error('[PhotoManager] Download failed:', downloadResult.error);
+      if (statusEl) {
+        statusEl.textContent = 'Move failed: ' + downloadResult.error.message;
+        setTimeout(function () { statusEl.textContent = ''; }, 3000);
+      }
+      return;
+    }
+
+    var uploadResult = await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .upload(destPath, downloadResult.data, { upsert: true });
+
+    if (uploadResult.error) {
+      console.error('[PhotoManager] Upload to new path failed:', uploadResult.error);
+      if (statusEl) {
+        statusEl.textContent = 'Move failed: ' + uploadResult.error.message;
+        setTimeout(function () { statusEl.textContent = ''; }, 3000);
+      }
+      return;
+    }
+
+    await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .remove([srcPath]);
+
+    if (srcPathFlat !== srcPath) {
+      await sb.storage
+        .from(PHOTO_STORAGE_BUCKET)
+        .remove([srcPathFlat]);
+    }
+
+    _setCassetteForPhoto(fileName, newCassetteId);
+
+    if (statusEl) {
+      statusEl.textContent = 'Moved to ' + newCassetteId.toUpperCase();
+      setTimeout(function () { statusEl.textContent = ''; }, 2500);
+    }
+
+    _showToast(fileName.substring(0, 20) + ' \u2192 ' + newCassetteId.toUpperCase());
+
+    await loadStoragePhotos();
+
+  } catch (err) {
+    console.error('[PhotoManager] Reassignment error:', err);
+    if (statusEl) {
+      statusEl.textContent = 'Move failed: ' + err.message;
+      setTimeout(function () { statusEl.textContent = ''; }, 3000);
+    }
+  }
+}
+
 function updatePhotoCount() {
   var badge = document.getElementById('photo-count');
   if (!badge) return;
@@ -817,11 +953,22 @@ function renderPhotoList() {
   listEl.innerHTML = window.managedPhotos.map(function (photo, index) {
     var isEnabled = photo.enabled;
     var safeName = _escapeHtml(photo.name);
-    var displayName = safeName.length > 32 ? safeName.substring(0, 29) + '...' : safeName;
+    var displayName = safeName.length > 28 ? safeName.substring(0, 25) + '...' : safeName;
+    var currentCassette = photo.cassette_id || 'c1';
+
+    var selectOptions = CASSETTE_IDS.map(function (cid) {
+      var label = 'C-' + cid.charAt(1).toUpperCase();
+      var selected = cid === currentCassette ? ' selected' : '';
+      return '<option value="' + cid + '"' + selected + '>' + label + '</option>';
+    }).join('');
+
     return '<li class="photo-item ' + (isEnabled ? '' : 'disabled') + '" data-photo-id="' + safeName + '">'
       + '<span class="photo-index">' + (index + 1) + '.</span>'
       + '<img class="photo-thumb" src="' + photo.src + '" alt="' + safeName + '" onerror="this.style.opacity=0.3">'
       + '<span class="photo-name" title="' + safeName + '">' + displayName + '</span>'
+      + '<select class="cassette-row-select" data-photo-id="' + safeName + '" title="Assign to cassette">'
+      + selectOptions
+      + '</select>'
       + '<div class="photo-actions">'
       + '<button class="photo-toggle-btn ' + (isEnabled ? 'photo-enabled' : 'photo-disabled') + '" data-action="toggle-photo" data-photo-id="' + safeName + '">' + (isEnabled ? 'Enabled' : 'Disabled') + '</button>'
       + '<button class="photo-delete-btn" data-action="delete-photo" data-photo-id="' + safeName + '">Delete</button>'
@@ -838,6 +985,14 @@ function renderPhotoList() {
   listEl.querySelectorAll('[data-action="delete-photo"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       deleteManagedPhoto(btn.getAttribute('data-photo-id'));
+    });
+  });
+
+  listEl.querySelectorAll('.cassette-row-select').forEach(function (select) {
+    select.addEventListener('change', function () {
+      var photoId = this.getAttribute('data-photo-id');
+      var newCassette = this.value;
+      reassignPhoto(photoId, newCassette);
     });
   });
 
