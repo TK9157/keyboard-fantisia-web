@@ -975,11 +975,11 @@
     .center-control-panel .mini-eq-container,
     .mini-eq-container {
       position: absolute !important;
-      top: calc(49% - 18px) !important;
+      top: calc(47.9% - 18px) !important;
       /* Aligns EQ bottom edge to the top of the volume dial */
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: 230px !important;
+      width: 237px !important;
       height: 18px !important;
       z-index: 1000 !important;
       pointer-events: none;
@@ -2195,10 +2195,12 @@
       <hr style="border:none;border-top:1px solid #102131;margin:0 0 12px 0;">
       <div class="photo-upload-bar">
         <input type="file" id="photo-file-input" multiple accept="image/*">
-        <button class="photo-add-btn" onclick="document.getElementById('photo-file-input').click()">+ Add New Photos</button>
+        <button class="photo-add-btn" onclick="document.getElementById('photo-file-input').click()">+ Add New
+          Photos</button>
         <span class="photo-upload-hint">Select multiple images at once</span>
       </div>
-      <div id="photo-upload-status" style="font-family:var(--font-tech);font-size:0.78rem;color:#00f0ff;margin-bottom:8px;min-height:1em;"></div>
+      <div id="photo-upload-status"
+        style="font-family:var(--font-tech);font-size:0.78rem;color:#00f0ff;margin-bottom:8px;min-height:1em;"></div>
       <ul id="photo-list" class="cyber-list"></ul>
     </div>
   </div>
