@@ -629,6 +629,240 @@ window.uploadSongThumbnail = (fileInput) => AdminModule.uploadSongThumbnail(file
 window.uploadStorageFile = (folderName) => AdminModule.uploadStorageFile(folderName);
 window.saveCassetteTrack = () => AdminModule.saveCassetteTrack();
 
+// ============================================================
+// PHOTO MANAGER — Standalone for admin.html
+// ============================================================
+
+const PHOTO_STORAGE_BUCKET = 'PradeepN_songs_tracks';
+const PHOTO_STORAGE_FOLDER = 'images';
+const PHOTO_VALID_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+
+window.managedPhotos = [];
+
+function _loadPhotoToggleState() {
+  try {
+    return JSON.parse(localStorage.getItem('kf_photo_toggle_state') || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function _savePhotoToggleState(state) {
+  localStorage.setItem('kf_photo_toggle_state', JSON.stringify(state));
+}
+
+function _escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function loadStoragePhotos() {
+  var sb = getSupabase();
+  if (!sb) {
+    console.warn('[PhotoManager] Supabase not available.');
+    return;
+  }
+
+  console.log('[PhotoManager] Fetching photos from Supabase Storage...');
+  var result = await sb.storage
+    .from(PHOTO_STORAGE_BUCKET)
+    .list(PHOTO_STORAGE_FOLDER, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+
+  var files = result.data;
+  var storageErr = result.error;
+
+  if (storageErr) {
+    console.error('[PhotoManager] Storage list error:', storageErr);
+    var listEl = document.getElementById('photo-list');
+    if (listEl) listEl.innerHTML = '<li class="photo-empty-msg">Error loading photos: ' + storageErr.message + '</li>';
+    return;
+  }
+
+  if (!files || files.length === 0) {
+    console.warn('[PhotoManager] No files found in images/ storage folder.');
+    window.managedPhotos = [];
+    renderPhotoList();
+    return;
+  }
+
+  var toggleState = _loadPhotoToggleState();
+
+  window.managedPhotos = files
+    .filter(function (f) {
+      if (!f.name || f.name.startsWith('.')) return false;
+      if (f.name === '.emptyFolderPlaceholder') return false;
+      var lower = f.name.toLowerCase();
+      return PHOTO_VALID_EXTENSIONS.some(function (ext) { return lower.endsWith(ext); });
+    })
+    .map(function (f) {
+      var urlResult = sb.storage
+        .from(PHOTO_STORAGE_BUCKET)
+        .getPublicUrl(PHOTO_STORAGE_FOLDER + '/' + f.name);
+
+      var publicUrl = urlResult.data ? urlResult.data.publicUrl : '';
+      var isEnabled = toggleState[f.name] !== undefined ? toggleState[f.name] : true;
+
+      return {
+        id: f.name,
+        name: f.name,
+        src: publicUrl,
+        enabled: isEnabled
+      };
+    });
+
+  console.log('[PhotoManager] Loaded ' + window.managedPhotos.length + ' photos from storage.');
+  renderPhotoList();
+}
+
+async function uploadManagedPhotos(fileList) {
+  var sb = getSupabase();
+  if (!sb) return;
+  if (!fileList || fileList.length === 0) return;
+
+  var files = Array.from(fileList).filter(function (f) {
+    return f.type.startsWith('image/');
+  });
+  if (files.length === 0) return;
+
+  var statusEl = document.getElementById('photo-upload-status');
+  var uploaded = 0;
+  var failed = 0;
+
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var safeName = Date.now() + '_' + file.name;
+    var path = PHOTO_STORAGE_FOLDER + '/' + safeName;
+
+    if (statusEl) statusEl.textContent = 'Uploading ' + (i + 1) + '/' + files.length + ': ' + file.name + '...';
+
+    var result = await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .upload(path, file);
+
+    if (result.error) {
+      console.error('[PhotoManager] Upload failed:', file.name, result.error);
+      failed++;
+    } else {
+      uploaded++;
+    }
+  }
+
+  if (statusEl) {
+    statusEl.textContent = uploaded + ' uploaded' + (failed > 0 ? ', ' + failed + ' failed' : '');
+    setTimeout(function () { statusEl.textContent = ''; }, 3000);
+  }
+
+  console.log('[PhotoManager] Upload complete: ' + uploaded + ' ok, ' + failed + ' failed.');
+  await loadStoragePhotos();
+}
+
+async function deleteManagedPhoto(fileName) {
+  if (!confirm('Delete "' + fileName + '" from storage?')) return;
+
+  var sb = getSupabase();
+  if (!sb) return;
+
+  var result = await sb.storage
+    .from(PHOTO_STORAGE_BUCKET)
+    .remove([PHOTO_STORAGE_FOLDER + '/' + fileName]);
+
+  if (result.error) {
+    console.error('[PhotoManager] Delete error:', fileName, result.error);
+    alert('Failed to delete: ' + result.error.message);
+    return;
+  }
+
+  var toggleState = _loadPhotoToggleState();
+  delete toggleState[fileName];
+  _savePhotoToggleState(toggleState);
+
+  console.log('[PhotoManager] Deleted: ' + fileName);
+  await loadStoragePhotos();
+}
+
+function toggleManagedPhoto(photoId) {
+  var photo = window.managedPhotos.find(function (p) { return p.id === photoId; });
+  if (!photo) return;
+
+  photo.enabled = !photo.enabled;
+
+  var toggleState = _loadPhotoToggleState();
+  toggleState[photoId] = photo.enabled;
+  _savePhotoToggleState(toggleState);
+
+  renderPhotoList();
+}
+
+function updatePhotoCount() {
+  var badge = document.getElementById('photo-count');
+  if (!badge) return;
+  var total = window.managedPhotos.length;
+  badge.textContent = total + ' Photo' + (total === 1 ? '' : 's');
+}
+
+function renderPhotoList() {
+  var listEl = document.getElementById('photo-list');
+  if (!listEl) return;
+
+  if (window.managedPhotos.length === 0) {
+    listEl.innerHTML = '<li class="photo-empty-msg">No photos in storage yet.</li>';
+    updatePhotoCount();
+    return;
+  }
+
+  listEl.innerHTML = window.managedPhotos.map(function (photo, index) {
+    var isEnabled = photo.enabled;
+    var safeName = _escapeHtml(photo.name);
+    var displayName = safeName.length > 32 ? safeName.substring(0, 29) + '...' : safeName;
+    return '<li class="photo-item ' + (isEnabled ? '' : 'disabled') + '" data-photo-id="' + safeName + '">'
+      + '<span class="photo-index">' + (index + 1) + '.</span>'
+      + '<img class="photo-thumb" src="' + photo.src + '" alt="' + safeName + '" onerror="this.style.opacity=0.3">'
+      + '<span class="photo-name" title="' + safeName + '">' + displayName + '</span>'
+      + '<div class="photo-actions">'
+      + '<button class="photo-toggle-btn ' + (isEnabled ? 'photo-enabled' : 'photo-disabled') + '" data-action="toggle-photo" data-photo-id="' + safeName + '">' + (isEnabled ? 'Enabled' : 'Disabled') + '</button>'
+      + '<button class="photo-delete-btn" data-action="delete-photo" data-photo-id="' + safeName + '">Delete</button>'
+      + '</div>'
+      + '</li>';
+  }).join('');
+
+  listEl.querySelectorAll('[data-action="toggle-photo"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      toggleManagedPhoto(btn.getAttribute('data-photo-id'));
+    });
+  });
+
+  listEl.querySelectorAll('[data-action="delete-photo"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      deleteManagedPhoto(btn.getAttribute('data-photo-id'));
+    });
+  });
+
+  updatePhotoCount();
+}
+
+function initPhotoManager() {
+  var fileInput = document.getElementById('photo-file-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', function () {
+      uploadManagedPhotos(fileInput.files);
+      fileInput.value = '';
+    });
+  }
+  loadStoragePhotos();
+}
+
+window.PhotoManager = {
+  fetch: loadStoragePhotos,
+  upload: uploadManagedPhotos,
+  delete: deleteManagedPhoto,
+  toggle: toggleManagedPhoto,
+  getPhotos: function () { return window.managedPhotos; }
+};
+
 // Initialization for dedicated /admin.html page
 document.addEventListener('DOMContentLoaded', async () => {
   initSupabase();
@@ -636,6 +870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hasSession = localStorage.getItem('admin_session') === 'true';
     if (hasSession) {
       AdminModule.openDashboard();
+      initPhotoManager();
     } else {
       AdminModule.openLogin();
     }
