@@ -1620,48 +1620,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-// ── Mobile OS Session Verification & Desktop Guide Modal ──
+// ── Mobile Phone Session Detection & Desktop Guide Modal ──
 
-function getMobileSessionInfo() {
+function isMobilePhoneSession() {
   var ua = navigator.userAgent;
-  var isAndroid = /Android/i.test(ua);
-  var isIOS = /iPhone|iPad|iPod/i.test(ua);
-  var isMobileDevice = isAndroid || isIOS || (window.innerWidth <= 768);
-  var isDesktopViewMode = !/Mobile/i.test(ua) && isMobileDevice;
-  return { isAndroid: isAndroid, isIOS: isIOS, isMobileDevice: isMobileDevice, isDesktopViewMode: isDesktopViewMode };
+  if (/Windows|Macintosh|Linux x86_64/i.test(ua) && !/Android|iPhone/i.test(ua)) {
+    return false;
+  }
+  var isMobileUA = /Android|iPhone|iPod/i.test(ua);
+  var isSmallScreen = window.innerWidth <= 768;
+  var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  return isMobileUA && isSmallScreen && hasTouch;
 }
 
 (function () {
-  var session = getMobileSessionInfo();
+  var modal = document.getElementById('desktop-guide-modal');
 
-  // Auto full-screen on first touch if mobile and not already in desktop mode
-  if (session.isMobileDevice && !session.isDesktopViewMode) {
-    document.addEventListener('touchstart', function enableFullScreen() {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(function () {});
-      } else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
-      }
-      document.removeEventListener('touchstart', enableFullScreen);
-    }, { once: true });
+  if (!isMobilePhoneSession()) {
+    if (modal) modal.classList.add('hidden');
+    return;
   }
 
-  // Show desktop guide modal if mobile and not dismissed
-  var modal = document.getElementById('desktop-guide-modal');
+  document.addEventListener('touchstart', function enableFullScreen() {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(function () {});
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen();
+    }
+    document.removeEventListener('touchstart', enableFullScreen);
+  }, { once: true });
+
+  if (!modal) return;
+  if (sessionStorage.getItem('desktop_prompt_dismissed')) return;
+
   var instructionsBox = document.getElementById('os-instructions-box');
   var dismissBtn = document.getElementById('btn-dismiss-modal');
 
-  if (!modal || !instructionsBox) return;
-  if (!session.isMobileDevice || sessionStorage.getItem('desktop_prompt_dismissed')) return;
-
   modal.classList.add('active');
 
-  if (session.isAndroid) {
+  var ua = navigator.userAgent;
+  if (/Android/i.test(ua)) {
     instructionsBox.innerHTML = '<ol>'
       + '<li>Tap the <strong>three dots (⋮)</strong> at the top-right of Google Chrome.</li>'
       + '<li>Check the box next to <strong>"Desktop site"</strong>.</li>'
       + '</ol>';
-  } else if (session.isIOS) {
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
     instructionsBox.innerHTML = '<ol>'
       + '<li>Tap the <strong>\'aA\' icon</strong> on the left side of the Safari search bar.</li>'
       + '<li>Select <strong>"Request Desktop Website"</strong> from the menu.</li>'
@@ -1680,4 +1683,3 @@ function getMobileSessionInfo() {
     });
   }
 })();
-
