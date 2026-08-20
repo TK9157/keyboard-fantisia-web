@@ -1622,24 +1622,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // ── Mobile Phone Session Detection & Desktop Guide Modal ──
 
-function isMobilePhoneSession() {
-  var ua = navigator.userAgent;
-  if (/Windows|Macintosh|Linux x86_64/i.test(ua) && !/Android|iPhone/i.test(ua)) {
-    return false;
-  }
-  var isMobileUA = /Android|iPhone|iPod/i.test(ua);
-  var isSmallScreen = window.innerWidth <= 768;
-  var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  return isMobileUA && isSmallScreen && hasTouch;
-}
-
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
   var modal = document.getElementById('desktop-guide-modal');
+  var isMobile = /Android|iPhone|iPod/i.test(navigator.userAgent) && window.innerWidth <= 768;
 
-  if (!isMobilePhoneSession()) {
-    if (modal) modal.classList.add('hidden');
+  if (!isMobile) {
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('active');
+    }
     return;
   }
+
+  document.body.classList.add('is-mobile');
 
   document.addEventListener('touchstart', function enableFullScreen() {
     if (document.documentElement.requestFullscreen) {
@@ -1661,7 +1656,7 @@ function isMobilePhoneSession() {
   var ua = navigator.userAgent;
   if (/Android/i.test(ua)) {
     instructionsBox.innerHTML = '<ol>'
-      + '<li>Tap the <strong>three dots (⋮)</strong> at the top-right of Google Chrome.</li>'
+      + '<li>Tap the <strong>three dots (\u22EE)</strong> at the top-right of Google Chrome.</li>'
       + '<li>Check the box next to <strong>"Desktop site"</strong>.</li>'
       + '</ol>';
   } else if (/iPhone|iPad|iPod/i.test(ua)) {
@@ -1682,4 +1677,4 @@ function isMobilePhoneSession() {
       sessionStorage.setItem('desktop_prompt_dismissed', 'true');
     });
   }
-})();
+});

@@ -2256,8 +2256,6 @@
       transform: scale(0.95) translateY(1px) !important;
       filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.3)) !important;
     }
-  </style>
-
 
     /* ── Desktop Guide Modal ── */
     #desktop-guide-modal.hidden {
@@ -2282,10 +2280,11 @@
       transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    #desktop-guide-modal.active {
-      opacity: 1;
-      pointer-events: auto;
-      visibility: visible;
+    body.is-mobile #desktop-guide-modal.active {
+      display: flex !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
     }
 
     #desktop-guide-modal .cyber-modal-card {
@@ -2378,8 +2377,10 @@
     #desktop-guide-modal .cyber-btn-glow:hover {
       background: rgba(0, 240, 255, 0.22);
       box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
-    }
-  <!-- Supabase JS Client -->
+    }  </style>
+
+
+<!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 
@@ -2824,7 +2825,7 @@
 
 
   <!-- Desktop Guide Modal -->
-  <div id="desktop-guide-modal" class="cyber-modal-overlay">
+  <div id="desktop-guide-modal" class="cyber-modal-overlay hidden">
     <div class="cyber-modal-card">
       <div class="modal-header">
         <span class="warning-icon">⚠️</span>
