@@ -92,10 +92,92 @@
   box-sizing: border-box;
 }
 
+html, body, * {
+  -webkit-text-size-adjust: 100% !important;
+  -moz-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+
 html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Equalizer Display Boundary Lock */
+.screen-container, .display-screen, #lcd-screen, .center-screen-container, .video-container {
+  position: relative !important;
+  overflow: hidden !important; /* Clips equalizer bars inside the screen frame */
+  z-index: 10 !important;
+}
+
+.equalizer-wrapper, .eq-bars-container {
+  position: absolute !important;
+  inset: 0 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  z-index: 11 !important;
+  pointer-events: none !important; /* Prevents clicks from being blocked */
+}
+
+/* Equalizer Bar Anchor Lock & Scale Lock */
+.eq-container,
+.equalizer-wrapper,
+.mini-eq-container {
+  position: absolute !important;
+  transform-origin: center bottom !important;
+  contain: layout size style !important;
+  overflow: hidden !important;
+  max-height: 100% !important;
+}
+
+.eq-bar,
+#mini-eq-canvas {
+  /* Keep width fixed regardless of zoom scale */
+  flex-shrink: 0 !important;
+  transform-box: fill-box !important;
+}
+
+/* Button & Control Panel Coordinate Lock */
+.control-panel, .physical-controls-wrapper, .center-control-panel {
+  position: absolute !important;
+  z-index: 20 !important; /* Higher than LCD display and EQ */
+}
+
+/* Prevent transform/margin layout shifts on button active/focus states */
+.control-panel button, .dial-knob, .volume-dial-area, button.overlay-area {
+  box-sizing: border-box !important;
+  margin: 0 !important; /* Prevents shifting when pseudo-classes trigger */
+}
+
+.control-panel button:active,
+.control-panel button:focus,
+button.overlay-area:active,
+button.overlay-area:focus {
+  transform: none !important; /* Disables unwanted movement on click */
+  top: auto !important;
+}
+
+/* Isolated Display Layer Hierarchy */
+.image-player {
+  z-index: 1; /* Chassis Background Image Context */
+}
+
+.left-top-screen, .right-screen-container, .center-screen-container {
+  z-index: 10 !important; /* LCD Screen Container */
+}
+
+.mini-eq-container, .now-playing-info, .song-list__track-meta {
+  z-index: 11 !important; /* Green Equalizer Animation & Track Text */
+}
+
+.cassette-switch, .volume-dial-area, button.overlay-area, #power-btn {
+  z-index: 20 !important; /* Physical Buttons, Knobs, & LED Indicators */
+}
+
+#artist-modal, #youtube-lightbox, #desktop-guide-modal, .song-list-overlay {
+  z-index: 30 !important; /* Overlays / Modals */
 }
 
 body {

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description"
     content="Keyboard Fantasia by Pradeep N — A nostalgic Panasonic-style cassette stereo media player featuring instrumental renditions of classic songs">
   <title>Keyboard Fantasia — by Pradeep N, Engineer, VSSC</title>
@@ -51,6 +51,13 @@
       box-sizing: border-box;
     }
 
+    html, body, * {
+      -webkit-text-size-adjust: 100% !important;
+      -moz-text-size-adjust: 100% !important;
+      -ms-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
+    }
+
     html {
       font-size: 16px;
       -webkit-font-smoothing: antialiased;
@@ -85,6 +92,7 @@
     /*  Image Player Layout  */
     .image-player {
       position: relative;
+      container-type: inline-size;
       width: 100%;
       max-width: 100vw;
       /* Allow it to fill the screen width */
