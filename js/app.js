@@ -1620,3 +1620,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+// ── Mobile OS Session Verification & Desktop Guide Modal ──
+
+function getMobileSessionInfo() {
+  var ua = navigator.userAgent;
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var isMobileDevice = isAndroid || isIOS || (window.innerWidth <= 768);
+  var isDesktopViewMode = !/Mobile/i.test(ua) && isMobileDevice;
+  return { isAndroid: isAndroid, isIOS: isIOS, isMobileDevice: isMobileDevice, isDesktopViewMode: isDesktopViewMode };
+}
+
+(function () {
+  var session = getMobileSessionInfo();
+
+  // Auto full-screen on first touch if mobile and not already in desktop mode
+  if (session.isMobileDevice && !session.isDesktopViewMode) {
+    document.addEventListener('touchstart', function enableFullScreen() {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(function () {});
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      }
+      document.removeEventListener('touchstart', enableFullScreen);
+    }, { once: true });
+  }
+
+  // Show desktop guide modal if mobile and not dismissed
+  var modal = document.getElementById('desktop-guide-modal');
+  var instructionsBox = document.getElementById('os-instructions-box');
+  var dismissBtn = document.getElementById('btn-dismiss-modal');
+
+  if (!modal || !instructionsBox) return;
+  if (!session.isMobileDevice || sessionStorage.getItem('desktop_prompt_dismissed')) return;
+
+  modal.classList.add('active');
+
+  if (session.isAndroid) {
+    instructionsBox.innerHTML = '<ol>'
+      + '<li>Tap the <strong>three dots (⋮)</strong> at the top-right of Google Chrome.</li>'
+      + '<li>Check the box next to <strong>"Desktop site"</strong>.</li>'
+      + '</ol>';
+  } else if (session.isIOS) {
+    instructionsBox.innerHTML = '<ol>'
+      + '<li>Tap the <strong>\'aA\' icon</strong> on the left side of the Safari search bar.</li>'
+      + '<li>Select <strong>"Request Desktop Website"</strong> from the menu.</li>'
+      + '</ol>';
+  } else {
+    instructionsBox.innerHTML = '<ol>'
+      + '<li>Open your browser\'s <strong>settings menu</strong>.</li>'
+      + '<li>Enable <strong>"Desktop site"</strong> or <strong>"Request Desktop Website"</strong>.</li>'
+      + '</ol>';
+  }
+
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function () {
+      modal.classList.remove('active');
+      sessionStorage.setItem('desktop_prompt_dismissed', 'true');
+    });
+  }
+})();
+
