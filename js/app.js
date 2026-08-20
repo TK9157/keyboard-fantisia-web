@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Keyboard Fantasia — Main Application
  * Initializes all components and wires up the stereo system
  */
@@ -1210,6 +1210,52 @@ async function uploadManagedPhotos(fileList) {
   await loadStoragePhotos();
 }
 
+async function uploadManagedPhotosToCassette(fileList, cassetteId) {
+  var sb = getSupabase();
+  if (!sb) {
+    console.warn('[PhotoManager] Supabase not available.');
+    return;
+  }
+  if (!fileList || fileList.length === 0) return;
+
+  var files = Array.from(fileList).filter(function (f) {
+    return f.type.startsWith('image/');
+  });
+  if (files.length === 0) return;
+
+  var statusEl = document.getElementById('photo-upload-status');
+  var uploaded = 0;
+  var failed = 0;
+
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var safeName = Date.now() + '_' + file.name;
+    var path = PHOTO_STORAGE_FOLDER + '/' + cassetteId + '/' + safeName;
+
+    if (statusEl) statusEl.textContent = 'Uploading to ' + cassetteId.toUpperCase() + ' (' + (i + 1) + '/' + files.length + '): ' + file.name + '...';
+
+    var result = await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .upload(path, file);
+
+    if (result.error) {
+      console.error('[PhotoManager] Upload failed:', file.name, result.error);
+      failed++;
+    } else {
+      _setCassetteForPhoto(safeName, cassetteId);
+      uploaded++;
+    }
+  }
+
+  if (statusEl) {
+    statusEl.textContent = uploaded + ' uploaded to ' + cassetteId.toUpperCase() + (failed > 0 ? ', ' + failed + ' failed' : '');
+    setTimeout(function () { statusEl.textContent = ''; }, 3000);
+  }
+
+  console.log('[PhotoManager] Upload to ' + cassetteId + ' complete: ' + uploaded + ' ok, ' + failed + ' failed.');
+  await loadStoragePhotos();
+}
+
 // ── Supabase Delete: Remove file from bucket ──
 
 async function deleteManagedPhoto(fileName) {
@@ -1218,17 +1264,26 @@ async function deleteManagedPhoto(fileName) {
   var sb = getSupabase();
   if (!sb) return;
 
-  var result = await sb.storage
-    .from(PHOTO_STORAGE_BUCKET)
-    .remove([PHOTO_STORAGE_FOLDER + '/' + fileName]);
+  var currentCassette = _getCassetteForPhoto(fileName);
+  var paths = [
+    PHOTO_STORAGE_FOLDER + '/' + currentCassette + '/' + fileName,
+    PHOTO_STORAGE_FOLDER + '/' + fileName
+  ];
 
-  if (result.error) {
-    console.error('[PhotoManager] Delete error:', fileName, result.error);
-    alert('Failed to delete: ' + result.error.message);
+  var deleted = false;
+  for (var i = 0; i < paths.length; i++) {
+    var result = await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .remove([paths[i]]);
+    if (!result.error) { deleted = true; break; }
+  }
+
+  if (!deleted) {
+    console.error('[PhotoManager] Delete error:', fileName);
+    alert('Failed to delete: ' + fileName);
     return;
   }
 
-  // Clear persisted toggle state for deleted file
   var toggleState = _loadPhotoToggleState();
   delete toggleState[fileName];
   _savePhotoToggleState(toggleState);
@@ -1380,65 +1435,103 @@ function updatePhotoCount() {
   badge.textContent = total + ' Photo' + (total === 1 ? '' : 's');
 }
 
-// ── UI: Render Admin List (outputs <li> elements into <ul class="cyber-list">) ──
+// ── UI: Render Per-Cassette Grouped Photo Cards ──
 
 function renderPhotoList() {
-  var listEl = document.getElementById('photo-list');
-  if (!listEl) return;
+  var container = document.getElementById('manage-photos-container');
+  if (!container) return;
+
+  window._photoFileInputTarget = null;
+
+  var grouped = {};
+  CASSETTE_IDS.forEach(function (cid) { grouped[cid] = []; });
+  window.managedPhotos.forEach(function (photo) {
+    var cid = photo.cassette_id || 'c1';
+    if (!grouped[cid]) grouped[cid] = [];
+    grouped[cid].push(photo);
+  });
 
   if (window.managedPhotos.length === 0) {
-    listEl.innerHTML = '<li class="photo-empty-msg">No photos in storage yet.</li>';
+    container.innerHTML = CASSETTE_IDS.map(function (cid) {
+      var label = 'C-' + cid.charAt(1).toUpperCase();
+      return '<div class="photo-manager-cassette-card">'
+        + '<div class="photo-manager-cassette-header">'
+        + '<span>' + label + '</span>'
+        + '<div style="display:flex;align-items:center;gap:10px;">'
+        + '<span class="cassette-track-count">0 photos</span>'
+        + '<button class="btn-add-small" onclick="triggerCassetteUpload(\'' + cid + '\')">+ Add</button>'
+        + '</div>'
+        + '</div>'
+        + '<p class="photo-manager-cassette-empty">No photos assigned to ' + label + ' yet.</p>'
+        + '</div>';
+    }).join('');
     updatePhotoCount();
     return;
   }
 
-  listEl.innerHTML = window.managedPhotos.map(function (photo, index) {
-    var isEnabled = photo.enabled;
-    var safeName = escapeHtml(photo.name);
-    var displayName = safeName.length > 28 ? safeName.substring(0, 25) + '...' : safeName;
-    var currentCassette = photo.cassette_id || 'c1';
+  container.innerHTML = CASSETTE_IDS.map(function (cid) {
+    var label = 'C-' + cid.charAt(1).toUpperCase();
+    var photos = grouped[cid] || [];
+    var countLabel = photos.length + ' photo' + (photos.length === 1 ? '' : 's');
 
-    var selectOptions = CASSETTE_IDS.map(function (cid) {
-      var label = 'C-' + cid.charAt(1).toUpperCase();
-      var selected = cid === currentCassette ? ' selected' : '';
-      return '<option value="' + cid + '"' + selected + '>' + label + '</option>';
-    }).join('');
+    var photosHtml;
+    if (photos.length === 0) {
+      photosHtml = '<p class="photo-manager-cassette-empty">No photos assigned to ' + label + ' yet.</p>';
+    } else {
+      photosHtml = '<div class="photo-manager-photo-list">'
+        + photos.map(function (photo, localIndex) {
+          var isEnabled = photo.enabled;
+          var safeName = escapeHtml(photo.name);
+          var displayName = safeName.length > 28 ? safeName.substring(0, 25) + '...' : safeName;
+          return '<div class="photo-manager-photo-item ' + (isEnabled ? '' : 'disabled') + '" data-photo-id="' + safeName + '">'
+            + '<span class="photo-index">' + (localIndex + 1) + '.</span>'
+            + '<img class="photo-thumb" src="' + photo.src + '" alt="' + safeName + '" onerror="this.style.opacity=0.3">'
+            + '<span class="photo-name" title="' + safeName + '">' + displayName + '</span>'
+            + '<div class="photo-actions">'
+            + '<button class="photo-toggle-btn ' + (isEnabled ? 'photo-enabled' : 'photo-disabled') + '" data-action="toggle-photo" data-photo-id="' + safeName + '">' + (isEnabled ? 'Enabled' : 'Disabled') + '</button>'
+            + '<button class="photo-delete-btn" data-action="delete-photo" data-photo-id="' + safeName + '">Delete</button>'
+            + '</div>'
+            + '</div>';
+        }).join('')
+        + '</div>';
+    }
 
-    return '<li class="photo-item ' + (isEnabled ? '' : 'disabled') + '" data-photo-id="' + safeName + '">'
-      + '<span class="photo-index">' + (index + 1) + '.</span>'
-      + '<img class="photo-thumb" src="' + photo.src + '" alt="' + safeName + '" onerror="this.style.opacity=0.3">'
-      + '<span class="photo-name" title="' + safeName + '">' + displayName + '</span>'
-      + '<select class="cassette-row-select" data-photo-id="' + safeName + '" title="Assign to cassette">'
-      + selectOptions
-      + '</select>'
-      + '<div class="photo-actions">'
-      + '<button class="photo-toggle-btn ' + (isEnabled ? 'photo-enabled' : 'photo-disabled') + '" data-action="toggle-photo" data-photo-id="' + safeName + '">' + (isEnabled ? 'Enabled' : 'Disabled') + '</button>'
-      + '<button class="photo-delete-btn" data-action="delete-photo" data-photo-id="' + safeName + '">Delete</button>'
+    return '<div class="photo-manager-cassette-card">'
+      + '<div class="photo-manager-cassette-header">'
+      + '<span>' + label + '</span>'
+      + '<div style="display:flex;align-items:center;gap:10px;">'
+      + '<span class="cassette-track-count">' + countLabel + '</span>'
+      + '<button class="btn-add-small" onclick="triggerCassetteUpload(\'' + cid + '\')">+ Add</button>'
       + '</div>'
-      + '</li>';
+      + '</div>'
+      + photosHtml
+      + '</div>';
   }).join('');
 
-  listEl.querySelectorAll('[data-action="toggle-photo"]').forEach(function (btn) {
+  container.querySelectorAll('[data-action="toggle-photo"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       toggleManagedPhoto(btn.getAttribute('data-photo-id'));
     });
   });
 
-  listEl.querySelectorAll('[data-action="delete-photo"]').forEach(function (btn) {
+  container.querySelectorAll('[data-action="delete-photo"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       deleteManagedPhoto(btn.getAttribute('data-photo-id'));
     });
   });
 
-  listEl.querySelectorAll('.cassette-row-select').forEach(function (select) {
-    select.addEventListener('change', function () {
-      var photoId = this.getAttribute('data-photo-id');
-      var newCassette = this.value;
-      reassignPhoto(photoId, newCassette);
-    });
-  });
-
   updatePhotoCount();
+}
+
+// ── Per-Cassette Upload Trigger ──
+
+function triggerCassetteUpload(cassetteId) {
+  window._photoFileInputTarget = cassetteId;
+  var fileInput = document.getElementById('photo-file-input');
+  if (fileInput) {
+    fileInput.value = '';
+    fileInput.click();
+  }
 }
 
 // ── HTML Escape Helper ──
@@ -1458,8 +1551,10 @@ function initPhotoManager() {
   var fileInput = document.getElementById('photo-file-input');
   if (fileInput) {
     fileInput.addEventListener('change', function () {
-      uploadManagedPhotos(fileInput.files);
+      var targetCassette = window._photoFileInputTarget || 'c1';
+      uploadManagedPhotosToCassette(fileInput.files, targetCassette);
       fileInput.value = '';
+      window._photoFileInputTarget = null;
     });
   }
   loadStoragePhotos();

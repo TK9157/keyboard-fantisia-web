@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1862,107 +1862,89 @@
       }
     }
 
-    /* ── Photo Manager Card (Admin Panel) ── */
-    .photo-manager-card {
-      background: #080c14;
-      border: 1px solid #102131;
-      border-radius: var(--radius-md, 8px);
-      padding: var(--gap-md);
-      margin-top: var(--gap-lg, 24px);
+    /* ── Photo Manager: Per-Cassette Card Layout ── */
+    .photo-manager-cassette-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
     }
 
-    .photo-manager-header {
+    .photo-manager-cassette-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--gap-md);
-    }
-
-    .photo-manager-header h3 {
+      color: var(--led-cyan);
       font-family: var(--font-display);
-      color: #00f0ff;
-      margin: 0;
-      font-size: 1rem;
+      border-bottom: 1px solid rgba(0, 255, 204, 0.33);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
     }
 
-    .photo-count-badge {
-      font-family: var(--font-tech);
+    .photo-manager-cassette-header .cassette-track-count {
       font-size: 0.8rem;
-      background: rgba(0, 240, 255, 0.1);
-      color: #00f0ff;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--led-cyan);
       padding: 2px 10px;
       border-radius: 10px;
-      border: 1px solid rgba(0, 240, 255, 0.25);
+      font-family: var(--font-tech);
     }
 
-    .photo-upload-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: var(--gap-md);
-      padding-bottom: var(--gap-md);
-      border-bottom: 1px solid #102131;
-    }
-
-    .photo-upload-bar input[type="file"] {
-      display: none;
-    }
-
-    .photo-add-btn {
+    .photo-manager-cassette-header .btn-add-small {
       background: rgba(0, 240, 255, 0.12);
       color: #00f0ff;
       border: 1px solid rgba(0, 240, 255, 0.35);
-      padding: 8px 16px;
+      padding: 3px 12px;
       font-family: var(--font-display);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       cursor: pointer;
       border-radius: 4px;
       transition: background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .photo-add-btn:hover {
+    .photo-manager-cassette-header .btn-add-small:hover {
       background: rgba(0, 240, 255, 0.22);
       box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
     }
 
-    .photo-upload-hint {
+    .photo-manager-cassette-empty {
       font-family: var(--font-tech);
-      font-size: 0.78rem;
+      font-style: italic;
       color: var(--silver-dark, #a0a0a0);
+      margin: 4px 8px;
     }
 
-    #photo-list {
-      max-height: 400px;
-      overflow-y: auto;
+    .photo-manager-photo-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .photo-item {
+    .photo-manager-photo-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 10px;
+      padding: 8px 12px;
       background: #090d16;
       border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .photo-item.disabled {
+    .photo-manager-photo-item.disabled {
       opacity: 0.45;
       border-color: rgba(255, 0, 85, 0.2);
     }
 
-    .photo-index {
+    .photo-manager-photo-item .photo-index {
       font-family: var(--font-tech);
       font-size: 0.85rem;
-      color: #00f0ff;
+      color: var(--led-cyan);
       min-width: 22px;
       text-align: right;
     }
 
-    .photo-thumb {
+    .photo-manager-photo-item .photo-thumb {
       width: 40px;
       height: 40px;
       border-radius: 3px;
@@ -1971,7 +1953,7 @@
       flex-shrink: 0;
     }
 
-    .photo-name {
+    .photo-manager-photo-item .photo-name {
       flex: 1;
       font-family: var(--font-tech);
       font-size: 0.85rem;
@@ -1982,7 +1964,7 @@
       min-width: 0;
     }
 
-    .photo-actions {
+    .photo-manager-photo-item .photo-actions {
       display: flex;
       align-items: center;
       gap: 6px;
@@ -2038,42 +2020,15 @@
       box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
     }
 
-    .photo-empty-msg {
+    .photo-count-badge {
       font-family: var(--font-tech);
-      font-style: italic;
-      color: var(--silver-dark, #a0a0a0);
-      padding: 16px;
-      text-align: center;
+      font-size: 0.8rem;
+      background: rgba(0, 240, 255, 0.1);
+      color: #00f0ff;
+      padding: 2px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 240, 255, 0.25);
     }
-
-    .cyber-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      max-height: 400px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .cyber-list::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .cyber-list::-webkit-scrollbar-track {
-      background: #080c14;
-    }
-
-    .cyber-list::-webkit-scrollbar-thumb {
-      background: rgba(0, 240, 255, 0.3);
-      border-radius: 3px;
-    }
-
-    .cyber-list::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 240, 255, 0.5);
-    }
-
     /* ── Cassette Row Select (Inline Assignment Dropdown) ── */
     .cassette-row-select {
       background: #09121d;
@@ -2415,22 +2370,15 @@
     </div>
 
     <!-- Photo Manager -->
-    <div id="manage-photos-container" class="photo-manager-card">
-      <div class="photo-manager-header">
-        <h3>Manage Photos</h3>
-        <span class="photo-count-badge" id="photo-count">0 Photos</span>
-      </div>
-      <hr style="border:none;border-top:1px solid #102131;margin:0 0 12px 0;">
-      <div class="photo-upload-bar">
-        <input type="file" id="photo-file-input" multiple accept="image/*">
-        <button class="photo-add-btn" onclick="document.getElementById('photo-file-input').click()">+ Add New
-          Photos</button>
-        <span class="photo-upload-hint">Select multiple images at once</span>
-      </div>
+    <div class="admin-panel" style="margin-top:var(--gap-lg);">
+      <h3>Manage Photos <span class="photo-count-badge" id="photo-count" style="margin-left:8px;vertical-align:middle;">0 Photos</span></h3>
       <div id="photo-upload-status"
         style="font-family:var(--font-tech);font-size:0.78rem;color:#00f0ff;margin-bottom:8px;min-height:1em;"></div>
-      <ul id="photo-list" class="cyber-list"></ul>
+      <div id="manage-photos-container">
+        <!-- Populated via JS: per-cassette cassette-category-block cards -->
+      </div>
     </div>
+    <input type="file" id="photo-file-input" multiple accept="image/*" style="display:none;">
   </div>
 
   <!-- USER BADGE -->
