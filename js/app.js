@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Keyboard Fantasia — Main Application
  * Initializes all components and wires up the stereo system
  */
@@ -717,6 +717,11 @@ class KeyboardFantasiaApp {
       if (s.songListOpen && s.activeCassette) {
         this._renderSongList(s.activeCassette);
       }
+
+      // Purge previous cassette photos and load photos strictly assigned to active cassette
+      if (s.activeCassette) {
+        loadPhotosForCassette(s.activeCassette);
+      }
     });
 
     // Song list open/close
@@ -932,9 +937,45 @@ class KeyboardFantasiaApp {
 // ==========================================
 
 window.currentPhotoIndex = 0;
+let activeGalleryPhotos = [];
+let currentActiveCassetteId = 'c1';
 
 function getActivePhotos() {
-  return window.managedPhotos.filter(function (p) { return p.enabled !== false; });
+  var activeCassetteId = (state.get('activeCassette') || currentActiveCassetteId || 'c1').toLowerCase();
+  return window.managedPhotos.filter(function (p) {
+    var pCassette = (p.cassette_id || 'c1').toLowerCase();
+    return pCassette === activeCassetteId && p.enabled !== false;
+  });
+}
+
+async function loadPhotosForCassette(cassetteId) {
+  if (cassetteId) {
+    currentActiveCassetteId = cassetteId.toLowerCase();
+  }
+  window.currentPhotoIndex = 0;
+  var photos = getActivePhotos();
+  activeGalleryPhotos = photos.map(function(p) { return p.src; });
+  renderActivePhoto();
+  updateGalleryDisplay();
+}
+
+function renderActivePhoto() {
+  const photoElement = document.getElementById('mini-photo-display') || document.getElementById('viewer-img-display');
+  if (!photoElement) return;
+
+  const photos = getActivePhotos();
+  if (photos.length === 0) {
+    if (galleryFadeTimeout) clearTimeout(galleryFadeTimeout);
+    photoElement.style.transition = 'opacity 0.3s ease-in-out';
+    photoElement.style.opacity = '0';
+    setTimeout(function () { photoElement.src = ''; }, 300);
+    return;
+  }
+
+  if (window.currentPhotoIndex >= photos.length) {
+    window.currentPhotoIndex = 0;
+  }
+  photoElement.src = photos[window.currentPhotoIndex].src;
 }
 
 let galleryFadeTimeout = null;
@@ -1016,17 +1057,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') window.nextGalleryPhoto(-1);
   if (e.key === 'ArrowRight') window.nextGalleryPhoto(1);
 });
-
-// ==========================================
-// PHOTO MANAGER MODULE (Admin Panel)
-// Supabase Storage-backed CRUD + Viewer Sync
-// ==========================================
-
-const PHOTO_STORAGE_BUCKET = 'PradeepN_songs_tracks';
-const PHOTO_STORAGE_FOLDER = 'images';
-const PHOTO_VALID_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
-
-window.managedPhotos = [];
 
 // ── localStorage Toggle State Persistence ──
 
