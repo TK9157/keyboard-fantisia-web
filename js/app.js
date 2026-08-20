@@ -1107,61 +1107,56 @@ async function loadStoragePhotos() {
     return;
   }
 
-  console.log('[PhotoManager] Fetching photos from Supabase Storage...');
-  var result = await sb.storage
-    .from(PHOTO_STORAGE_BUCKET)
-    .list(PHOTO_STORAGE_FOLDER, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
-
-  var files = result.data;
-  var storageErr = result.error;
-
-  if (storageErr) {
-    console.error('[PhotoManager] Storage list error:', storageErr);
-    var listEl = document.getElementById('photo-list');
-    if (listEl) listEl.innerHTML = '<li class="photo-empty-msg">Error loading photos: ' + storageErr.message + '</li>';
-    return;
-  }
-
-  if (!files || files.length === 0) {
-    console.warn('[PhotoManager] No files found in images/ storage folder.');
-    window.managedPhotos = [];
-    renderPhotoList();
-    syncGalleryFromManaged();
-    return;
-  }
-
+  console.log('[PhotoManager] Fetching photos from Supabase Storage subfolders...');
+  var allPhotos = [];
   var toggleState = _loadPhotoToggleState();
 
-  window.managedPhotos = files
-    .filter(function (f) {
-      if (!f.name || f.name.startsWith('.')) return false;
-      if (f.name === '.emptyFolderPlaceholder') return false;
+  for (var ci = 0; ci < CASSETTE_IDS.length; ci++) {
+    var cId = CASSETTE_IDS[ci];
+    var folderPath = PHOTO_STORAGE_FOLDER + '/' + cId;
+
+    var result = await sb.storage
+      .from(PHOTO_STORAGE_BUCKET)
+      .list(folderPath, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+
+    if (result.error) {
+      console.warn('[PhotoManager] Could not list ' + folderPath + ':', result.error.message);
+      continue;
+    }
+
+    var files = result.data;
+    if (!files || files.length === 0) continue;
+
+    for (var fi = 0; fi < files.length; fi++) {
+      var f = files[fi];
+      if (!f.name || f.name.startsWith('.')) continue;
+      if (f.name === '.emptyFolderPlaceholder') continue;
       var lower = f.name.toLowerCase();
-      return PHOTO_VALID_EXTENSIONS.some(function (ext) { return lower.endsWith(ext); });
-    })
-    .map(function (f) {
+      if (!PHOTO_VALID_EXTENSIONS.some(function (ext) { return lower.endsWith(ext); })) continue;
+
+      var fullPath = folderPath + '/' + f.name;
       var urlResult = sb.storage
         .from(PHOTO_STORAGE_BUCKET)
-        .getPublicUrl(PHOTO_STORAGE_FOLDER + '/' + f.name);
+        .getPublicUrl(fullPath);
 
       var publicUrl = urlResult.data ? urlResult.data.publicUrl : '';
       var isEnabled = toggleState[f.name] !== undefined ? toggleState[f.name] : true;
 
-      return {
-        id: f.name,
+      allPhotos.push({
+        id: cId + '/' + f.name,
         name: f.name,
         src: publicUrl,
         enabled: isEnabled,
-        cassette_id: _getCassetteForPhoto(f.name)
-      };
-    });
+        cassette_id: cId
+      });
+    }
+  }
 
-  console.log('[PhotoManager] Loaded ' + window.managedPhotos.length + ' photos from storage.');
+  window.managedPhotos = allPhotos;
+  console.log('[PhotoManager] Loaded ' + allPhotos.length + ' photos from storage.');
   renderPhotoList();
   syncGalleryFromManaged();
 }
-
-// ── Supabase Upload: Add files to bucket ──
 
 async function uploadManagedPhotos(fileList) {
   var sb = getSupabase();
@@ -1185,7 +1180,7 @@ async function uploadManagedPhotos(fileList) {
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
     var safeName = Date.now() + '_' + file.name;
-    var path = PHOTO_STORAGE_FOLDER + '/' + safeName;
+    var path = PHOTO_STORAGE_FOLDER + '/c1/' + safeName;
 
     if (statusEl) statusEl.textContent = 'Uploading ' + (i + 1) + '/' + files.length + ': ' + file.name + '...';
 
@@ -1229,20 +1224,21 @@ async function uploadManagedPhotosToCassette(fileList, cassetteId) {
 
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
+    var sanitizedId = cassetteId.toLowerCase().replace('-', '');
     var safeName = Date.now() + '_' + file.name;
-    var path = PHOTO_STORAGE_FOLDER + '/' + cassetteId + '/' + safeName;
+    var path = PHOTO_STORAGE_FOLDER + '/' + sanitizedId + '/' + safeName;
 
-    if (statusEl) statusEl.textContent = 'Uploading to ' + cassetteId.toUpperCase() + ' (' + (i + 1) + '/' + files.length + '): ' + file.name + '...';
+    if (statusEl) statusEl.textContent = 'Uploading to ' + sanitizedId.toUpperCase() + ' (' + (i + 1) + '/' + files.length + '): ' + file.name + '...';
 
     var result = await sb.storage
       .from(PHOTO_STORAGE_BUCKET)
-      .upload(path, file);
+      .upload(path, file, { upsert: true });
 
     if (result.error) {
       console.error('[PhotoManager] Upload failed:', file.name, result.error);
       failed++;
     } else {
-      _setCassetteForPhoto(safeName, cassetteId);
+      _setCassetteForPhoto(safeName, sanitizedId);
       uploaded++;
     }
   }
@@ -1315,7 +1311,6 @@ function toggleManagedPhoto(photoId) {
   renderPhotoList();
   syncGalleryFromManaged();
 }
-
 // ── Supabase Reassignment: Move file between cassette folders ──
 
 async function reassignPhoto(fileName, newCassetteId) {
