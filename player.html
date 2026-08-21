@@ -1210,42 +1210,6 @@
       opacity: 1;
     }
 
-    .modal-content {
-      position: relative;
-      width: 580px;
-      max-width: 92vw;
-      max-height: 85vh;
-      overflow-y: auto;
-      background: linear-gradient(145deg, rgba(30, 33, 37, 0.98) 0%, rgba(15, 15, 20, 0.98) 100%);
-      border: 1px solid rgba(0, 255, 65, 0.2);
-      border-radius: var(--radius-xl);
-      padding: var(--gap-xl);
-      box-shadow: 0 0 60px rgba(0, 255, 65, 0.08), 0 25px 80px rgba(0, 0, 0, 0.7);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 1px solid var(--steel-dark);
-      background: transparent;
-      color: var(--silver-dark);
-      font-size: 1.4rem;
-      line-height: 1;
-      cursor: pointer;
-      z-index: 2;
-      transition: all 0.2s;
-    }
-
-    .modal-close:hover {
-      color: var(--led-red);
-      border-color: var(--led-red);
-      background: rgba(255, 0, 0, 0.1);
-    }
-
     .modal-header h2 {
       font-family: var(--font-display);
       font-size: 1.05rem;
@@ -2483,7 +2447,38 @@
       font-size: clamp(10px, 1vw, 16px) !important;
       max-width: 100% !important;
       overflow: hidden !important;
-    
+    }
+
+    /* ── Artist Bio Modal Repair ── */
+    .modal-content {
+      position: relative;
+      width: 580px;
+      max-width: 92vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(5, 5, 5, 0.98));
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 255, 65, 0.15);
+      color: #fff;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      color: var(--silver-dark);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--led-green);
+    }
 
     /* ═══ GPU LIQUID MOTION LAYER ═══ */
     .control-panel button,
