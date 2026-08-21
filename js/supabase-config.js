@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // SUPABASE CONFIG — Keyboard Fantasia Player
 // ============================================================
 // 
@@ -22,16 +22,22 @@ var SUPABASE_CONFIG = {
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZneWR0dmpzcG94aGNrbWV6eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDM2NzAsImV4cCI6MjEwMDgxOTY3MH0.PMKs7g9DvaQiFbBrEsYlR8pfZlYQUo3FW2Bt51CkgJE'
 };
 
-// Initialize Supabase client (loaded from CDN in index.html)
+// Singleton Supabase client — prevents duplicate initializations
 var supabaseClient = null;
+var _supabaseInitializing = false;
 
 function initSupabase() {
+  if (supabaseClient) return supabaseClient;
+  if (_supabaseInitializing) return supabaseClient;
+  _supabaseInitializing = true;
+
   if (typeof supabase !== 'undefined' && supabase.createClient) {
     supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
     console.log('✅ Supabase client initialized');
     return supabaseClient;
   } else {
     console.error('❌ Supabase JS library not loaded. Check CDN script in index.html.');
+    _supabaseInitializing = false;
     return null;
   }
 }

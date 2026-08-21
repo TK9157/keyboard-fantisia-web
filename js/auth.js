@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // AUTH MODULE — Anonymous Guest Auto-Login + Admin Google OAuth
 // Keyboard Fantasia Player
 // ============================================================
@@ -93,15 +93,19 @@ var AuthModule = (function () {
   // ─────────────────────────────────────────────────────────
   function _signInAsGuest() {
     var sb = getSupabase();
-    if (!sb) return;
+    if (!sb) {
+      _fallbackGuest();
+      return;
+    }
 
     sb.auth.signInAnonymously().then(function (result) {
       if (result.error) {
-        console.warn('Anonymous sign-in failed:', result.error.message);
-        // Still allow page to work — data will use local fallback
-        currentUser = { id: null, email: null, name: 'Guest', avatar: '', isAnonymous: true };
-        isAdmin = false;
-        notifyListeners('guest', currentUser);
+        var code = result.error.status || result.error.code;
+        console.warn('Guest Auth notice:', result.error.message);
+        if (code === 422 || (result.error.message && result.error.message.indexOf('422') !== -1)) {
+          console.warn('Anonymous sign-ins may be disabled in Supabase. Falling back to Guest Session Mode.');
+        }
+        _fallbackGuest();
         return;
       }
 
@@ -120,10 +124,15 @@ var AuthModule = (function () {
         notifyListeners('guest', currentUser);
       }
     }).catch(function (err) {
-      console.warn('Anonymous sign-in exception:', err);
-      currentUser = { id: null, email: null, name: 'Guest', avatar: '', isAnonymous: true };
-      notifyListeners('guest', currentUser);
+      console.warn('Guest sign-in bypassed:', err.message || err);
+      _fallbackGuest();
     });
+  }
+
+  function _fallbackGuest() {
+    currentUser = { id: null, email: null, name: 'Guest', avatar: '', isAnonymous: true };
+    isAdmin = false;
+    notifyListeners('guest', currentUser);
   }
 
   // ─────────────────────────────────────────────────────────
@@ -196,11 +205,15 @@ var AuthModule = (function () {
 
     sb.auth.signInAnonymously().then(function (result) {
       if (result.error) {
-        console.warn('Anonymous sign-in warning:', result.error.message);
+        var code = result.error.status || result.error.code;
+        console.warn('Guest Auth notice:', result.error.message);
+        if (code === 422 || (result.error.message && result.error.message.indexOf('422') !== -1)) {
+          console.warn('Anonymous sign-ins may be disabled in Supabase. Proceeding with Guest Session Mode.');
+        }
       }
       window.location.href = 'player.html';
     }).catch(function (err) {
-      console.warn('Anonymous sign-in exception:', err);
+      console.warn('Guest sign-in bypassed:', err.message || err);
       window.location.href = 'player.html';
     });
   }

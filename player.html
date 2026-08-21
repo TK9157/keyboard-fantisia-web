@@ -2687,7 +2687,7 @@
         <div
           style="width: 80px; height: 80px; border-radius: 50%; background: var(--gunmetal); border: 2px solid var(--led-green); overflow: hidden; flex-shrink: 0;">
           <img src="media/images/profile_placeholder.jpg" alt="Artist Profile"
-            style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src=''; this.alt='Profile Picture';">
+            style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.style.display='none';">
         </div>
         <div>
           <h2 style="font-family: var(--font-display); color: var(--led-green); margin-bottom: 4px;">Pradeep N</h2>
@@ -2788,7 +2788,7 @@
 
       <div id="idle-screen" class="video-overlay">
         <!-- AI Piano Video Placeholder -->
-        <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline
+        <video id="welcome-video" src="media/video/ai_piano.mp4" autoplay loop muted playsinline onerror="this.style.display='none';"
           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; z-index: 0; pointer-events: none;"></video>
 
         <div id="idle-screen-content" class="screen-idle-layer">
