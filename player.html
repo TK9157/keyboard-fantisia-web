@@ -78,10 +78,6 @@
       margin: 0;
     }
 
-    .image-player.is-off {
-      /* Power OFF: blank ONLY the two display screens (top-left photo viewer +
-         center screen) to black. The surrounding hardware chassis stays lit. */
-    }
 
     /* Top-left photo viewer screen → blank to black */
     .image-player.is-off #left-screen-container .photo-viewer-wrapper,
@@ -441,9 +437,6 @@
       z-index: 2;
     }
 
-    #idle-screen {
-      /* Background removed per request */
-    }
 
     /* Idle screen content layer (title + visualizer + subtitle) */
     .screen-idle-layer {
@@ -2483,9 +2476,7 @@
     #desktop-guide-modal .cyber-btn-glow:hover {
       background: rgba(0, 240, 255, 0.22);
       box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
-
-
-
+    }
 
     /* Lock font size scaling to element container bounds */
     .btn-label, .track-title, .status-text, #lcd-screen span {
