@@ -15,15 +15,20 @@ let masterGain = null;
 
 function initAudioContext() {
   if (!audioCtx) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AudioContext();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+    // Allow browser to default to native device hardware sampleRate
+    // to prevent resampling stutter and crackle on mobile
+    audioCtx = new AudioContextClass({
+      latencyHint: 'playback', // Prioritizes smooth, crackle-free playback over ultra-low latency
+    });
 
     globalAnalyser = audioCtx.createAnalyser();
     globalAnalyser.fftSize = 64;
     globalAnalyser.smoothingTimeConstant = 0.8;
 
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 1.0;
+    masterGain.gain.value = 0.85; // Headroom to prevent digital clipping on mobile speakers
 
     // Route: Analyser -> Master Gain -> Speakers
     globalAnalyser.connect(masterGain);
@@ -80,6 +85,29 @@ function setupMediaAudio(mediaElement) {
     }
   }, { passive: true });
 });
+
+// ── Silent Buffer Touch-Warmup (Mobile Audio Unlock) ──
+// Mobile browsers (iOS Safari & Mobile Chrome) throttle uninitialized audio contexts.
+// Resume and decode a 1-frame silent buffer on the very first user interaction.
+document.addEventListener('touchstart', function unlockMobileAudio() {
+  initAudioContext();
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+
+  // Play silent buffer to warm up mobile hardware decoder pipeline
+  try {
+    const buffer = audioCtx.createBuffer(1, 1, 22050);
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start(0);
+  } catch (e) {
+    // Silent fail - warmup is best-effort
+  }
+
+  document.removeEventListener('touchstart', unlockMobileAudio);
+}, { once: true });
 
 class KeyboardFantasiaApp {
   constructor() {
