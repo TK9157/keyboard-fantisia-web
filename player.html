@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -126,6 +126,9 @@
       background-position: center;
       background-repeat: no-repeat;
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    
+      contain: layout style paint !important;
+      transform-style: preserve-3d !important;
     }
 
     /* Invisible clickable areas that overlay the image */
@@ -2408,7 +2411,26 @@
     #desktop-guide-modal .cyber-btn-glow:hover {
       background: rgba(0, 240, 255, 0.22);
       box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
-    }  </style>
+
+
+    /* ── Freeze browser font recalculation engine on zoom ── */
+    html, body, div, span, p, button, h1, h2, h3 {
+      -webkit-text-size-adjust: none !important;
+      -moz-text-size-adjust: none !important;
+      -ms-text-size-adjust: none !important;
+      text-size-adjust: none !important;
+    }
+
+    .btn-label, .track-title, .status-text, #lcd-screen span, .control-panel label {
+      max-height: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* ── Lock parent frame scale matrix ── */
+    #image-player-wrapper {
+      contain: layout style paint !important;
+      transform-style: preserve-3d !important;
+    }    }  </style>
 
 
 <!-- Supabase JS Client -->
