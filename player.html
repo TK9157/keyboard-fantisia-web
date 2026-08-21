@@ -201,7 +201,7 @@
       justify-content: center;
       align-items: center;
       color: black;
-      font-size: 0.65vw !important;
+      font-size: 12px;
       font-weight: bold;
       font-family: monospace;
       user-select: none;
@@ -298,77 +298,6 @@
       height: 2.8%;
     }
 
-    /* ── VW-Scaled Cassette Slot Labels & Rack Items ── */
-    .cassette-rack-item {
-      width: 14vw !important;
-      height: 1.8vw !important;
-      border-radius: 0.2vw !important;
-      box-sizing: border-box !important;
-    }
-
-    .cassette-rack-item span {
-      font-size: 0.75vw !important;
-      letter-spacing: 0.05vw !important;
-      line-height: 1 !important;
-      white-space: nowrap !important;
-      -webkit-text-size-adjust: none !important;
-      text-size-adjust: none !important;
-    }
-
-    /* ── VW-Scaled Physical Selection Buttons (C1–C6) ── */
-    .cassette-switch {
-      width: 4.2vw !important;
-      height: 1.6vw !important;
-      font-size: 0.8vw !important;
-      border-radius: 0.8vw !important;
-      padding: 0 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      box-sizing: border-box !important;
-    }
-
-    /* Prevent browser font inflation from distorting button shapes */
-    .cassette-switch * {
-      max-height: 100% !important;
-      transform-box: fill-box !important;
-    }
-
-    /* ── VW-Scaled Photo Viewer Navigation Arrows ── */
-    .nav-arrow {
-      width: 2vw !important;
-      height: 2.5vw !important;
-      font-size: 1.5vw !important;
-      line-height: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-
-    .left-arrow,
-    .nav-arrow.left,
-    #prev-btn {
-      left: 0.6vw !important;
-    }
-
-    .right-arrow,
-    .nav-arrow.right,
-    #next-btn {
-      right: 0.6vw !important;
-    }
-
-    /* ── VW-Scaled Display Bar Text & Mini EQ ── */
-    .display-bar-header,
-    #volume-value,
-    .mini-eq-container {
-      font-size: 1.1vw !important;
-      letter-spacing: 0.08vw !important;
-    }
-
-    #mini-eq-canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
 
     /* Central Black Display Screen Container */
     .video-container {
@@ -736,12 +665,12 @@
     button[aria-label*="Pause"] *,
     button[aria-label*="PAUSE"] * {
       font-family: monospace !important;
-      font-size: 0.85vw !important;
+      font-size: 0.88rem !important;
       font-weight: 800 !important;
       color: #000 !important;
       white-space: nowrap !important;
       text-align: center !important;
-      line-height: 1 !important;
+      line-height: 1.1 !important;
       pointer-events: none !important;
       transition: all 0.2s !important;
     }
@@ -762,15 +691,14 @@
     }
 
     .transport-btn-area span {
-      font-size: 0.85vw !important;
+      font-size: 0.88rem;
       font-family: monospace;
       font-weight: 800;
       color: #000;
       pointer-events: none;
       transition: all 0.2s;
       text-align: center;
-      line-height: 1;
-      white-space: nowrap;
+      line-height: 1.1;
     }
 
     .transport-btn-area:hover span {
@@ -977,13 +905,13 @@
       left: 50% !important;
       transform: translate(-50%, -50%) !important;
       background: #000000 !important;
-      border-radius: 0.2vw;
+      border-radius: 4px;
 
-      /* Reduced width boundaries — converted to vw for zoom-invariance */
+      /* Reduced width boundaries */
       width: auto !important;
-      min-width: 1.875vw !important; /* 36px ÷ 1920 × 100vw */
-      max-width: 2.6vw !important;   /* 50px ÷ 1920 × 100vw */
-      padding: 0.1vw 0.2vw !important;
+      min-width: 36px !important;
+      max-width: 50px !important;
+      padding: 2px 4px !important;
 
       display: flex;
       align-items: center;
@@ -996,7 +924,7 @@
     #volume-text {
       font-family: 'Courier New', monospace, sans-serif;
       font-weight: bold;
-      font-size: 0.7vw !important;
+      font-size: 13px;
       color: #ffffff !important;
       /* Pure white text */
       text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
@@ -1052,12 +980,12 @@
     .eq-container,
     .equalizer-wrapper {
       position: absolute !important;
-      top: calc(47.9% - 0.9375vw) !important;
+      top: calc(47.9% - 18px) !important;
       /* Aligns EQ bottom edge to the top of the volume dial */
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: 12.34vw !important;   /* 237px ÷ 1920 × 100vw */
-      height: 0.9375vw !important; /* 18px  ÷ 1920 × 100vw */
+      width: 237px !important;
+      height: 18px !important;
       z-index: 11 !important;
       overflow: hidden !important;
       max-height: 100% !important;
@@ -2204,7 +2132,7 @@
 
     .capsule-help-btn span {
       font-family: var(--font-tech);
-      font-size: 0.72vw !important;
+      font-size: 0.72rem;
       font-weight: 800;
       color: #111111;
       letter-spacing: 0.5px;
@@ -2484,9 +2412,8 @@
       max-width: 100% !important;
       overflow: hidden !important;
     }
-    
 
-    /* ═══ GPU LIQUID MOTION LAYER ═══ */
+    /*   /* ═══ GPU LIQUID MOTION LAYER ═══ */
     .control-panel button,
     .volume-dial-area,
     .photo-viewer-wrapper img,
@@ -2868,13 +2795,13 @@
           cursor: pointer !important;">
         <span style="
           font-family: monospace !important;
-          font-size: 0.85vw !important;
+          font-size: 0.75rem !important;
           font-weight: 800 !important;
           color: #000 !important;
           background: transparent !important;
           white-space: nowrap !important;
           text-align: center !important;
-          line-height: 1 !important;
+          line-height: 1.1 !important;
           pointer-events: none !important;
           transition: all 0.2s !important;
           display: inline !important;">PAUSE</span>
