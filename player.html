@@ -2483,6 +2483,63 @@
       font-size: clamp(10px, 1vw, 16px) !important;
       max-width: 100% !important;
       overflow: hidden !important;
+    
+
+    /* ═══ GPU LIQUID MOTION LAYER ═══ */
+    .control-panel button,
+    .volume-dial-area,
+    .photo-viewer-wrapper img,
+    .eq-bar,
+    .cassette-rack-item,
+    .cassette-switch,
+    .nav-arrow,
+    .dial-knob {
+      will-change: transform, opacity;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 0.35s ease,
+                  box-shadow 0.35s ease;
+    }
+
+    /* ═══ TACTILE HOVER & DEPTH ═══ */
+    .control-panel button:hover,
+    .cassette-switch:hover,
+    .cassette-rack-item:hover,
+    .nav-arrow:hover {
+      filter: brightness(1.15) drop-shadow(0 0 8px rgba(0, 240, 255, 0.35));
+      transform: scale(1.03) translateZ(0);
+    }
+
+    .control-panel button:active,
+    .cassette-switch:active,
+    .cassette-rack-item:active {
+      transform: scale(0.96) translateZ(0) !important;
+      filter: brightness(0.9);
+      transition: transform 0.08s ease-out !important;
+    }
+
+    /* ═══ LIQUID EQUALIZER MOTION ═══ */
+    .eq-bar {
+      transition: height 0.08s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    }
+
+    /* ═══ HIGH-END PHOTO GALLERY CROSS-FADE ═══ */
+    .photo-viewer-wrapper img {
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .photo-viewer-wrapper img.fading {
+      opacity: 0;
+      filter: blur(4px);
+    }
+
+    /* ═══ MOBILE TOUCH OPTIMIZATION ═══ */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }  </style>
 
 
