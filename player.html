@@ -205,7 +205,7 @@
       justify-content: center;
       align-items: center;
       color: black;
-      font-size: 12px;
+      font-size: 0.65vw !important;
       font-weight: bold;
       font-family: monospace;
       user-select: none;
@@ -300,6 +300,42 @@
       left: 61.2%;
       width: 3.8%;
       height: 2.8%;
+    }
+
+    /* ── VW-Scaled Cassette Slot Labels & Rack Items ── */
+    .cassette-rack-item {
+      width: 13.5vw !important;
+      height: 1.8vw !important;
+      border-radius: 0.2vw !important;
+      box-sizing: border-box !important;
+    }
+
+    .cassette-rack-item span {
+      font-size: 0.75vw !important;
+      letter-spacing: 0.05vw !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+      -webkit-text-size-adjust: none !important;
+      text-size-adjust: none !important;
+    }
+
+    /* ── VW-Scaled Physical Selection Buttons (C1–C6) ── */
+    .cassette-switch {
+      width: 4.2vw !important;
+      height: 1.6vw !important;
+      font-size: 0.8vw !important;
+      border-radius: 0.8vw !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Prevent browser font inflation from distorting button shapes */
+    .cassette-switch * {
+      max-height: 100% !important;
+      transform-box: fill-box !important;
     }
 
     /* Central Black Display Screen Container */
@@ -671,12 +707,12 @@
     button[aria-label*="Pause"] *,
     button[aria-label*="PAUSE"] * {
       font-family: monospace !important;
-      font-size: 0.88rem !important;
+      font-size: 0.85vw !important;
       font-weight: 800 !important;
       color: #000 !important;
       white-space: nowrap !important;
       text-align: center !important;
-      line-height: 1.1 !important;
+      line-height: 1 !important;
       pointer-events: none !important;
       transition: all 0.2s !important;
     }
@@ -697,14 +733,15 @@
     }
 
     .transport-btn-area span {
-      font-size: 0.88rem;
+      font-size: 0.85vw !important;
       font-family: monospace;
       font-weight: 800;
       color: #000;
       pointer-events: none;
       transition: all 0.2s;
       text-align: center;
-      line-height: 1.1;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .transport-btn-area:hover span {
@@ -911,13 +948,13 @@
       left: 50% !important;
       transform: translate(-50%, -50%) !important;
       background: #000000 !important;
-      border-radius: 4px;
+      border-radius: 0.2vw;
 
-      /* Reduced width boundaries */
+      /* Reduced width boundaries — converted to vw for zoom-invariance */
       width: auto !important;
-      min-width: 36px !important;
-      max-width: 50px !important;
-      padding: 2px 4px !important;
+      min-width: 1.875vw !important; /* 36px ÷ 1920 × 100vw */
+      max-width: 2.6vw !important;   /* 50px ÷ 1920 × 100vw */
+      padding: 0.1vw 0.2vw !important;
 
       display: flex;
       align-items: center;
@@ -930,12 +967,13 @@
     #volume-text {
       font-family: 'Courier New', monospace, sans-serif;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 0.7vw !important;
       color: #ffffff !important;
       /* Pure white text */
       text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
       /* Subtle white LED glow */
       letter-spacing: 1px;
+      white-space: nowrap;
       pointer-events: none;
     }
 
@@ -985,12 +1023,12 @@
     .eq-container,
     .equalizer-wrapper {
       position: absolute !important;
-      top: calc(47.9% - 18px) !important;
+      top: calc(47.9% - 0.9375vw) !important;
       /* Aligns EQ bottom edge to the top of the volume dial */
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: 237px !important;
-      height: 18px !important;
+      width: 12.34vw !important;   /* 237px ÷ 1920 × 100vw */
+      height: 0.9375vw !important; /* 18px  ÷ 1920 × 100vw */
       z-index: 11 !important;
       overflow: hidden !important;
       max-height: 100% !important;
@@ -2137,11 +2175,12 @@
 
     .capsule-help-btn span {
       font-family: var(--font-tech);
-      font-size: 0.72rem;
+      font-size: 0.72vw !important;
       font-weight: 800;
       color: #111111;
       letter-spacing: 0.5px;
       line-height: 1;
+      white-space: nowrap;
       pointer-events: none;
       transition: color 0.2s, text-shadow 0.2s;
     }
@@ -2744,13 +2783,13 @@
           cursor: pointer !important;">
         <span style="
           font-family: monospace !important;
-          font-size: 0.75rem !important;
+          font-size: 0.85vw !important;
           font-weight: 800 !important;
           color: #000 !important;
           background: transparent !important;
           white-space: nowrap !important;
           text-align: center !important;
-          line-height: 1.1 !important;
+          line-height: 1 !important;
           pointer-events: none !important;
           transition: all 0.2s !important;
           display: inline !important;">PAUSE</span>
