@@ -1027,19 +1027,14 @@
       box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
 
 
-    /* ── Freeze browser font recalculation engine on zoom ── */
-    html, body, div, span, p, button, h1, h2, h3 {
-      -webkit-text-size-adjust: none !important;
-      -moz-text-size-adjust: none !important;
-      -ms-text-size-adjust: none !important;
-      text-size-adjust: none !important;
-    }
 
-    .btn-label, .track-title, .status-text, #lcd-screen span, .control-panel label {
-      max-height: 100% !important;
-      box-sizing: border-box !important;
-    }    }  </style>
 
+    /* Lock font size scaling to element container bounds */
+    .btn-label, .track-title, .status-text, #lcd-screen span {
+      font-size: clamp(10px, 1vw, 16px) !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }  </style>
 
 <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

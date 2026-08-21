@@ -108,7 +108,7 @@
       /* Power button always clickable */
     }
 
-    /* ── Image Player Layout ── */
+/* ── Image Player Layout ── */
     /* — Image Player Layout — */
     .image-player {
       position: relative;
@@ -126,9 +126,6 @@
       background-position: center;
       background-repeat: no-repeat;
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-    
-      contain: layout style paint !important;
-      transform-style: preserve-3d !important;
     }
 
     /* Invisible clickable areas that overlay the image */
@@ -2413,24 +2410,14 @@
       box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
 
 
-    /* ── Freeze browser font recalculation engine on zoom ── */
-    html, body, div, span, p, button, h1, h2, h3 {
-      -webkit-text-size-adjust: none !important;
-      -moz-text-size-adjust: none !important;
-      -ms-text-size-adjust: none !important;
-      text-size-adjust: none !important;
-    }
 
-    .btn-label, .track-title, .status-text, #lcd-screen span, .control-panel label {
-      max-height: 100% !important;
-      box-sizing: border-box !important;
-    }
 
-    /* ── Lock parent frame scale matrix ── */
-    #image-player-wrapper {
-      contain: layout style paint !important;
-      transform-style: preserve-3d !important;
-    }    }  </style>
+    /* Lock font size scaling to element container bounds */
+    .btn-label, .track-title, .status-text, #lcd-screen span {
+      font-size: clamp(10px, 1vw, 16px) !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }  </style>
 
 
 <!-- Supabase JS Client -->
@@ -2594,8 +2581,8 @@
     </div>
   </div>
 
-  <!-- IMAGE PLAYER WRAPPER -->
-  <div class="image-player is-off" id="image-player-wrapper">
+    <!-- IMAGE PLAYER WRAPPER -->
+    <div class="image-player is-off" id="image-player-wrapper">
 
     <!-- POWER BUTTON (Green button on lower right) -->
     <div id="power-btn" class="power-flash" title="Master Power"></div>
@@ -2897,7 +2884,7 @@
   <script src="js/auth.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/data-service.js"></script>
-  <script src="js/webaudio.js"></script>
+  <script type="module" src="js/webaudio.js"></script>
   <script type="module" src="js/app.js"></script>
 
   <!-- Vector Mask Definitions for Curved Console Buttons -->

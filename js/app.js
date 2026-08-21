@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Keyboard Fantasia — Main Application
  * Initializes all components and wires up the stereo system
  */
